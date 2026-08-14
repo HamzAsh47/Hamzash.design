@@ -9,6 +9,13 @@ export const hero = {
   /** Fraunces italic, directly under the headline. */
   subtitle: 'From old-school craft to the AI-driven future.',
 
+  /**
+   * Substring of `subtitle` that carries the Electric Cyan accent. Cyan is
+   * reserved for AI/system context, so this must stay on the AI phrase — it is
+   * not a decorative highlight. Set to '' to remove the accent entirely.
+   */
+  subtitleAccent: 'AI-driven future',
+
   intro:
     'Most startups hire a brand designer, a UI/UX designer and a motion editor, then spend the next six months keeping three people in sync. I own all three and deliver them as one connected system.',
 

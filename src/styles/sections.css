@@ -42,32 +42,17 @@
   cursor: pointer;
 }
 
-.nav__monogram {
-  width: 46px;
-  height: 46px;
-  border-radius: var(--radius-sm);
+/* The lockup is a single vector — its kerning and weight pairing are baked in,
+   so it is sized by height only and never rebuilt from live text. */
+.nav__lockup {
+  height: 48px;
+  width: auto;
 }
 
-.nav__wordmark {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-  font-family: var(--font-display);
-  letter-spacing: 0.16em;
-  text-align: left;
-}
-
-.nav__wordmark-strong {
-  font-weight: 900;
-  font-size: 0.85rem;
-  color: var(--white);
-}
-
-.nav__wordmark-light {
-  font-weight: 400;
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.24em;
+@media (max-width: 480px) {
+  .nav__lockup {
+    height: 40px;
+  }
 }
 
 .nav__links {
@@ -280,6 +265,12 @@
   margin-top: var(--space-2xs);
 }
 
+/* Electric Cyan's one appearance in the hero. It sits on the AI phrase because
+   the colour is reserved for AI/system context — not used as a highlight. */
+.hero__subtitle-ai {
+  color: var(--cyan);
+}
+
 .hero__intro {
   max-width: 52ch;
 }
@@ -300,14 +291,10 @@
   border-radius: var(--radius-md);
 }
 
-.hero__media-note {
-  margin-top: var(--space-xs);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  line-height: 1.6;
-  letter-spacing: 0.06em;
-  color: var(--gunmetal);
-  max-width: 34ch;
+/* Small mono labels in the hero carry the legible Gunmetal tint — at true
+   #4A4E58 they measure 2.19:1 on Obsidian, which is unreadable at this size. */
+.hero .eyebrow {
+  color: var(--gunmetal-legible);
 }
 
 /* Orchestrated entrance — one sequence, staged by index. */
@@ -352,13 +339,15 @@
   display: flex;
 }
 
+/* JetBrains Mono, tracked out, on the legible Gunmetal tint — the pillars have
+   to read at a glance, and true #4A4E58 measures 2.19:1 here. */
 .ticker__item {
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: 0.76rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--gunmetal-legible);
   padding: 0.85rem clamp(1.5rem, 4vw, 3rem);
   display: inline-flex;
   align-items: center;

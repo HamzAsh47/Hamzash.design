@@ -6,6 +6,22 @@ import { Heading } from './Heading'
 import { Ticker } from './Ticker'
 
 /**
+ * Splits the subtitle around the Electric Cyan phrase so the accent lands on
+ * the AI reference only. Returns the whole string unaccented when the phrase
+ * is empty or not found, so a copy edit can never silently drop the line.
+ */
+function splitOnAccent(text: string, accent: string) {
+  const at = accent ? text.indexOf(accent) : -1
+  if (at === -1) return [{ text, accent: false }]
+
+  return [
+    { text: text.slice(0, at), accent: false },
+    { text: accent, accent: true },
+    { text: text.slice(at + accent.length), accent: false },
+  ].filter((part) => part.text.length > 0)
+}
+
+/**
  * The one orchestrated entrance on the site. Everything downstream uses the
  * quieter scroll reveal instead, so the sequence stays a single moment rather
  * than a page full of competing effects.
@@ -25,7 +41,15 @@ export function Hero() {
             className="lede hero__subtitle hero__stage"
             style={{ '--stage': 7 } as React.CSSProperties}
           >
-            {hero.subtitle}
+            {splitOnAccent(hero.subtitle, hero.subtitleAccent).map((part, i) =>
+              part.accent ? (
+                <span className="hero__subtitle-ai" key={i}>
+                  {part.text}
+                </span>
+              ) : (
+                <span key={i}>{part.text}</span>
+              ),
+            )}
           </p>
 
           <p className="body hero__intro hero__stage" style={{ '--stage': 8 } as React.CSSProperties}>
@@ -55,12 +79,6 @@ export function Hero() {
             priority
             treatment={hero.portrait.treatment}
           />
-          {hero.portrait.isPlaceholder && (
-            <p className="hero__media-note">
-              Placeholder crop — the signature portrait drops straight into this frame with the
-              CRT treatment already applied.
-            </p>
-          )}
         </div>
       </div>
 

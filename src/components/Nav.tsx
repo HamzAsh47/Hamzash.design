@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
-import monogram from '../assets/logo/Monogram_Dark.svg'
+// The official horizontal lockup — monogram, wordmark and tagline with their
+// kerning locked in the vector. Never rebuild this from live text.
+// (Named "Vertical" in the kit, but this is the wide single-row lockup.)
+import lockup from '../assets/logo/Logo_Vertical_Dark_BG.svg'
 import { navCta, navLinks } from '../content'
 import { goToSection } from '../lib/scroll'
 
@@ -37,11 +40,7 @@ export function Nav() {
     <header className={`nav${scrolled ? ' nav--scrolled' : ''}`}>
       <div className="container nav__inner">
         <button className="nav__brand" onClick={() => navigate('top')} aria-label="Hamza Ashraf — back to top">
-          <img className="nav__monogram" src={monogram} alt="" width={40} height={40} />
-          <span className="nav__wordmark">
-            <span className="nav__wordmark-strong">HAMZA</span>
-            <span className="nav__wordmark-light">ASHRAF</span>
-          </span>
+          <img className="nav__lockup" src={lockup} alt="Hamza Ashraf" />
         </button>
 
         <nav className="nav__links" aria-label="Primary">
@@ -53,7 +52,9 @@ export function Nav() {
         </nav>
 
         <div className="nav__actions">
-          <button className="btn btn--primary nav__cta" onClick={() => navigate(navCta.id)}>
+          {/* Ghost, so the hero's solid-crimson primary CTA stays the one
+              focal point in the first viewport. */}
+          <button className="btn btn--ghost nav__cta" onClick={() => navigate(navCta.id)}>
             {navCta.label}
           </button>
           <button

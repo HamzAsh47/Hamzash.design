@@ -13,6 +13,13 @@
   --gunmetal: #4a4e58;
   --cyan: #22d3ee;
 
+  /* Gunmetal is locked for secondary text, but at #4A4E58 on Obsidian it
+     measures 2.19:1 — well under the 4.5:1 needed for small type, and these
+     mono labels are the smallest text on the page. This is the same hue lifted
+     until it clears the threshold (measured 4.71:1); true --gunmetal stays in
+     use for structure, hairlines and non-text marks. */
+  --gunmetal-legible: #7a8191;
+
   /* Derived neutrals, all mixed from the locked palette rather than invented */
   --obsidian-raised: #131d33;
   --obsidian-sunken: #0a1020;
