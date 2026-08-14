@@ -72,6 +72,7 @@ export function Hero() {
         <div className="hero__media hero__stage" style={{ '--stage': 4 } as React.CSSProperties}>
           <CrtImage
             src={hero.portrait.src}
+            src2x={hero.portrait.src2x}
             alt={hero.portrait.alt}
             aspectRatio={hero.portrait.aspectRatio}
             labels={{ left: hero.portraitLabels.left, right: hero.portraitLabels.right }}

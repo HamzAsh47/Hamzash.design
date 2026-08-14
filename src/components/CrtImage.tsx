@@ -11,6 +11,8 @@ import type { CSSProperties } from 'react'
 
 type CrtImageProps = {
   src: string
+  /** Optional higher-resolution source, served to high-DPR screens only. */
+  src2x?: string
   alt: string
   /** CSS aspect-ratio string, e.g. "4 / 5". Keeps the swap-in crop honest. */
   aspectRatio?: string
@@ -29,6 +31,7 @@ type CrtImageProps = {
 
 export function CrtImage({
   src,
+  src2x,
   alt,
   aspectRatio,
   className = '',
@@ -38,6 +41,8 @@ export function CrtImage({
   treatment = 'full',
 }: CrtImageProps) {
   const style = aspectRatio ? ({ aspectRatio } as CSSProperties) : undefined
+  // The ghosts reuse the same source, so the browser serves them from cache.
+  const srcSet = src2x ? `${src} 1x, ${src2x} 2x` : undefined
 
   return (
     <figure
@@ -46,15 +51,16 @@ export function CrtImage({
     >
       {/* Channel-split ghosts sit behind the real image and screen-blend on hover. */}
       <span className="crt__ghost crt__ghost--r" aria-hidden="true">
-        <img src={src} alt="" />
+        <img src={src} srcSet={srcSet} alt="" />
       </span>
       <span className="crt__ghost crt__ghost--c" aria-hidden="true">
-        <img src={src} alt="" />
+        <img src={src} srcSet={srcSet} alt="" />
       </span>
 
       <img
         className="crt__media"
         src={src}
+        srcSet={srcSet}
         alt={alt}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"

@@ -449,14 +449,21 @@ a {
   }
 }
 
-/* 16px minimum inset from every card edge, and each label truncates rather
-   than overflowing — at narrow widths these were being cut mid-word. */
+/* Labels keep a 16px inset from every card edge (as padding now, so the scrim
+   can still run edge to edge) and truncate rather than overflow — at narrow
+   widths they were being cut mid-word.
+
+   The scrim is what keeps them readable: the label sits wherever the photo
+   happens to be light — over the oatmeal sweater on a narrow viewport, for
+   instance — so a soft gradient guarantees contrast without moving the label
+   or dimming the photograph. */
 .crt__label {
   position: absolute;
   z-index: 5;
-  bottom: 1rem;
-  left: 1rem;
-  right: 1rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2.75rem 1rem 1rem;
   display: flex;
   justify-content: space-between;
   gap: var(--space-sm);
@@ -466,8 +473,9 @@ a {
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(242, 242, 242, 0.72);
+  color: rgba(242, 242, 242, 0.86);
   pointer-events: none;
+  background: linear-gradient(to top, rgba(13, 21, 38, 0.88) 0%, rgba(13, 21, 38, 0) 100%);
 }
 
 .crt__label > span {

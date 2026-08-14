@@ -1,4 +1,5 @@
-import heroPortrait from '../assets/images/portrait-placeholder.svg'
+import heroPortrait from '../assets/images/hero-portrait.webp'
+import heroPortrait2x from '../assets/images/hero-portrait@2x.webp'
 
 export const hero = {
   eyebrow: 'SYS.01 :: SENIOR ART DIRECTOR',
@@ -23,17 +24,20 @@ export const hero = {
   secondaryCta: { label: 'Start a project', target: 'contact' },
 
   /**
-   * Placeholder portrait at the exact 4:5 crop the real signature shot will
-   * use — oxblood corduroy overshirt, top-down angle, selective crimson
-   * rim-light. Swapping in the real photograph is a one-line import change;
-   * the CRT treatment is already applied to this placeholder so the effect can
-   * be tuned before the photography arrives.
+   * The signature portrait: oxblood corduroy overshirt over an oatmeal
+   * sweater, with a crimson rim-light tracing the silhouette. Re-encoded from
+   * the 6.8 MB source PNG to WebP at two widths (110 KB / 163 KB).
+   *
+   * The source is 3:4, so the 4:5 frame trims roughly 3.5% from the top and
+   * bottom under object-fit: cover. Change `aspectRatio` to '3 / 4' to show the
+   * full frame uncropped.
    */
   portrait: {
     src: heroPortrait,
-    alt: 'Placeholder for the signature portrait of Hamza Ashraf',
+    src2x: heroPortrait2x,
+    alt: 'Hamza Ashraf, in an oxblood corduroy overshirt, lit with a crimson rim-light',
     aspectRatio: '4 / 5',
-    isPlaceholder: true,
+    isPlaceholder: false,
     /**
      * 'selective' is the locked hero treatment — black & white except the
      * crimson rim-light, applied in-filter so an ordinary full-colour
