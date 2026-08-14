@@ -54,10 +54,37 @@ goes inside the brackets so it stays attached to the highlighted word.
 ### Signature portrait
 
 `src/assets/images/portrait-placeholder.svg` is a 4:5 stand-in sitting in the
-exact crop the real photograph will occupy, with the CRT treatment already
-applied so the effect can be tuned before the shoot. To swap it in, drop the
-real file into `src/assets/images/` and change one import at the top of
-`src/content/hero.ts`. Nothing else changes.
+exact crop the real photograph will occupy, with both the CRT and the selective
+colour treatment already applied so they can be tuned before the shoot. To swap
+it in, drop the real file into `src/assets/images/` and change one import at the
+top of `src/content/hero.ts`. Nothing else changes.
+
+**Selective colour.** The locked hero treatment is black & white except the
+crimson rim-light. It is applied in-filter (`#selective-crimson` in
+`CrtImage.tsx`), so the hero runs from an ordinary full-colour photograph —
+there is no separately masked file to keep in sync.
+
+The filter builds a mask from red dominance, `R - (G + B) / 2`, and ramps it
+from 0.320 to 0.420. Measured against real swatches:
+
+| Sampled from | Mask | Result |
+| --- | --- | --- |
+| Bright rim on hair `#FF2D3F` | 0.788 | keeps colour |
+| Crimson rim-light `#C81E3A` | 0.612 | keeps colour |
+| Dimmest rim edge `#8E1526` | 0.441 | keeps colour |
+| Lit corduroy `#7A2B33` | 0.294 | desaturates |
+| Skin midtone `#C99A7A` | 0.247 | desaturates |
+| Oxblood corduroy `#5C3A32` | 0.149 | desaturates |
+| Oatmeal sweater `#D9D2C4` | 0.055 | desaturates |
+
+Lit corduroy is the closest false positive, so the ramp starts above it and
+completes below the dimmest part of the rim. If a future photograph is graded
+differently and skin starts picking up colour, adjust `slope`/`intercept` on
+the `feFuncA`: the ramp starts at `-intercept / slope` and reaches full colour
+at `(1 - intercept) / slope`.
+
+Set `hero.portrait.treatment` to `'full'` in `src/content/hero.ts` to keep a
+photograph in colour instead.
 
 ### Case studies
 

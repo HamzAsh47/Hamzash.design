@@ -53,6 +53,7 @@ export function Hero() {
             labels={{ left: hero.portraitLabels.left, right: hero.portraitLabels.right }}
             showRec
             priority
+            treatment={hero.portrait.treatment}
           />
           {hero.portrait.isPlaceholder && (
             <p className="hero__media-note">

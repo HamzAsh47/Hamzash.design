@@ -330,6 +330,16 @@ a {
   transition: filter var(--dur-mid) var(--ease-out);
 }
 
+/* Hero/signature shots only: black & white except the crimson rim-light.
+   The hover state repeats the filter chain because `filter` replaces rather
+   than extends — dropping the url() there would flash the photo to colour.
+   The class is doubled so this outranks the later `.crt:hover .crt__media`
+   rule regardless of source order. */
+.crt.crt--selective .crt__media,
+.crt.crt--selective:hover .crt__media {
+  filter: url('#selective-crimson') contrast(1.05);
+}
+
 /* Scanlines + very light vignette. */
 .crt__scanlines {
   position: absolute;

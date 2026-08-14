@@ -19,6 +19,12 @@ type CrtImageProps = {
   /** Adds the blinking-free REC dot to the right-hand label. */
   showRec?: boolean
   priority?: boolean
+  /**
+   * 'selective' drops skin and clothing to black & white while keeping the
+   * crimson rim-light in colour — the locked treatment for hero/signature
+   * shots. Everything else uses 'full'.
+   */
+  treatment?: 'full' | 'selective'
 }
 
 export function CrtImage({
@@ -29,11 +35,15 @@ export function CrtImage({
   labels,
   showRec = false,
   priority = false,
+  treatment = 'full',
 }: CrtImageProps) {
   const style = aspectRatio ? ({ aspectRatio } as CSSProperties) : undefined
 
   return (
-    <figure className={`crt ${className}`.trim()} style={style}>
+    <figure
+      className={`crt ${treatment === 'selective' ? 'crt--selective' : ''} ${className}`.trim()}
+      style={style}
+    >
       {/* Channel-split ghosts sit behind the real image and screen-blend on hover. */}
       <span className="crt__ghost crt__ghost--r" aria-hidden="true">
         <img src={src} alt="" />
@@ -72,6 +82,51 @@ export function CrtFilters() {
   return (
     <svg className="visually-hidden" aria-hidden="true" focusable="false">
       <defs>
+        {/*
+          Selective colour, per the locked hero photography direction: skin and
+          clothing fall to black & white while the crimson rim-light keeps its
+          colour. Done in-filter so the hero can run from an ordinary
+          full-colour photograph — no separately masked file to keep in sync.
+
+          The mask is red dominance, R - (G + B) / 2, pushed through a linear
+          ramp. Saturated crimson clears the ramp; reddish-but-muted tones
+          (skin, the oxblood corduroy) fall under it and desaturate. Tune with
+          slope/intercept: colour starts at -intercept/slope and is full at
+          (1 - intercept) / slope.
+        */}
+        <filter id="selective-crimson" colorInterpolationFilters="sRGB">
+          <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="mono" />
+
+          <feColorMatrix
+            in="SourceGraphic"
+            type="matrix"
+            values="0 0 0 0 0
+                    0 0 0 0 0
+                    0 0 0 0 0
+                    1 -0.5 -0.5 0 0"
+            result="redMask"
+          />
+
+          {/*
+            Ramp runs 0.320 -> 0.420, measured against real swatches from the
+            brand system and the portrait. Mask values: crimson rim 0.612,
+            bright rim 0.788, dim rim edge 0.441 (all kept); lit corduroy
+            0.294, skin midtone 0.247, oxblood 0.149, oatmeal 0.055 (all
+            dropped). The widest offender is lit corduroy, so the ramp starts
+            above it and completes below the dimmest part of the rim.
+          */}
+          <feComponentTransfer in="redMask" result="redMaskRamped">
+            <feFuncA type="linear" slope="10" intercept="-3.2" />
+          </feComponentTransfer>
+
+          <feComposite in="SourceGraphic" in2="redMaskRamped" operator="in" result="crimsonOnly" />
+
+          <feMerge>
+            <feMergeNode in="mono" />
+            <feMergeNode in="crimsonOnly" />
+          </feMerge>
+        </filter>
+
         <filter id="crt-red" colorInterpolationFilters="sRGB">
           <feColorMatrix
             type="matrix"

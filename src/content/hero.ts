@@ -27,6 +27,12 @@ export const hero = {
     alt: 'Placeholder for the signature portrait of Hamza Ashraf',
     aspectRatio: '4 / 5',
     isPlaceholder: true,
+    /**
+     * 'selective' is the locked hero treatment — black & white except the
+     * crimson rim-light, applied in-filter so an ordinary full-colour
+     * photograph drops straight in. Use 'full' to keep the photo in colour.
+     */
+    treatment: 'selective',
   },
 
   /** Small system-log readouts sitting on the portrait frame. */
