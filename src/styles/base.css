@@ -1,0 +1,551 @@
+/* ---------------------------------------------------------------------------
+   Reset, global typography and the shared primitives used by every section:
+   container, section, eyebrow, kinetic heading, buttons, reveal, CRT frame.
+--------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + var(--space-sm));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--obsidian);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-base);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  max-width: 68ch;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--crimson);
+  color: var(--white);
+}
+
+/* --- Layout primitives -------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+.section {
+  padding-block: var(--space-2xl);
+  position: relative;
+}
+
+/* Sections are separated by whitespace, not rules. A hairline above every
+   section made the page read as a stack of boxes rather than one layout. */
+.section--hairline {
+  border-top: 0;
+}
+
+.section__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.section__lede {
+  font-size: var(--step-1);
+  color: var(--text-secondary);
+  max-width: 58ch;
+}
+
+/* --- System-log eyebrow (JetBrains Mono, sparing use only) --------------- */
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gunmetal);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 1.75rem;
+  height: 1px;
+  background: var(--crimson);
+  flex: none;
+}
+
+.eyebrow--ai {
+  color: var(--cyan);
+}
+
+.eyebrow--ai::before {
+  background: var(--cyan);
+}
+
+/* --- Kinetic heading ----------------------------------------------------- */
+/* Base words: Medium + White. Highlighted word: Black + Crimson. */
+
+.headline {
+  font-size: var(--step-3);
+}
+
+.headline--hero {
+  font-size: var(--step-5);
+  letter-spacing: -0.035em;
+}
+
+.headline--lg {
+  font-size: var(--step-4);
+}
+
+.headline__word {
+  display: inline-block;
+  white-space: pre;
+}
+
+.headline__word--hl {
+  font-weight: var(--weight-highlight);
+  color: var(--crimson);
+}
+
+/* Each word rises into place; the highlighted word lands last and lingers. */
+.headline--animate .headline__word {
+  opacity: 0;
+  transform: translateY(0.42em);
+  animation: word-in var(--dur-slow) var(--ease-out) forwards;
+  animation-delay: calc(var(--word-index) * 55ms + var(--headline-delay, 0ms));
+}
+
+.headline--animate .headline__word--hl {
+  animation-delay: calc(var(--word-index) * 55ms + 90ms + var(--headline-delay, 0ms));
+}
+
+@keyframes word-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Body copy ----------------------------------------------------------- */
+
+.lede {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--step-1);
+  color: var(--text-secondary);
+}
+
+.body {
+  color: var(--text-secondary);
+}
+
+/* --- Buttons ------------------------------------------------------------- */
+
+.btn {
+  --btn-bg: transparent;
+  --btn-fg: var(--white);
+  --btn-border: var(--hairline-strong);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step--1);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius-sm);
+  padding: 0.95rem 1.6rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65em;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  --btn-bg: var(--crimson);
+  --btn-border: var(--crimson);
+}
+
+.btn--primary:hover {
+  --btn-bg: #e0243f;
+  --btn-border: #e0243f;
+}
+
+.btn--ghost:hover {
+  --btn-border: var(--white);
+}
+
+.btn__arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
+}
+
+/* --- Scroll reveal ------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Tags / chips -------------------------------------------------------- */
+
+/* Meta labels are text, not chips — no border box, and no nowrap, which was
+   pushing long strings past the card's overflow boundary and clipping them. */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: inline-block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Build-state marker. Reads as a note about the page, never as content. */
+.draft-chip {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gunmetal);
+  display: inline-block;
+}
+
+/* Unfilled data, phrased as a plain aside rather than a bracketed data tag. */
+.result-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- CRT treatment ------------------------------------------------------- */
+/* Scoped to photography only — never applied to buttons, nav, cards or text. */
+
+.crt {
+  position: relative;
+  overflow: hidden;
+  background: var(--obsidian-sunken);
+  isolation: isolate;
+}
+
+.crt__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.06);
+  transition: filter var(--dur-mid) var(--ease-out);
+}
+
+/* Scanlines + very light vignette. */
+.crt__scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(13, 21, 38, 0) 0px,
+    rgba(13, 21, 38, 0) 1px,
+    rgba(13, 21, 38, 0.26) 2px,
+    rgba(13, 21, 38, 0.26) 3px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+
+.crt__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(13, 21, 38, 0) 52%,
+    rgba(13, 21, 38, 0.55) 100%
+  );
+}
+
+/* Soft phosphor glow — a crimson bloom sitting just off the image edge. */
+.crt__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  box-shadow:
+    inset 0 0 60px rgba(13, 21, 38, 0.6),
+    inset 0 0 22px rgba(200, 30, 58, 0.16);
+  transition: box-shadow var(--dur-mid) var(--ease-out);
+}
+
+/* Chromatic aberration / RGB shift — hover only, never a looping idle effect. */
+.crt__ghost {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+
+.crt__ghost img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.crt__ghost--r {
+  filter: url('#crt-red');
+}
+
+.crt__ghost--c {
+  filter: url('#crt-cyan');
+}
+
+.crt:hover .crt__ghost,
+.crt:focus-within .crt__ghost {
+  opacity: 0.55;
+}
+
+.crt:hover .crt__ghost--r {
+  transform: translate3d(2px, 0, 0);
+}
+
+.crt:hover .crt__ghost--c {
+  transform: translate3d(-2px, 0, 0);
+}
+
+.crt:hover .crt__media {
+  filter: saturate(1) contrast(1.1);
+  animation: crt-glitch 620ms var(--ease-in-out) 1;
+}
+
+.crt:hover .crt__glow {
+  box-shadow:
+    inset 0 0 60px rgba(13, 21, 38, 0.5),
+    inset 0 0 30px rgba(200, 30, 58, 0.3);
+}
+
+@keyframes crt-glitch {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    transform: translate3d(-2px, 1px, 0);
+  }
+  22% {
+    transform: translate3d(2px, -1px, 0);
+  }
+  46% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  52% {
+    transform: translate3d(1px, 0, 0);
+  }
+}
+
+/* 16px minimum inset from every card edge, and each label truncates rather
+   than overflowing — at narrow widths these were being cut mid-word. */
+.crt__label {
+  position: absolute;
+  z-index: 5;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 242, 242, 0.72);
+  pointer-events: none;
+}
+
+.crt__label > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crt__rec {
+  color: var(--crimson);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+/* The REC dot must not be squeezed out when the label truncates. */
+.crt__rec::before {
+  flex: none;
+}
+
+.crt__rec::before {
+  content: '';
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: var(--crimson);
+}
+
+/* --- Accessibility ------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  transform: translateY(-120%);
+  background: var(--crimson);
+  color: var(--white);
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Motion is a garnish, not a dependency — everything resolves without it. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .headline--animate .headline__word {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .crt:hover .crt__media {
+    animation: none;
+  }
+}

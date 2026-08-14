@@ -1,0 +1,77 @@
+import type { ElementType } from 'react'
+
+type HeadingProps = {
+  /** Highlighted words are wrapped in square brackets: "as [one system]." */
+  text: string
+  as?: ElementType
+  className?: string
+  /** Runs the kinetic word-by-word entrance. Reserved for the hero. */
+  animate?: boolean
+  delayMs?: number
+  id?: string
+}
+
+type Token = { word: string; highlighted: boolean }
+
+/**
+ * Splits the heading into words, tagging the ones inside brackets.
+ * Base words render Archivo Medium + White; highlighted words render
+ * Archivo Black + Crimson — the locked heading rule.
+ */
+function tokenize(text: string): Token[] {
+  const tokens: Token[] = []
+
+  for (const segment of text.split(/(\[[^\]]*\])/g)) {
+    if (!segment) continue
+    const highlighted = segment.startsWith('[') && segment.endsWith(']')
+    const body = highlighted ? segment.slice(1, -1) : segment
+
+    for (const word of body.split(/(\s+)/g)) {
+      if (!word) continue
+      // Whitespace rides along with the preceding word so wrapping stays natural.
+      if (/^\s+$/.test(word) && tokens.length > 0) {
+        tokens[tokens.length - 1].word += word
+        continue
+      }
+      tokens.push({ word, highlighted })
+    }
+  }
+
+  return tokens
+}
+
+export function Heading({
+  text,
+  as: Tag = 'h2',
+  className = '',
+  animate = false,
+  delayMs = 0,
+  id,
+}: HeadingProps) {
+  const tokens = tokenize(text)
+  const classes = ['headline', animate ? 'headline--animate' : '', className]
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <Tag
+      className={classes}
+      id={id}
+      style={delayMs ? ({ '--headline-delay': `${delayMs}ms` } as React.CSSProperties) : undefined}
+    >
+      {/* Screen readers get the plain sentence, not word-by-word fragments. */}
+      <span className="visually-hidden">{text.replace(/[[\]]/g, '')}</span>
+      <span aria-hidden="true">
+        {tokens.map((token, index) => (
+          <span
+            key={index}
+            className={`headline__word${token.highlighted ? ' headline__word--hl' : ''}`}
+            style={{ '--word-index': index } as React.CSSProperties}
+          >
+            {token.word}
+          </span>
+        ))}
+      </span>
+    </Tag>
+  )
+}

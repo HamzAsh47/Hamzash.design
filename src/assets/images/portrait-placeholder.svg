@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="Portrait placeholder">
+  <rect width="800" height="1000" fill="#0d1526"/>
+  <g stroke="#4a4e58" stroke-width="1" opacity="0.16"><line x1="50" y1="0" x2="50" y2="1000"/><line x1="100" y1="0" x2="100" y2="1000"/><line x1="150" y1="0" x2="150" y2="1000"/><line x1="200" y1="0" x2="200" y2="1000"/><line x1="250" y1="0" x2="250" y2="1000"/><line x1="300" y1="0" x2="300" y2="1000"/><line x1="350" y1="0" x2="350" y2="1000"/><line x1="400" y1="0" x2="400" y2="1000"/><line x1="450" y1="0" x2="450" y2="1000"/><line x1="500" y1="0" x2="500" y2="1000"/><line x1="550" y1="0" x2="550" y2="1000"/><line x1="600" y1="0" x2="600" y2="1000"/><line x1="650" y1="0" x2="650" y2="1000"/><line x1="700" y1="0" x2="700" y2="1000"/><line x1="750" y1="0" x2="750" y2="1000"/><line x1="0" y1="50" x2="800" y2="50"/><line x1="0" y1="100" x2="800" y2="100"/><line x1="0" y1="150" x2="800" y2="150"/><line x1="0" y1="200" x2="800" y2="200"/><line x1="0" y1="250" x2="800" y2="250"/><line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="350" x2="800" y2="350"/><line x1="0" y1="400" x2="800" y2="400"/><line x1="0" y1="450" x2="800" y2="450"/><line x1="0" y1="500" x2="800" y2="500"/><line x1="0" y1="550" x2="800" y2="550"/><line x1="0" y1="600" x2="800" y2="600"/><line x1="0" y1="650" x2="800" y2="650"/><line x1="0" y1="700" x2="800" y2="700"/><line x1="0" y1="750" x2="800" y2="750"/><line x1="0" y1="800" x2="800" y2="800"/><line x1="0" y1="850" x2="800" y2="850"/><line x1="0" y1="900" x2="800" y2="900"/><line x1="0" y1="950" x2="800" y2="950"/></g>
+  <!-- Head and shoulders block at the crop the real top-down portrait will use -->
+  <g>
+    <path d="M120 1000 C120 800 260 700 400 700 C540 700 680 800 680 1000 Z" fill="#202c47"/>
+    <ellipse cx="400" cy="560" rx="132" ry="158" fill="#202c47"/>
+  </g>
+  <!-- Selective crimson rim-light tracing the silhouette, per photography direction -->
+  <g fill="none" stroke="#c81e3a" stroke-width="4" stroke-linecap="round" opacity="0.9">
+    <path d="M287 470 C310 420 350 402 400 402"/>
+    <path d="M269 596 C266 646 286 686 318 710"/>
+    <path d="M150 996 C152 830 218 742 318 712"/>
+  </g>
+  <line x1="0" y1="560" x2="800" y2="560" stroke="#c81e3a" stroke-width="1" opacity="0.25"/>
+  <g fill="none" stroke="#4a4e58" stroke-width="1.5" opacity="0.55"><path d="M44 74 L44 44 L74 44"/><path d="M756 74 L756 44 L726 44"/><path d="M44 926 L44 956 L74 956"/><path d="M756 926 L756 956 L726 956"/></g>
+  <text x="56" y="96" font-family="monospace" font-size="20" font-weight="500" letter-spacing="1.6" fill="#4a4e58" text-anchor="start">PLACEHOLDER :: 4:5</text>
+  <text x="56" y="126" font-family="monospace" font-size="14" font-weight="500" letter-spacing="1.6" fill="#4a4e58" text-anchor="start">SIGNATURE PORTRAIT PENDING</text>
+  <text x="744" y="96" font-family="monospace" font-size="20" font-weight="500" letter-spacing="1.6" fill="#c81e3a" text-anchor="end">SYS.2026</text>
+</svg>
