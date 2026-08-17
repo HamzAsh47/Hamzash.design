@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { Tier } from '../content'
 import { oneTimePackages, pricingIntro, retainer } from '../content'
 import { useSpotlight } from '../hooks/useSpotlight'
@@ -6,7 +6,15 @@ import { goToSection } from '../lib/scroll'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
-import { TierDetail, type TierContext } from './TierDetail'
+import type { TierContext } from './TierDetail'
+
+/* The tier dialog is the largest thing in this section and nothing sees it
+   until a card is opened, so it loads on demand instead of riding along with
+   the home page. The chunk is warmed on idle below, which means the click
+   itself almost never waits on the network. */
+const TierDetail = lazy(() =>
+  import('./TierDetail').then((m) => ({ default: m.TierDetail })),
+)
 
 function TierCard({
   tier,
@@ -78,6 +86,20 @@ function TierCard({
 
 export function Pricing() {
   const [detail, setDetail] = useState<TierContext | null>(null)
+
+  /* Warm the dialog chunk once the browser is idle. It stays out of the
+     critical path, and by the time anyone has scrolled to pricing and picked
+     a tier the code is already parsed — the split costs the visitor nothing. */
+  useEffect(() => {
+    const warm = () => void import('./TierDetail')
+    const idle = window.requestIdleCallback
+    if (idle) {
+      const id = idle(warm, { timeout: 4000 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const id = window.setTimeout(warm, 2500)
+    return () => window.clearTimeout(id)
+  }, [])
   const [tab, setTab] = useState<'one-time' | 'retainer'>('one-time')
   const [packageId, setPackageId] = useState(oneTimePackages[0].id)
 
@@ -180,7 +202,11 @@ export function Pricing() {
         )}
       </div>
 
-      {detail && <TierDetail context={detail} onClose={() => setDetail(null)} />}
+      {detail && (
+        <Suspense fallback={null}>
+          <TierDetail context={detail} onClose={() => setDetail(null)} />
+        </Suspense>
+      )}
     </section>
   )
 }

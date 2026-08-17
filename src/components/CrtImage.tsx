@@ -1,4 +1,5 @@
 import { useRef, type CSSProperties } from 'react'
+import { useHoverCapable } from '../hooks/useHoverCapable'
 import { useLiquidReveal } from '../hooks/useLiquidReveal'
 
 /**
@@ -68,6 +69,7 @@ export function CrtImage({
   const frameRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mediaRef = useRef<HTMLImageElement>(null)
+  const hoverable = useHoverCapable()
 
   // The frame carries the focal point as a custom property so the base image
   // and both channel-split ghosts crop identically.
@@ -107,13 +109,22 @@ export function CrtImage({
       {/* Channel-split ghosts sit behind the real image and screen-blend on
           hover. Same URL as the plate, so they cost one cached fetch — but
           they are invisible until hover, and at low priority they stop
-          competing with the plate itself for the first paint. */}
-      <span className="crt__ghost crt__ghost--r" aria-hidden="true">
-        <img src={src} alt="" fetchPriority="low" decoding="async" />
-      </span>
-      <span className="crt__ghost crt__ghost--c" aria-hidden="true">
-        <img src={src} alt="" fetchPriority="low" decoding="async" />
-      </span>
+          competing with the plate itself for the first paint.
+
+          Rendered only where hover exists. On touch these were two extra
+          full-size photo copies per image, each on an SVG-filtered layer, for
+          an effect no touch visitor can ever trigger — ten filtered layers
+          across the page, decoded and rasterised for nothing. */}
+      {hoverable && (
+        <>
+          <span className="crt__ghost crt__ghost--r" aria-hidden="true">
+            <img src={src} alt="" fetchPriority="low" decoding="async" />
+          </span>
+          <span className="crt__ghost crt__ghost--c" aria-hidden="true">
+            <img src={src} alt="" fetchPriority="low" decoding="async" />
+          </span>
+        </>
+      )}
 
       <img
         ref={mediaRef}

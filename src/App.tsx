@@ -1,4 +1,4 @@
-import { CaseStudy, CaseStudyNotFound } from './components/CaseStudy'
+import { lazy, Suspense } from 'react'
 import { Contact } from './components/Contact'
 import { CrtFilters } from './components/CrtImage'
 import { Faq } from './components/Faq'
@@ -15,6 +15,16 @@ import { StructuredData } from './components/StructuredData'
 import { brand, caseStudies, site } from './content'
 import { useDocumentMeta } from './hooks/useDocumentMeta'
 import { useHashRoute } from './hooks/useHashRoute'
+
+/* Case studies live behind #/case/<slug>. Nobody lands on one first — the
+   hash router only reaches them from the portfolio — so their code has no
+   business in the bundle that has to parse before the home page can paint. */
+const CaseStudy = lazy(() =>
+  import('./components/CaseStudy').then((m) => ({ default: m.CaseStudy })),
+)
+const CaseStudyNotFound = lazy(() =>
+  import('./components/CaseStudy').then((m) => ({ default: m.CaseStudyNotFound })),
+)
 
 function HomePage() {
   return (
@@ -57,7 +67,7 @@ export default function App() {
 
   return (
     <>
-      <StructuredData />
+      <StructuredData includeFaq={route.name === 'home'} />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -67,10 +77,13 @@ export default function App() {
       <main id="main">
         {route.name === 'home' ? (
           <HomePage />
-        ) : study ? (
-          <CaseStudy study={study} />
         ) : (
-          <CaseStudyNotFound />
+          /* No fallback markup: the chunk is small and same-origin, and a
+             flash of skeleton between two dark pages reads worse than the
+             extra beat. */
+          <Suspense fallback={null}>
+            {study ? <CaseStudy study={study} /> : <CaseStudyNotFound />}
+          </Suspense>
         )}
       </main>
 

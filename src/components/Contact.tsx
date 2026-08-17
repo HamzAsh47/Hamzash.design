@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { contact, site } from '../content'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
@@ -61,6 +61,38 @@ function buildMailto(form: FormState) {
 
   return `mailto:${site.contactEmail}?subject=${encodeURIComponent(brief.subject)}&body=${encodeURIComponent(body)}`
 }
+
+/**
+ * The heading, lede and step rail, split out and memoised.
+ *
+ * None of it depends on a single character the visitor types, but it used to
+ * re-render on every keystroke along with the rest of the form — heading
+ * re-tokenised, step rail rebuilt, the whole subtree diffed. Keyed on `step`
+ * alone, a keystroke now stops at the field it belongs to.
+ */
+const ContactIntro = memo(function ContactIntro({ step }: { step: number }) {
+  return (
+    <Reveal className="contact__intro">
+      <Eyebrow>{contact.eyebrow}</Eyebrow>
+      <Heading text={contact.headline} className="headline--lg" />
+      <p className="section__lede">{contact.lede}</p>
+
+      <ol className="contact__steps" aria-hidden="true">
+        {contact.steps.map((item, index) => (
+          <li
+            key={item.id}
+            className={`contact__step${index === step ? ' is-active' : ''}${
+              index < step ? ' is-done' : ''
+            }`}
+          >
+            <span className="contact__step-index">{String(index + 1).padStart(2, '0')}</span>
+            <span className="contact__step-label">{item.label}</span>
+          </li>
+        ))}
+      </ol>
+    </Reveal>
+  )
+})
 
 export function Contact() {
   const [step, setStep] = useState(0)
@@ -144,25 +176,7 @@ export function Contact() {
   return (
     <section className="section section--hairline section--tint section--mark-frame contact" id="contact">
       <div className="container contact__inner">
-        <Reveal className="contact__intro">
-          <Eyebrow>{contact.eyebrow}</Eyebrow>
-          <Heading text={contact.headline} className="headline--lg" />
-          <p className="section__lede">{contact.lede}</p>
-
-          <ol className="contact__steps" aria-hidden="true">
-            {contact.steps.map((item, index) => (
-              <li
-                key={item.id}
-                className={`contact__step${index === step ? ' is-active' : ''}${
-                  index < step ? ' is-done' : ''
-                }`}
-              >
-                <span className="contact__step-index">{String(index + 1).padStart(2, '0')}</span>
-                <span className="contact__step-label">{item.label}</span>
-              </li>
-            ))}
-          </ol>
-        </Reveal>
+        <ContactIntro step={step} />
 
         <Reveal className="contact__panel" delayMs={100}>
           {status === 'success' ? (

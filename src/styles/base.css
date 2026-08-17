@@ -86,6 +86,25 @@ a {
   color: var(--white);
 }
 
+/* The focus ring above was kept off cyan on purpose — but the browser was
+   painting cyan anyway, everywhere, and only on touch.
+   -webkit-tap-highlight-color defaults to rgba(51,181,229,.4) in Chrome, so
+   every tap on every control flashed a sky-blue box over the obsidian: the
+   single largest source of off-palette colour on the site, and invisible on a
+   desktop where nobody taps.
+   Nothing is lost by removing it. Every control here already has its own
+   :active state, which is the feedback the highlight was standing in for. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Native controls tint themselves the UA accent — a blue — unless told
+   otherwise. The form draws its own checkboxes, so this only ever shows up on
+   a control added later, which is exactly when it would be missed. */
+:root {
+  accent-color: var(--crimson);
+}
+
 /* --- Layout primitives -------------------------------------------------- */
 
 .container {
@@ -103,6 +122,17 @@ a {
   padding-block: var(--space-2xl);
   position: relative;
 }
+
+/* Deliberately no `content-visibility: auto` here.
+   It is the obvious optimisation for a long page and it was measured: first
+   contentful paint on a throttled phone improved 996ms → 616ms and the mount
+   blocked for 206ms instead of 555ms. But deferring each section's layout to
+   the moment it approaches moves that work into the scroll, and scrolling is
+   what actually felt bad — at a realistic reading pace it turned a clean
+   20ms worst frame into five frames over 50ms and a 106ms spike.
+   A slower first paint is a moment; a page that stutters every time you move
+   is the whole experience. If this is revisited, it needs per-section
+   contain-intrinsic-size measured from real heights, not one global guess. */
 
 /* A hairline this faint does not draw a box round the section — it just makes
    the seam deliberate. An earlier, heavier rule did read as a stack of boxes;
@@ -736,7 +766,6 @@ a {
   pointer-events: none;
   z-index: 1;
   opacity: 0;
-  mix-blend-mode: screen;
   transition: opacity var(--dur-mid) var(--ease-out);
 }
 
@@ -759,17 +788,26 @@ a {
   pointer-events: none;
 }
 
-.crt__ghost--r {
-  filter: url('#crt-red');
-}
-
-.crt__ghost--c {
-  filter: url('#crt-cyan');
-}
-
+/* The SVG filters and the screen blend are attached on hover, not at rest.
+   Held permanently they cost a rasterised filtered layer per ghost whether or
+   not anything is visible — the largest single rendering cost on the page,
+   paid on every scroll frame for pixels at opacity 0. Applying them with the
+   same hover rule that reveals the ghosts leaves the effect identical and
+   leaves the idle page with no SVG filtering at all. */
 .crt:hover .crt__ghost,
 .crt:focus-within .crt__ghost {
   opacity: 0.55;
+  mix-blend-mode: screen;
+}
+
+.crt:hover .crt__ghost--r,
+.crt:focus-within .crt__ghost--r {
+  filter: url('#crt-red');
+}
+
+.crt:hover .crt__ghost--c,
+.crt:focus-within .crt__ghost--c {
+  filter: url('#crt-cyan');
 }
 
 .crt:hover .crt__ghost--r {

@@ -34,8 +34,9 @@ export function Nav() {
   }
 
   return (
-    <header className={`nav${scrolled ? ' nav--scrolled' : ''}`}>
-      <div className="container nav__inner">
+    <>
+      <header className={`nav${scrolled ? ' nav--scrolled' : ''}`}>
+        <div className="container nav__inner">
         <button className="nav__brand" onClick={() => navigate('top')} aria-label="Hamza Ashraf — back to top">
           {/* The supplied file is a full lockup — mark and wordmark together —
               so the HTML wordmark that used to sit beside the monogram is gone
@@ -66,9 +67,17 @@ export function Nav() {
           >
             <span className={`nav__toggle-bar${open ? ' is-open' : ''}`} />
           </button>
+          </div>
         </div>
-      </div>
+      </header>
 
+      {/* Deliberately a sibling of the header, not a child of it.
+          .nav--scrolled applies backdrop-filter, and a filtered element becomes
+          the containing block for its position:fixed descendants — so nested
+          here the drawer stopped resolving against the viewport the moment the
+          page scrolled. Its `inset: var(--header-height) 0 0 0` then measured
+          against a bar exactly --header-height tall and collapsed to zero
+          height: the toggle flipped to an X and no menu ever appeared. */}
       <div id="mobile-nav" className={`nav__drawer${open ? ' is-open' : ''}`} hidden={!open}>
         <nav className="container nav__drawer-inner" aria-label="Mobile">
           {navLinks.map((link, index) => (
@@ -87,6 +96,6 @@ export function Nav() {
           </button>
         </nav>
       </div>
-    </header>
+    </>
   )
 }

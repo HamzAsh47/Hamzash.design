@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import type { ElementType } from 'react'
 
 type HeadingProps = {
@@ -40,7 +41,7 @@ function tokenize(text: string): Token[] {
   return tokens
 }
 
-export function Heading({
+function HeadingBase({
   text,
   as: Tag = 'h2',
   className = '',
@@ -48,7 +49,11 @@ export function Heading({
   delayMs = 0,
   id,
 }: HeadingProps) {
-  const tokens = tokenize(text)
+  /* Every heading on the page re-tokenises on each render of its parent.
+     Harmless in isolation, but the contact form re-renders its whole
+     subtree on every keystroke, and this was doing the split-and-rebuild
+     work per character typed. */
+  const tokens = useMemo(() => tokenize(text), [text])
   const classes = ['headline', animate ? 'headline--animate' : '', className]
     .filter(Boolean)
     .join(' ')
@@ -78,3 +83,8 @@ export function Heading({
     </Tag>
   )
 }
+
+/* Headings are pure functions of their props, and they sit inside subtrees
+   that re-render for reasons the heading does not care about — a keystroke in
+   a form field, a step change. */
+export const Heading = memo(HeadingBase)

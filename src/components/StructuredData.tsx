@@ -1,4 +1,4 @@
-import { brand, services, site, testimonials } from '../content'
+import { brand, faq, services, site, testimonials } from '../content'
 
 /**
  * schema.org graph for the site.
@@ -12,8 +12,13 @@ import { brand, services, site, testimonials } from '../content'
  *
  * Rendered as a plain script tag rather than injected, so it is in the markup
  * the first time the page paints.
+ *
+ * `includeFaq` is not a convenience switch. Google requires FAQ markup to
+ * describe questions actually visible on the page it is served with, and the
+ * FAQ section only exists on the home route — emitting it on a case study
+ * would be marking up content that is not there.
  */
-export function StructuredData() {
+export function StructuredData({ includeFaq = false }: { includeFaq?: boolean }) {
   const verified = testimonials.filter((item) => !item.isPlaceholder && item.sourceUrl)
 
   const graph = {
@@ -80,6 +85,19 @@ export function StructuredData() {
           })),
         }),
       },
+      ...(includeFaq
+        ? [
+            {
+              '@type': 'FAQPage',
+              '@id': `${site.url}/#faq`,
+              mainEntity: faq.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: { '@type': 'Answer', text: item.answer },
+              })),
+            },
+          ]
+        : []),
     ],
   }
 
