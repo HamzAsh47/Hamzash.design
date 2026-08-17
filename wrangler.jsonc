@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "hamzash47-github-io",
+  "compatibility_date": "2026-08-17",
+
+  // Assets only — no "main". Nothing here renders on demand: Vite emits a
+  // finished static build and Cloudflare serves it. An assets-only Worker also
+  // must not declare "assets.binding", which is only valid alongside a Worker
+  // script.
+  "assets": {
+    "directory": "./dist",
+
+    // Deliberately NOT "single-page-application".
+    //
+    // Case studies are hash routes (#/case/<slug>), and a fragment never
+    // reaches the server — so "/" is the only real path this site has, next to
+    // the static files (sitemap.xml, robots.txt, og-image.png). SPA handling
+    // would answer every unknown path with index.html and a 200, turning
+    // typos and stale links into soft 404s that a crawler indexes as
+    // duplicate homepages. "404-page" keeps them honest.
+    "not_found_handling": "404-page"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

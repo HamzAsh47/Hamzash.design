@@ -106,24 +106,38 @@ LinkedIn rather than silently dropping leads.
 
 ## Deploying
 
-Hosted on Cloudflare, served at **https://hamzash47.com**. `main` is the only
-branch that deploys; there is no GitHub Actions workflow, because two deploy
-paths pointing at the same repository is the fastest way to lose track of what
-is actually live.
+Hosted on **Cloudflare Workers** (not Pages) and served at
+**https://hamzash47.com**. `main` is the only branch that deploys; there is no
+GitHub Actions workflow, because two deploy paths pointing at the same
+repository is the fastest way to lose track of what is actually live.
 
-Cloudflare build settings:
+`wrangler.jsonc` is what makes the deploy work — Workers Builds has no
+convention for "where is the build output", so without it a connected Worker
+has nothing to publish. It declares an assets-only Worker: no `main`, because
+nothing renders on demand.
+
+Workers Builds settings, in the dashboard:
 
 | Setting | Value |
 | --- | --- |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
+| Deploy command | `npx wrangler deploy` |
 | Production branch | `main` |
-| Node version | 22 |
 
 The Vite `base` is `'./'` and case studies use a hash router (`#/case/<slug>`),
-so the same build works from the apex domain, a preview deployment on a
-`*.pages.dev` subdomain, or a local `dist` preview — with no rewrite rules, no
-SPA fallback and no base-path reconfiguration.
+so the same build works from the apex domain, a `*.workers.dev` preview, or a
+local `dist` preview — with no rewrite rules and no base-path reconfiguration.
+
+`not_found_handling` is set to `404-page` rather than `single-page-application`
+on purpose: a fragment never reaches the server, so `/` is the only real path
+here. SPA handling would answer every unknown path with the homepage and a
+200, which a crawler indexes as duplicate content.
+
+Validate a config change without deploying:
+
+```sh
+npm run build && npx wrangler deploy --dry-run
+```
 
 `VITE_SITE_URL` does not need to be set: the origin defaults to the production
 domain. Set it only on a preview deployment, so previews do not emit canonical
