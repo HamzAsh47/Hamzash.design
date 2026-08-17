@@ -5,7 +5,7 @@ import { Reveal } from './Reveal'
 
 export function Process() {
   return (
-    <section className="section section--hairline process" id="process">
+    <section className="section section--hairline section--tint process" id="process">
       <div className="container">
         <Reveal className="section__head">
           <Eyebrow>{processIntro.eyebrow}</Eyebrow>

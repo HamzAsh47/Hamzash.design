@@ -1,4 +1,5 @@
-import type { CSSProperties } from 'react'
+import { useRef, type CSSProperties } from 'react'
+import { useLiquidReveal } from '../hooks/useLiquidReveal'
 
 /**
  * CRT treatment — scoped to photography only.
@@ -7,12 +8,14 @@ import type { CSSProperties } from 'react'
  * chromatic-aberration RGB split that only fires on hover. Deliberately no
  * barrel curvature and no looping flicker: this is a texture, not a gimmick,
  * and it never wraps UI chrome (buttons, nav, cards, text blocks).
+ *
+ * Opting in with `reveal` adds the liquid cursor-trail on top: a canvas that
+ * paints a hotter grade of the same photograph along the pointer path. Purely
+ * additive — the graded base image below it is always the fallback.
  */
 
 type CrtImageProps = {
   src: string
-  /** Optional higher-resolution source, served to high-DPR screens only. */
-  src2x?: string
   alt: string
   /** CSS aspect-ratio string, e.g. "4 / 5". Keeps the swap-in crop honest. */
   aspectRatio?: string
@@ -21,50 +24,112 @@ type CrtImageProps = {
   /** Adds the blinking-free REC dot to the right-hand label. */
   showRec?: boolean
   priority?: boolean
+  /** Turns on the cursor-trail reveal. Off everywhere except the hero. */
+  reveal?: boolean
   /**
-   * 'selective' drops skin and clothing to black & white while keeping the
-   * crimson rim-light in colour — the locked treatment for hero/signature
-   * shots. Everything else uses 'full'.
+   * Image painted along the trail. Defaults to `src`, which the canvas then
+   * regrades — pass a second file here if a dedicated variant exists.
    */
-  treatment?: 'full' | 'selective'
+  revealSrc?: string
+  /**
+   * Which part of the photo to hold when the frame crops it, normalised 0–1
+   * (0.5/0.5 = centre). One value drives both the CSS object-position and the
+   * canvas crop, so the revealed layer can never drift off the base image.
+   */
+  focalPoint?: { x: number; y: number }
+  /**
+   * Optional second focal point for narrow screens, where the frame turns
+   * portrait and the crop swings from vertical to horizontal. The stylesheet
+   * picks which one applies; the canvas reads back whichever won.
+   */
+  focalPointNarrow?: { x: number; y: number }
+  /**
+   * The artwork is a transparent cut-out rather than a filled frame. The CRT
+   * chrome then has to follow the subject's own silhouette — painted across
+   * the whole box it would draw a rectangle on the page.
+   */
+  cutout?: boolean
 }
 
 export function CrtImage({
   src,
-  src2x,
   alt,
   aspectRatio,
   className = '',
   labels,
   showRec = false,
   priority = false,
-  treatment = 'full',
+  reveal = false,
+  revealSrc,
+  focalPoint,
+  focalPointNarrow,
+  cutout = false,
 }: CrtImageProps) {
-  const style = aspectRatio ? ({ aspectRatio } as CSSProperties) : undefined
-  // The ghosts reuse the same source, so the browser serves them from cache.
-  const srcSet = src2x ? `${src} 1x, ${src2x} 2x` : undefined
+  const frameRef = useRef<HTMLElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mediaRef = useRef<HTMLImageElement>(null)
+
+  // The frame carries the focal point as a custom property so the base image
+  // and both channel-split ghosts crop identically.
+  const style: CSSProperties = {}
+  if (aspectRatio) style.aspectRatio = aspectRatio
+  const asPosition = (point: { x: number; y: number }) =>
+    `${point.x * 100}% ${point.y * 100}%`
+  if (focalPoint) {
+    ;(style as Record<string, string>)['--crt-object-position'] = asPosition(focalPoint)
+  }
+  if (focalPointNarrow) {
+    ;(style as Record<string, string>)['--crt-object-position-narrow'] =
+      asPosition(focalPointNarrow)
+  }
+  if (cutout) {
+    // Lets the scanline layer be masked by the artwork's own alpha.
+    ;(style as Record<string, string>)['--crt-mask'] = `url("${src}")`
+  }
+
+  // A distinct reveal file is already the hot state, so the canvas paints it
+  // straight rather than synthesising a grade on top of it.
+  const hasVariant = Boolean(revealSrc && revealSrc !== src)
+
+  useLiquidReveal(canvasRef, frameRef, reveal ? { base: src, reveal: revealSrc ?? src } : undefined, {
+    regrade: !hasVariant,
+    focalX: focalPoint?.x,
+    focalY: focalPoint?.y,
+    baseRef: mediaRef,
+  })
 
   return (
     <figure
-      className={`crt ${treatment === 'selective' ? 'crt--selective' : ''} ${className}`.trim()}
+      ref={frameRef}
+      className={`crt ${cutout ? 'crt--cutout' : ''} ${className}`.replace(/\s+/g, ' ').trim()}
       style={style}
     >
-      {/* Channel-split ghosts sit behind the real image and screen-blend on hover. */}
+      {/* Channel-split ghosts sit behind the real image and screen-blend on
+          hover. Same URL as the plate, so they cost one cached fetch — but
+          they are invisible until hover, and at low priority they stop
+          competing with the plate itself for the first paint. */}
       <span className="crt__ghost crt__ghost--r" aria-hidden="true">
-        <img src={src} srcSet={srcSet} alt="" />
+        <img src={src} alt="" fetchPriority="low" decoding="async" />
       </span>
       <span className="crt__ghost crt__ghost--c" aria-hidden="true">
-        <img src={src} srcSet={srcSet} alt="" />
+        <img src={src} alt="" fetchPriority="low" decoding="async" />
       </span>
 
       <img
+        ref={mediaRef}
         className="crt__media"
         src={src}
-        srcSet={srcSet}
         alt={alt}
         loading={priority ? 'eager' : 'lazy'}
+        /* The hero plate is the mobile LCP element; everything else can wait
+           for it. */
+        fetchPriority={priority ? 'high' : 'auto'}
         decoding="async"
       />
+
+      {/* Shares z-index 1 with the ghosts and wins on DOM order, so the trail
+          still sits under the scanlines, vignette and glow. */}
+      {reveal && <canvas ref={canvasRef} className="crt__reveal" aria-hidden="true" />}
 
       <span className="crt__scanlines" aria-hidden="true" />
       <span className="crt__vignette" aria-hidden="true" />
@@ -88,51 +153,6 @@ export function CrtFilters() {
   return (
     <svg className="visually-hidden" aria-hidden="true" focusable="false">
       <defs>
-        {/*
-          Selective colour, per the locked hero photography direction: skin and
-          clothing fall to black & white while the crimson rim-light keeps its
-          colour. Done in-filter so the hero can run from an ordinary
-          full-colour photograph — no separately masked file to keep in sync.
-
-          The mask is red dominance, R - (G + B) / 2, pushed through a linear
-          ramp. Saturated crimson clears the ramp; reddish-but-muted tones
-          (skin, the oxblood corduroy) fall under it and desaturate. Tune with
-          slope/intercept: colour starts at -intercept/slope and is full at
-          (1 - intercept) / slope.
-        */}
-        <filter id="selective-crimson" colorInterpolationFilters="sRGB">
-          <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="mono" />
-
-          <feColorMatrix
-            in="SourceGraphic"
-            type="matrix"
-            values="0 0 0 0 0
-                    0 0 0 0 0
-                    0 0 0 0 0
-                    1 -0.5 -0.5 0 0"
-            result="redMask"
-          />
-
-          {/*
-            Ramp runs 0.320 -> 0.420, measured against real swatches from the
-            brand system and the portrait. Mask values: crimson rim 0.612,
-            bright rim 0.788, dim rim edge 0.441 (all kept); lit corduroy
-            0.294, skin midtone 0.247, oxblood 0.149, oatmeal 0.055 (all
-            dropped). The widest offender is lit corduroy, so the ramp starts
-            above it and completes below the dimmest part of the rim.
-          */}
-          <feComponentTransfer in="redMask" result="redMaskRamped">
-            <feFuncA type="linear" slope="10" intercept="-3.2" />
-          </feComponentTransfer>
-
-          <feComposite in="SourceGraphic" in2="redMaskRamped" operator="in" result="crimsonOnly" />
-
-          <feMerge>
-            <feMergeNode in="mono" />
-            <feMergeNode in="crimsonOnly" />
-          </feMerge>
-        </filter>
-
         <filter id="crt-red" colorInterpolationFilters="sRGB">
           <feColorMatrix
             type="matrix"

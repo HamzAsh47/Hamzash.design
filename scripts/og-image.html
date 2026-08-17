@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Source for the 1200x630 Open Graph card, rendered to PNG by
+      scripts/generate-og.mjs. Real HTML rather than a hand-built SVG so the
+      card is laid out in the same tokens and typefaces as the site — a social
+      preview that drifts from the brand is worse than none.
+    -->
+    <style>
+      /* The site's own self-hosted files, so the card cannot drift onto a
+         fallback face the brand does not use. */
+      @font-face {
+        font-family: 'Archivo';
+        src: url('../src/assets/fonts/archivo-normal-latin-1.woff2') format('woff2');
+        font-weight: 400 900;
+      }
+
+      @font-face {
+        font-family: 'JetBrains Mono';
+        src: url('../src/assets/fonts/jetbrains-mono-normal-latin-1.woff2') format('woff2');
+        font-weight: 400 600;
+      }
+
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 1200px;
+        height: 630px;
+        background: #0d1526;
+        color: #f2f2f2;
+        font-family: 'Archivo', system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 72px 80px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* The same oversized watermark the hero runs, at the same low opacity. */
+      .watermark {
+        position: absolute;
+        top: 42px;
+        left: -40px;
+        right: 0;
+        font-size: 150px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: #fff;
+        opacity: 0.04;
+        white-space: nowrap;
+        line-height: 1;
+      }
+
+      .rule {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 320px;
+        height: 6px;
+        background: #c81e3a;
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 19px;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        position: relative;
+      }
+
+      .eyebrow b {
+        color: #c81e3a;
+        font-weight: 500;
+      }
+
+      .eyebrow i {
+        width: 1px;
+        height: 15px;
+        background: rgba(74, 78, 88, 0.62);
+      }
+
+      .eyebrow span {
+        color: #4a4e58;
+        letter-spacing: 0.13em;
+        font-style: normal;
+      }
+
+      h1 {
+        position: relative;
+        font-size: 82px;
+        font-weight: 500;
+        line-height: 1.03;
+        letter-spacing: -0.035em;
+        max-width: 15ch;
+      }
+
+      h1 em {
+        font-weight: 900;
+        font-style: normal;
+        color: #c81e3a;
+      }
+
+      .foot {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 40px;
+      }
+
+      .name {
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+      }
+
+      .role {
+        margin-top: 8px;
+        font-size: 19px;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+        color: #9aa0ad;
+      }
+
+      .sys {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.16em;
+        color: #4a4e58;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="watermark">BRAND &nbsp;•&nbsp; UI/UX &nbsp;•&nbsp; MOTION</div>
+
+    <div class="eyebrow"><b>SYS.01</b><i></i><span>Senior Art Director</span></div>
+
+    <h1>Brand, product, and motion as <em>one system.</em></h1>
+
+    <div class="foot">
+      <div>
+        <div class="name">HAMZA ASHRAF</div>
+        <div class="role">UI/UX &amp; Product Strategist &nbsp;·&nbsp; Motion &amp; Brand</div>
+      </div>
+      <div class="sys">SYS.2026</div>
+    </div>
+  </body>
+</html>

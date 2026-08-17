@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { system } from '../content'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
@@ -10,10 +11,24 @@ import { Reveal } from './Reveal'
  * disconnected blocks that each stop at their own edge, the right column is one
  * continuous rail running through all three disciplines into a single output.
  * No abstract node-and-circle graphic; the layout carries the argument.
+ *
+ * Stacked, that argument disappears: two columns become one long scroll and
+ * there is nothing left to compare at a glance. Below the breakpoint the two
+ * panels share a single cell and a segmented control switches between them, so
+ * the comparison stays a comparison. It opens on the system — the stronger of
+ * the two things being said.
+ *
+ * The control is plain buttons rather than an ARIA tablist. Above the
+ * breakpoint both panels are on screen at once, which is not what a tablist
+ * describes, and the control is display:none there — so assistive tech sees
+ * two panels and no tabs on desktop, and one panel and a two-state switch on
+ * mobile, each of which is true.
  */
 export function SystemSection() {
+  const [lane, setLane] = useState<'old' | 'new'>('new')
+
   return (
-    <section className="section section--hairline system" id="system">
+    <section className="section section--hairline section--tint section--mark-line system" id="system">
       <div className="container">
         <Reveal className="section__head">
           <Eyebrow>{system.eyebrow}</Eyebrow>
@@ -21,7 +36,24 @@ export function SystemSection() {
           <p className="section__lede">{system.lede}</p>
         </Reveal>
 
-        <div className="system__compare">
+        <div className="system__switch" role="group" aria-label="Compare the two approaches">
+          <button
+            className="system__switch-option"
+            onClick={() => setLane('old')}
+            aria-pressed={lane === 'old'}
+          >
+            Old way
+          </button>
+          <button
+            className="system__switch-option"
+            onClick={() => setLane('new')}
+            aria-pressed={lane === 'new'}
+          >
+            System
+          </button>
+        </div>
+
+        <div className="system__compare" data-lane={lane}>
           <Reveal className="system__panel system__panel--old">
             <div className="system__panel-head">
               <span className="system__label">{system.oldWay.label}</span>

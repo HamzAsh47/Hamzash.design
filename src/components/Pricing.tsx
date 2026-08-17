@@ -1,40 +1,90 @@
 import { useState } from 'react'
 import type { Tier } from '../content'
 import { oneTimePackages, pricingIntro, retainer } from '../content'
+import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
+import { TierDetail, type TierContext } from './TierDetail'
 
-function TierCard({ tier, ai = false }: { tier: Tier; ai?: boolean }) {
+function TierCard({
+  tier,
+  ai = false,
+  onOpen,
+}: {
+  tier: Tier
+  ai?: boolean
+  onOpen: () => void
+}) {
+  const { hot, handlers } = useSpotlight()
+
+  /* The AI package swaps the panel accent to Electric Cyan. It is the one
+     place on the page the palette allows cyan — an AI/system moment — and the
+     tier keeps it instead of falling in with the crimson everything else uses. */
   return (
-    <li className={`tier${tier.featured ? ' tier--featured' : ''}${ai ? ' tier--ai' : ''}`}>
+    <li
+      className={`panel tier${ai ? ' panel--ai tier--ai' : ''}${tier.featured ? ' tier--featured' : ''}${hot ? ' is-hot' : ''}`}
+      {...handlers}
+    >
+      {/* The whole card opens the detail. The CTA inside it is a different
+          action, so it stops the click from reaching this one. */}
+      <button className="tier__open" onClick={onOpen}>
+        <span className="visually-hidden">
+          {tier.name} — {tier.price}. See full details
+        </span>
+      </button>
+
       <div className="tier__head">
         <span className="tier__name">{tier.name}</span>
         {tier.featured && <span className="tier__badge">Most chosen</span>}
       </div>
-      <span className="tier__price">{tier.price}</span>
-      <span className="tier__meta">{tier.meta}</span>
+
+      {/* Price and hours share a baseline. Stacked they were two separate
+          lines of type doing one job, and the card had no block a reader's eye
+          could land on. */}
+      <p className="tier__price">
+        {tier.price}
+        <span className="tier__meta">{tier.meta}</span>
+      </p>
+
       <ul className="tier__points">
         {tier.points.map((point) => (
           <li key={point}>{point}</li>
         ))}
       </ul>
-      <button className="btn btn--ghost tier__cta" onClick={() => goToSection('contact')}>
-        Start here
-      </button>
+
+      {/* Both ways out of the card, ruled off from the scope above them: the
+          card itself opens the detail, the button skips to the brief. */}
+      <div className="tier__foot">
+        <span className="tier__more" aria-hidden="true">
+          See full details
+          <span className="btn__arrow">→</span>
+        </span>
+
+        <button
+          className="btn btn--ghost tier__cta"
+          onClick={(event) => {
+            event.stopPropagation()
+            goToSection('contact')
+          }}
+        >
+          Start here
+        </button>
+      </div>
     </li>
   )
 }
 
 export function Pricing() {
+  const [detail, setDetail] = useState<TierContext | null>(null)
   const [tab, setTab] = useState<'one-time' | 'retainer'>('one-time')
   const [packageId, setPackageId] = useState(oneTimePackages[0].id)
 
   const activePackage = oneTimePackages.find((item) => item.id === packageId) ?? oneTimePackages[0]
 
   return (
-    <section className="section section--hairline pricing" id="pricing">
+    <section className="section section--hairline section--tint section--mark-dot pricing" id="pricing">
       <div className="container">
         <Reveal className="section__head">
           <Eyebrow>{pricingIntro.eyebrow}</Eyebrow>
@@ -81,23 +131,26 @@ export function Pricing() {
 
             <ul className="tiers">
               {activePackage.tiers.map((tier) => (
-                <TierCard key={tier.name} tier={tier} ai={activePackage.isAiContext} />
+                <TierCard
+                  key={tier.name}
+                  tier={tier}
+                  ai={activePackage.isAiContext}
+                  onOpen={() =>
+                    setDetail({
+                      tier,
+                      packageTitle: activePackage.title,
+                      packageSummary: activePackage.summary,
+                      addOns: activePackage.addOns,
+                      ai: activePackage.isAiContext,
+                    })
+                  }
+                />
               ))}
             </ul>
 
-            {activePackage.addOns && (
-              <div className="addons">
-                <span className="addons__title">Add-ons</span>
-                <ul className="addons__list">
-                  {activePackage.addOns.map((addOn) => (
-                    <li key={addOn.label}>
-                      <span>{addOn.label}</span>
-                      <span className="addons__price">{addOn.price}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* No standalone add-ons block. Every tier's dialog already lists
+                them, and printing the same list again under the grid made the
+                AI package the only one that said everything twice. */}
           </Reveal>
         ) : (
           <Reveal className="pricing__panel" delayMs={60}>
@@ -105,7 +158,17 @@ export function Pricing() {
 
             <ul className="tiers">
               {retainer.tiers.map((tier) => (
-                <TierCard key={tier.name} tier={tier} />
+                <TierCard
+                  key={tier.name}
+                  tier={tier}
+                  onOpen={() =>
+                    setDetail({
+                      tier,
+                      packageTitle: 'Ongoing retainer',
+                      packageSummary: retainer.note,
+                    })
+                  }
+                />
               ))}
             </ul>
 
@@ -116,6 +179,8 @@ export function Pricing() {
           </Reveal>
         )}
       </div>
+
+      {detail && <TierDetail context={detail} onClose={() => setDetail(null)} />}
     </section>
   )
 }

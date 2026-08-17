@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
-// The official horizontal lockup — monogram, wordmark and tagline with their
-// kerning locked in the vector. Never rebuild this from live text.
-// (Named "Vertical" in the kit, but this is the wide single-row lockup.)
-import lockup from '../assets/logo/Logo_Vertical_Dark_BG.svg'
+import logoLockup from '../assets/logo/logo-lockup-header.svg'
 import { navCta, navLinks } from '../content'
 import { goToSection } from '../lib/scroll'
 
@@ -40,7 +37,12 @@ export function Nav() {
     <header className={`nav${scrolled ? ' nav--scrolled' : ''}`}>
       <div className="container nav__inner">
         <button className="nav__brand" onClick={() => navigate('top')} aria-label="Hamza Ashraf — back to top">
-          <img className="nav__lockup" src={lockup} alt="Hamza Ashraf" />
+          {/* The supplied file is a full lockup — mark and wordmark together —
+              so the HTML wordmark that used to sit beside the monogram is gone
+              with it, rather than setting the name twice in two typefaces.
+              The button carries its own aria-label, so the image stays
+              decorative. */}
+          <img className="nav__logo" src={logoLockup} alt="" width={894} height={318} />
         </button>
 
         <nav className="nav__links" aria-label="Primary">
@@ -52,8 +54,6 @@ export function Nav() {
         </nav>
 
         <div className="nav__actions">
-          {/* Ghost, so the hero's solid-crimson primary CTA stays the one
-              focal point in the first viewport. */}
           <button className="btn btn--ghost nav__cta" onClick={() => navigate(navCta.id)}>
             {navCta.label}
           </button>
@@ -82,7 +82,7 @@ export function Nav() {
               {link.label}
             </button>
           ))}
-          <button className="btn btn--primary nav__drawer-cta" onClick={() => navigate(navCta.id)}>
+          <button className="btn btn--ghost nav__drawer-cta" onClick={() => navigate(navCta.id)}>
             {navCta.label}
           </button>
         </nav>
