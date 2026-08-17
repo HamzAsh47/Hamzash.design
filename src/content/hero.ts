@@ -1,5 +1,5 @@
-import heroPortrait from '../assets/images/hero-portrait.webp'
-import heroPortrait2x from '../assets/images/hero-portrait@2x.webp'
+import heroBase from '../assets/images/hero-base.webp'
+import heroReveal from '../assets/images/hero-reveal.webp'
 
 export const hero = {
   eyebrow: 'SYS.01 :: SENIOR ART DIRECTOR',
@@ -10,13 +10,6 @@ export const hero = {
   /** Fraunces italic, directly under the headline. */
   subtitle: 'From old-school craft to the AI-driven future.',
 
-  /**
-   * Substring of `subtitle` that carries the Electric Cyan accent. Cyan is
-   * reserved for AI/system context, so this must stay on the AI phrase — it is
-   * not a decorative highlight. Set to '' to remove the accent entirely.
-   */
-  subtitleAccent: 'AI-driven future',
-
   intro:
     'Most startups hire a brand designer, a UI/UX designer and a motion editor, then spend the next six months keeping three people in sync. I own all three and deliver them as one connected system.',
 
@@ -24,26 +17,44 @@ export const hero = {
   secondaryCta: { label: 'Start a project', target: 'contact' },
 
   /**
-   * The signature portrait: oxblood corduroy overshirt over an oatmeal
-   * sweater, with a crimson rim-light tracing the silhouette. Re-encoded from
-   * the 6.8 MB source PNG to WebP at two widths (110 KB / 163 KB).
+   * Two purpose-shot layers of the same framing, not one photo graded twice.
    *
-   * The source is 3:4, so the 4:5 frame trims roughly 3.5% from the top and
-   * bottom under object-fit: cover. Change `aspectRatio` to '3 / 4' to show the
-   * full frame uncropped.
+   * `src` is the resting state: desaturated, plain tee, no glasses. `revealSrc`
+   * is what the cursor uncovers — crimson key light, tinted glasses, the
+   * oxblood corduroy. Because the variant is already the hot state, the canvas
+   * paints it straight instead of synthesising a grade over it.
+   *
+   * Both files are exported at an identical 2400x750 so the two layers stay in
+   * exact register under the same cover crop. Keep that rule if either is
+   * re-shot: a different aspect between them makes the reveal slide off the
+   * base image.
    */
   portrait: {
-    src: heroPortrait,
-    src2x: heroPortrait2x,
-    alt: 'Hamza Ashraf, in an oxblood corduroy overshirt, lit with a crimson rim-light',
-    aspectRatio: '4 / 5',
-    isPlaceholder: false,
+    src: heroBase,
+    revealSrc: heroReveal,
+    alt: 'Hamza Ashraf in profile against a dark ground',
+
     /**
-     * 'selective' is the locked hero treatment — black & white except the
-     * crimson rim-light, applied in-filter so an ordinary full-colour
-     * photograph drops straight in. Use 'full' to keep the photo in colour.
+     * Which part of the photo to hold as the frame crops it, normalised 0–1.
+     * The shot is 3.2:1 and the crop is almost entirely horizontal. Held a
+     * little right of centre: far enough that the copy clears him on the
+     * left, close enough that a wide window does not open a dead gap between
+     * the two.
+     *
+     * This one value drives the CSS object-position and the reveal canvas
+     * crop together — they cannot drift apart.
      */
-    treatment: 'selective',
+    focalPoint: { x: 0.56, y: 0.5 },
+
+    /**
+     * Narrow screens turn the frame portrait, which swings the crop from
+     * mostly-vertical to almost entirely horizontal — the desktop value would
+     * fill the phone with the empty half of the shot and slide his face off
+     * the right edge. Held further right so the face lands centre-frame.
+     */
+    focalPointNarrow: { x: 0.71, y: 0.5 },
+
+    isPlaceholder: false,
   },
 
   /** Small system-log readouts sitting on the portrait frame. */

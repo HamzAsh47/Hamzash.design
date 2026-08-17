@@ -57,6 +57,7 @@ export function Contact() {
   const validateStep = () => {
     if (step === 0) {
       if (!form.name.trim()) return 'Add your name so I know who I am replying to.'
+      if (!form.company.trim()) return 'Add the company or product this is for.'
       if (!isEmail(form.email)) return 'That email address does not look right.'
     }
     if (step === 1 && !form.budget) return 'Pick a budget range — an estimate is fine.'
@@ -109,7 +110,7 @@ export function Contact() {
   }
 
   return (
-    <section className="section section--hairline contact" id="contact">
+    <section className="section section--hairline section--tint section--mark-frame contact" id="contact">
       <div className="container contact__inner">
         <Reveal className="contact__intro">
           <Eyebrow>{contact.eyebrow}</Eyebrow>
@@ -159,7 +160,7 @@ export function Contact() {
                   </label>
 
                   <label className="field">
-                    <span className="field__label">{contact.fields.company.label}</span>
+                    <span className="field__label">{contact.fields.company.label} *</span>
                     <input
                       className="field__input"
                       value={form.company}
@@ -234,14 +235,15 @@ export function Contact() {
                     />
                   </label>
 
-                  {!isConnected && (
-                    <p className="form__notice">
-                      {contact.unconfiguredMessage}{' '}
-                      <a href={brand.handles.linkedin.href} target="_blank" rel="noreferrer">
-                        {brand.handles.linkedin.label}
-                      </a>
-                    </p>
-                  )}
+                  {/* Connected, LinkedIn is an alternative offered under the
+                      form. Unconnected, it is the only route there is, so it
+                      says so instead of letting a brief go nowhere. */}
+                  <p className="form__notice">
+                    {isConnected ? contact.altRoutePrompt : contact.unconfiguredMessage}{' '}
+                    <a href={brand.handles.linkedin.href} target="_blank" rel="noreferrer">
+                      {isConnected ? contact.altRouteLink : brand.handles.linkedin.label}
+                    </a>
+                  </p>
                 </div>
               )}
 
@@ -264,15 +266,25 @@ export function Contact() {
                   </button>
                 )}
 
+                {/* The keys matter. Both branches render a <button> in the
+                    same slot, so without them React reconciles one into the
+                    other and only patches the attributes — the advance button
+                    on the last-but-one step became type="submit" between
+                    mousedown and mouseup, and the browser submitted the form
+                    on the click that was meant to open the Details step. Every
+                    brief arrived a step early with details empty. Distinct
+                    keys force an unmount, so the node that receives the click
+                    is the node that was clicked. */}
                 {step < lastStep ? (
-                  <button type="button" className="btn btn--primary" onClick={next}>
-                    Continue
+                  <button key="advance" type="button" className="btn btn--primary" onClick={next}>
+                    {contact.steps[step].next}
                     <span className="btn__arrow" aria-hidden="true">
                       →
                     </span>
                   </button>
                 ) : (
                   <button
+                    key="submit"
                     type="submit"
                     className="btn btn--primary"
                     disabled={!isConnected || status === 'submitting'}

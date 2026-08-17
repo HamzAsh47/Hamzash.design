@@ -54,37 +54,10 @@ goes inside the brackets so it stays attached to the highlighted word.
 ### Signature portrait
 
 `src/assets/images/portrait-placeholder.svg` is a 4:5 stand-in sitting in the
-exact crop the real photograph will occupy, with both the CRT and the selective
-colour treatment already applied so they can be tuned before the shoot. To swap
-it in, drop the real file into `src/assets/images/` and change one import at the
-top of `src/content/hero.ts`. Nothing else changes.
-
-**Selective colour.** The locked hero treatment is black & white except the
-crimson rim-light. It is applied in-filter (`#selective-crimson` in
-`CrtImage.tsx`), so the hero runs from an ordinary full-colour photograph —
-there is no separately masked file to keep in sync.
-
-The filter builds a mask from red dominance, `R - (G + B) / 2`, and ramps it
-from 0.320 to 0.420. Measured against real swatches:
-
-| Sampled from | Mask | Result |
-| --- | --- | --- |
-| Bright rim on hair `#FF2D3F` | 0.788 | keeps colour |
-| Crimson rim-light `#C81E3A` | 0.612 | keeps colour |
-| Dimmest rim edge `#8E1526` | 0.441 | keeps colour |
-| Lit corduroy `#7A2B33` | 0.294 | desaturates |
-| Skin midtone `#C99A7A` | 0.247 | desaturates |
-| Oxblood corduroy `#5C3A32` | 0.149 | desaturates |
-| Oatmeal sweater `#D9D2C4` | 0.055 | desaturates |
-
-Lit corduroy is the closest false positive, so the ramp starts above it and
-completes below the dimmest part of the rim. If a future photograph is graded
-differently and skin starts picking up colour, adjust `slope`/`intercept` on
-the `feFuncA`: the ramp starts at `-intercept / slope` and reaches full colour
-at `(1 - intercept) / slope`.
-
-Set `hero.portrait.treatment` to `'full'` in `src/content/hero.ts` to keep a
-photograph in colour instead.
+exact crop the real photograph will occupy, with the CRT treatment already
+applied so the effect can be tuned before the shoot. To swap it in, drop the
+real file into `src/assets/images/` and change one import at the top of
+`src/content/hero.ts`. Nothing else changes.
 
 ### Case studies
 
@@ -123,7 +96,8 @@ block is what made the page read as a wireframe; don't reintroduce it.
 The multi-step form is built and validated but not yet wired to an inbox. Two
 options, both one-line changes in `src/content/brand.ts`:
 
-- Set `site.formEndpoint` to a POST endpoint (Formspree, Basin, Netlify Forms,
+- Set `VITE_CONTACT_ENDPOINT` in the environment (see `.env.example`) to a POST
+  endpoint (Formspree, Basin, Netlify Forms,
   a Worker). The form submits JSON and shows the success state in place.
 - Or set `site.contactEmail`, and the form composes a pre-filled email instead.
 
@@ -132,15 +106,28 @@ LinkedIn rather than silently dropping leads.
 
 ## Deploying
 
-`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every
-push to `main`.
+Hosted on Cloudflare, served at **https://hamzash47.com**. `main` is the only
+branch that deploys; there is no GitHub Actions workflow, because two deploy
+paths pointing at the same repository is the fastest way to lose track of what
+is actually live.
 
-**One-time setup:** in the repository, go to *Settings → Pages → Build and
-deployment* and set **Source** to **GitHub Actions**.
+Cloudflare build settings:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Production branch | `main` |
+| Node version | 22 |
 
 The Vite `base` is `'./'` and case studies use a hash router (`#/case/<slug>`),
-so the same build works from a user page, a project page under a subpath, or a
-local `dist` preview — with no rewrite rules and no base-path reconfiguration.
+so the same build works from the apex domain, a preview deployment on a
+`*.pages.dev` subdomain, or a local `dist` preview — with no rewrite rules, no
+SPA fallback and no base-path reconfiguration.
+
+`VITE_SITE_URL` does not need to be set: the origin defaults to the production
+domain. Set it only on a preview deployment, so previews do not emit canonical
+tags pointing at production.
 
 ## Brand rules baked into the build
 
@@ -169,7 +156,13 @@ These need real input before the site is fully launch-ready:
 2. **Case study copy** — the four `body` sections per client still need writing.
 3. **Photography** — signature portrait shots (oxblood corduroy overshirt,
    top-down angle, selective crimson rim-light).
-4. **Contact inbox** — set `formEndpoint` or `contactEmail` (see above).
+4. **Contact inbox** — set `VITE_CONTACT_ENDPOINT` or `VITE_CONTACT_EMAIL` in
+   the deploy environment (see `.env.example`). Until one of them is set the
+   form stays in review-only mode and points at LinkedIn, so no brief is lost.
+5. **SEO files** — `npm run seo` regenerates `public/sitemap.xml` and
+   `public/robots.txt`. Set `VITE_SITE_URL` first if a custom domain is
+   attached. The Open Graph card is committed at `public/og-image.png`; edit
+   `scripts/og-image.html` and re-shoot it to change the card.
 5. **Result stats** — every `resultStat` is a placeholder. Real figures only.
 
 ## Pricing source of truth

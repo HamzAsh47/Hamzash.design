@@ -25,6 +25,15 @@
   border-bottom-color: var(--hairline);
 }
 
+/* On a stacked hero the bar sits directly against the photograph from the
+   first pixel, so it carries its own ground rather than waiting for scroll. */
+@media (max-width: 900px) {
+  .nav {
+    background: var(--obsidian);
+    border-bottom-color: var(--hairline);
+  }
+}
+
 .nav__inner {
   display: flex;
   align-items: center;
@@ -32,6 +41,7 @@
   gap: var(--space-md);
 }
 
+/* The wordmark is a back-to-top control and was giving no sign of it. */
 .nav__brand {
   display: flex;
   align-items: center;
@@ -40,18 +50,29 @@
   border: 0;
   padding: 0;
   cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--dur-fast) var(--ease-out);
 }
 
-/* The lockup is a single vector — its kerning and weight pairing are baked in,
-   so it is sized by height only and never rebuilt from live text. */
-.nav__lockup {
-  height: 48px;
+.nav__brand:hover {
+  opacity: 0.78;
+}
+
+.nav__brand:active {
+  opacity: 0.6;
+}
+
+/* Height-driven, width auto: the lockup is one fixed-ratio artwork, so the
+   header sets how tall it may be and the file decides the rest. 34px inside a
+   72px bar leaves the mark room to breathe against the links beside it. */
+.nav__logo {
+  height: 34px;
   width: auto;
 }
 
-@media (max-width: 480px) {
-  .nav__lockup {
-    height: 40px;
+@media (max-width: 560px) {
+  .nav__logo {
+    height: 28px;
   }
 }
 
@@ -95,14 +116,27 @@
   transform: scaleX(1);
 }
 
+.nav__link:active {
+  color: var(--crimson);
+}
+
 .nav__actions {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
 
+/* Filled with the page's own ground rather than left transparent. Over the
+   photograph the transparent version showed the portrait through the button,
+   which read as a hole in the bar; obsidian gives it a body without making it
+   a second primary. The stroke and the label are untouched. */
 .nav__cta {
   padding: 0.7rem 1.2rem;
+  --btn-bg: var(--obsidian);
+}
+
+.nav__cta:hover {
+  --btn-bg: var(--obsidian);
 }
 
 .nav__toggle {
@@ -110,10 +144,21 @@
   width: 44px;
   height: 44px;
   background: none;
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--stroke);
   border-radius: var(--radius-sm);
   cursor: pointer;
   position: relative;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.nav__toggle:hover {
+  border-color: var(--crimson);
+}
+
+.nav__toggle:active {
+  background: rgba(200, 30, 58, 0.12);
 }
 
 .nav__toggle-bar,
@@ -189,6 +234,15 @@
   animation-delay: calc(var(--word-index) * 60ms);
 }
 
+.nav__drawer-link:hover {
+  border-bottom-color: var(--crimson);
+}
+
+.nav__drawer-link:active {
+  border-bottom-color: var(--crimson);
+  color: var(--crimson);
+}
+
 .nav__drawer-index {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -220,60 +274,154 @@
 
 /* === Hero ================================================================ */
 
+/* No block padding here any more: the photograph runs the full height of the
+   section and behind the transparent fixed header. The copy carries its own
+   inset instead, so it still clears the header.
+
+   Deliberately not pinned. Pinning is the element not moving, so a pinned hero
+   can never scroll to show anything taller than the screen — on a short laptop
+   that left the lower copy unreachable and handed the page straight to the
+   slide. Scrolling normally, the hero can always be read in full whatever the
+   window height; the slide still rides up over it on its own overlap. */
 .hero {
+  /* Height of the marquee band at the foot of the frame. Drives both the type
+     size and the room the copy leaves for it, so the two cannot drift. */
+  --hero-marquee: clamp(4rem, 12vw, 10rem);
+
+  /* The composition's own width. Past this the hero stops growing and centres
+     instead, exactly as the 1240px column does everywhere else on the page.
+
+     Deliberately in rem rather than vw. A viewport-sized portrait keeps its
+     physical size when the page is zoomed out, while every px of type around
+     it halves — which is what left the head towering over a wall of tiny text.
+     In rem the portrait shrinks with the type it is composed against. */
+  --hero-stage: 90rem;
+  --hero-bleed: max(0px, (100% - var(--hero-stage)) / 2);
+
+  /* The plate's own drawn width at the locked scale. Capping the photograph
+     here rather than at the stage keeps it full bleed on every real window —
+     it only stops once the window is wider than the whole 2400px plate, which
+     is the point past which bleeding further would just slice his arm off on
+     a hard vertical edge. */
+  --hero-plate: 179rem;
+
   position: relative;
-  min-height: 100svh;
+  /* Not 100svh unconditionally. The composition is now a fixed rem-sized
+     block, so on a very tall window a full-height hero is mostly empty
+     obsidian with the readouts stranded at the bottom of it. */
+  min-height: min(100svh, 68rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: calc(var(--header-height) + var(--space-lg));
-  padding-bottom: var(--space-lg);
   overflow: hidden;
 }
 
-/* A single wide crimson bloom anchors the composition without adding chrome. */
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 70vw;
-  height: 70vw;
-  max-width: 900px;
-  max-height: 900px;
-  background: radial-gradient(circle, rgba(200, 30, 58, 0.13) 0%, rgba(200, 30, 58, 0) 62%);
-  pointer-events: none;
+/* The photo's stage. Holds the media, the scrim and the copy, and stops above
+   the ticker so the CRT readouts never sit under it. */
+.hero__frame {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
 
 .hero__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
-  flex: 1;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  width: 100%;
+  padding-top: calc(var(--header-height) + var(--space-lg));
+  /* The frame centres its content, so the extra here lifts the whole block
+     rather than only padding it. */
+  padding-bottom: calc(var(--space-lg) * 2);
 }
 
+/* The centred 1240px column works everywhere the background is flat, but the
+   hero's photograph runs edge to edge. Past roughly 1450px the column's own
+   margin keeps growing while the photo does not, and the composition drifts
+   into the right half with a dead band on the left. So the copy tracks the
+   column exactly up to that point and then stops, staying anchored near the
+   left edge however wide the window gets. */
+@media (min-width: 901px) {
+  .hero__inner {
+    max-width: none;
+    /* Measured against the stage, not the window, and offset by whatever the
+       stage leaves at the edge — so the copy and the portrait travel together
+       instead of drifting to opposite sides of a very wide screen. Below the
+       stage width the bleed is zero and this is the old expression exactly. */
+    padding-inline: calc(
+      var(--hero-bleed) +
+        clamp(
+          var(--gutter),
+          calc((min(100%, var(--hero-stage)) - var(--container)) / 2 + var(--gutter)),
+          10rem
+        )
+    );
+  }
+}
+
+/* Short viewports: the full-size block runs past the fold on a laptop, which
+   means scrolling before the hero has even been read. Scaling it down keeps
+   the whole thing on one screen instead. */
+@media (min-width: 901px) and (max-height: 880px) {
+  .hero {
+    --hero-marquee: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .hero__inner {
+    padding-top: calc(var(--header-height) + var(--space-sm));
+    padding-bottom: calc(var(--space-sm) * 2);
+  }
+
+  .hero__copy {
+    gap: var(--space-xs);
+  }
+
+  .headline--hero {
+    font-size: clamp(1.9rem, 3.4vw, 3rem);
+    line-height: 1.06;
+  }
+
+  .hero__subtitle {
+    font-size: var(--step-0);
+    margin-top: 0;
+  }
+
+  .hero__intro {
+    font-size: 0.94rem;
+    line-height: 1.5;
+  }
+
+  .hero__ctas {
+    margin-top: var(--space-2xs);
+  }
+
+  .hero__ctas .btn {
+    padding-block: 0.7rem;
+  }
+}
+
+/* Copy holds the negative space on the left, breaking before the eyeline.
+   Capped in px, not ch: this block mixes display and body type, so a ch cap
+   would be measured against the body font and come out far too narrow. */
 .hero__copy {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  max-width: min(560px, 54%);
+}
+
+/* The tag belongs to the headline under it, not to the empty band above. At
+   the block's full gap it floated on its own — the same fix the section heads
+   already carry. */
+.hero__eyebrow {
+  margin-bottom: calc(var(--space-2xs) - var(--space-sm));
 }
 
 .hero__subtitle {
   margin-top: var(--space-2xs);
 }
 
-/* Electric Cyan's one appearance in the hero. It sits on the AI phrase because
-   the colour is reserved for AI/system context — not used as a highlight. */
-.hero__subtitle-ai {
-  color: var(--cyan);
-}
-
-.hero__intro {
-  max-width: 52ch;
-}
 
 .hero__ctas {
   display: flex;
@@ -282,19 +430,70 @@
   margin-top: var(--space-sm);
 }
 
+/* The artwork is a transparent cut-out, so full bleed on the top layer costs
+   nothing: only his silhouette covers anything. That is what lets the marquee
+   pass behind him for real, rather than behind a rectangle. */
 .hero__media {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  /* Both axes capped, then centred with auto margins. The cap is what fixes
+     the crop scale: `cover` takes the larger of width/height ratio, so an
+     uncapped box let a tall window drive the scale and blow the subject up to
+     2.4x the size he was drawn at. Capped, the ratio settles at the value the
+     composition was designed around and stays there however large the window
+     gets. 56rem is the drawn height of the 2400x750 plate at that scale. */
+  width: min(100%, var(--hero-plate));
+  height: min(100%, 56rem);
+  margin: auto;
+  z-index: 20;
+  pointer-events: none;
+  /* A filled photo can end on a straight line and read as a crop. A cut-out
+     cannot — it reads as the subject being sliced — so he dissolves into the
+     page at the foot of the frame instead. */
+  mask-image: linear-gradient(to bottom, #000 86%, transparent 100%);
+  /* Joins the staged entrance, but fades only — sliding the ground would read
+     as a panel moving into place, which is what this layout stopped being. */
+  opacity: 0;
+  animation: hero-ground-in var(--dur-slow) var(--ease-out) forwards;
 }
+
+@keyframes hero-ground-in {
+  to {
+    opacity: 1;
+  }
+}
+
 
 .hero__media .crt {
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-md);
+  width: 100%;
+  height: 100%;
+  background: transparent;
 }
 
-/* Small mono labels in the hero carry the legible Gunmetal tint — at true
-   #4A4E58 they measure 2.19:1 on Obsidian, which is unreadable at this size. */
-.hero .eyebrow {
-  color: var(--gunmetal-legible);
+/* Obsidian wash that buys the copy its contrast. Heavy on the left where the
+   headline sits, thinning to the right so the photograph still reads, with a
+   short bottom fade carrying it into the ticker. */
+/* A cut-out has no ground to darken — the copy sits on obsidian. */
+.hero__scrim {
+  display: none;
+}
+
+/* Sits above the scrim, and aligns to the container gutter rather than the
+   figure's own inset so it lines up with the copy. */
+.hero__readout {
+  z-index: 30;
+  bottom: var(--space-sm);
+  left: calc(var(--hero-bleed) + var(--gutter));
+  right: calc(var(--hero-bleed) + var(--gutter));
+}
+
+.hero__media-note {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  max-width: 34ch;
 }
 
 /* Orchestrated entrance — one sequence, staged by index. */
@@ -305,15 +504,88 @@
   animation-delay: calc(var(--stage) * 70ms + 120ms);
 }
 
+/* Narrow screens stop overlaying and start stacking. Standing copy on top of
+   a face is what wrecks both readability and the photograph: below 900px the
+   portrait becomes its own block at the top and the copy sits under it on
+   solid obsidian, with nothing overlapping anything. */
 @media (max-width: 900px) {
-  .hero__inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
+  .hero {
+    min-height: 0;
+    /* Clears the fixed header so the crop starts below it, rather than losing
+       the top of his head behind the bar. */
+    padding-top: var(--header-height);
+  }
+
+  .hero__frame {
+    display: block;
   }
 
   .hero__media {
-    order: -1;
-    max-width: 320px;
+    position: relative;
+    inset: auto;
+    /* The stage cap and its auto-margin centring are an overlay device; in the
+       stack the photograph is simply the first block. */
+    margin: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    /* Same dissolve, pulled in tighter: the stacked block ends mid-page, so
+       the seam is far more visible here than at the fold. */
+    mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  }
+
+  /* Both belong to the overlay composition and have no job in a stack. */
+  .hero__scrim,
+  .hero__readout {
+    display: none;
+  }
+
+  /* The desktop focal point would fill a portrait frame with the empty half
+     of a 3.2:1 shot and push the face off the right edge. */
+  .hero__media .crt {
+    --crt-pos: var(--crt-object-position-narrow, var(--crt-object-position, 50% 50%));
+  }
+
+  .hero__inner {
+    background: var(--obsidian);
+    /* padding-block only: this element is also .container, and the shorthand
+       would wipe the gutter and run the copy into the screen edge. The top
+       value is the gap under the photograph, which needs to read as a break
+       between two blocks rather than the eyebrow touching the crop. */
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+
+  .hero__copy,
+  .hero__eyebrow,
+  .hero__subtitle,
+  .hero__intro,
+  .hero__ctas,
+  .hero__media-note {
+    max-width: none;
+  }
+
+  /* Tighter display type: the desktop size wraps to a ragged tower on a phone. */
+  .headline--hero {
+    font-size: var(--step-3);
+    letter-spacing: -0.028em;
+    line-height: 1.1;
+  }
+
+  .hero__intro {
+    line-height: 1.6;
+  }
+
+  /* Full-width and stacked — side-by-side buttons are a cramped tap target. */
+  .hero__ctas {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .hero__ctas .btn {
+    width: 100%;
+    justify-content: center;
+    padding-block: 0.85rem;
   }
 }
 
@@ -325,7 +597,72 @@
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
   overflow: hidden;
-  margin-top: var(--space-lg);
+}
+
+/* Watermark variant: the pillars run across the top of the hero as oversized
+   near-transparent type sliding on the background, rather than a bordered
+   strip of chrome under the photograph. Sits above the scrim so it is not
+   dimmed twice, and below the copy so it never competes with the headline. */
+.ticker--watermark {
+  position: absolute;
+  /* Rides the foot of the frame rather than the head. Up top it competed with
+     the nav and the eyebrow for the same band; down here it sits under the
+     copy block and behind the subject, which is what the cut-out was for. */
+  bottom: calc(var(--space-sm) + 1.6rem);
+  left: 0;
+  right: 0;
+  z-index: 0;
+  border: 0;
+  pointer-events: none;
+}
+
+.ticker--watermark .ticker__item {
+  font-family: var(--font-display);
+  font-weight: var(--weight-highlight);
+  font-size: var(--hero-marquee);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  opacity: 0.04;
+  padding: 0 clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.ticker--watermark .ticker__item::after {
+  color: var(--crimson);
+  opacity: 0.5;
+  margin-left: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.ticker--watermark .ticker__viewport {
+  animation-duration: 42s;
+}
+
+/* On a stacked hero the marquee rides the seam where the portrait meets the
+   copy, so it reads across both grounds. Above the photograph rather than
+   behind it: the shot is opaque, so a layer underneath would simply not
+   exist. The offset tracks the 4:5 media block sitting above it. */
+@media (max-width: 900px) {
+  .ticker--watermark {
+    /* Lifted clear of the crop's bottom edge — sitting on it left the type
+       half cut by the seam. The offset tracks the 4:5 media block above. */
+    top: calc(100vw * 1.25 - 6rem);
+    bottom: auto;
+    z-index: 25;
+  }
+
+  .ticker--watermark .ticker__item {
+    font-size: 3.4rem;
+    opacity: 0.13;
+    padding: 0 1.25rem;
+  }
+
+  .ticker--watermark .ticker__item::after {
+    margin-left: 1.25rem;
+  }
+
+  .ticker--watermark .ticker__viewport {
+    animation-duration: 26s;
+  }
 }
 
 .ticker__viewport {
@@ -339,22 +676,20 @@
   display: flex;
 }
 
-/* JetBrains Mono, tracked out, on the legible Gunmetal tint — the pillars have
-   to read at a glance, and true #4A4E58 measures 2.19:1 here. */
 .ticker__item {
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: 0.76rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--gunmetal-legible);
+  color: var(--text-muted);
   padding: 0.85rem clamp(1.5rem, 4vw, 3rem);
   display: inline-flex;
   align-items: center;
 }
 
 .ticker__item::after {
-  content: '·';
+  content: '•';
   margin-left: clamp(1.5rem, 4vw, 3rem);
   color: var(--crimson);
 }
@@ -376,6 +711,32 @@
 
 /* === Services ============================================================ */
 
+/* The pillars overlap the foot of the hero rather than sitting under it. The
+   section itself carries no ground of its own — no gradient, no tint, no
+   fade — so the page's obsidian is all there is behind it and the band it
+   rides over stays the portrait. What visibly overlaps is the cards.
+
+   z-index has to clear 20, not 1: the hero sets no stacking context of its
+   own, so the portrait's own z-index competes in the root context. */
+.services-slide {
+  position: relative;
+  z-index: 30;
+  margin-top: -12vh;
+  padding-block: var(--space-2xl);
+}
+
+.services-slide__inner {
+  position: relative;
+}
+
+/* Nothing to overlap on a stacked hero — the photograph is at the top there
+   and the copy ends the section, so riding up only covers the buttons. */
+@media (max-width: 900px) {
+  .services-slide {
+    margin-top: 0;
+  }
+}
+
 .services__head {
   margin-bottom: var(--space-lg);
 }
@@ -387,9 +748,11 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--space-lg) var(--space-md);
+  gap: var(--space-sm);
 }
 
+/* Surface, spotlight, scanlines and lift all come from `.panel`. What is left
+   here is only what this card does that the others do not. */
 .service-card {
   width: 100%;
   height: 100%;
@@ -398,22 +761,27 @@
   gap: var(--space-xs);
   align-items: flex-start;
   text-align: left;
-  background: none;
-  border: 0;
-  padding: 0;
+  padding: var(--space-sm);
   cursor: pointer;
 }
 
 .service-card__index {
   font-family: var(--font-mono);
+  font-weight: 500;
   font-size: 0.7rem;
   letter-spacing: 0.16em;
   color: var(--crimson);
+  /* Room for the widest frame the scramble can land on, so a two-character
+     index resolving through a three-character one never reflows the card. */
+  min-width: 3.5ch;
 }
+
+/* SYS.02 is crimson because every section index now is — the eyebrow itself
+   splits the token from its label, so this no longer needs a local override. */
 
 .service-card__title {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: var(--weight-base);
   font-size: var(--step-1);
   line-height: 1.2;
   color: var(--white);
@@ -422,14 +790,23 @@
 .service-card__body {
   color: var(--text-secondary);
   font-size: 0.95rem;
+  line-height: 1.6;
   flex: 1;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+/* The body steps back so the CTA can step forward — the card resolves to one
+   thing to do rather than to a paragraph and a link competing. */
+.service-card:hover .service-card__body,
+.service-card.is-hot .service-card__body {
+  opacity: 0.7;
 }
 
 .service-card__link {
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
   display: inline-flex;
@@ -437,21 +814,87 @@
   transition: color var(--dur-fast) var(--ease-out);
 }
 
-.service-card:hover .service-card__link {
+/* The whole call to action takes the crimson, arrow included — on a card whose
+   stroke has just gone crimson too, a white label read as the odd one out. */
+.service-card:hover .service-card__link,
+.service-card.is-hot .service-card__link {
   color: var(--crimson);
 }
 
-.service-card:hover .btn__arrow {
-  transform: translateX(3px);
+.service-card__link .btn__arrow {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.service-card:hover .btn__arrow,
+.service-card.is-hot .btn__arrow {
+  color: var(--crimson);
+  transform: translateX(4px);
 }
 
 /* === The System ========================================================== */
 
 /* Separation now comes from the gap, since the panels lost their borders. */
+/* Rides up over the pillars the way the pillars ride over the hero, so the
+   page reads as panels sliding over one another rather than as a stack of
+   blocks meeting end to end. Above the pillars' own z-index, since its tinted
+   ground has to cover the bottom of that section for the overlap to read. */
+.system {
+  position: relative;
+  z-index: 40;
+  margin-top: -10vh;
+}
+
 .system__compare {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--space-xl);
+}
+
+/* The segmented control is a mobile device only — above the breakpoint both
+   panels are on screen and there is nothing to switch between. */
+.system__switch {
+  display: none;
+}
+
+.system__switch-option {
+  flex: 1;
+  /* Comfortable thumb target — this is the section's only mobile control. */
+  min-height: 44px;
+  background: none;
+  border: 1px solid transparent;
+  padding: 0.7rem 0.5rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-radius: calc(var(--radius-sm) - 1px);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.system__switch-option:hover:not([aria-pressed='true']) {
+  color: var(--text-secondary);
+  border-color: var(--hairline-strong);
+}
+
+.system__switch-option:active {
+  background: rgba(200, 30, 58, 0.1);
+}
+
+/* The selected lane takes the crimson edge. A white wash alone left the two
+   options reading as near-equals, and which one you are looking at is the
+   only thing this control has to say. */
+.system__switch-option[aria-pressed='true'] {
+  color: var(--white);
+  border-color: var(--crimson);
+  background: rgba(200, 30, 58, 0.1);
 }
 
 /* One device carries this section: the dot-timeline. The old-way column is
@@ -473,7 +916,7 @@
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .system__label--new {
@@ -493,11 +936,37 @@
   gap: var(--space-sm);
 }
 
+/* Three roles that were never assembled into anything. Each block sits at its
+   own slight angle and its own distance from the next, so the column reads as
+   three things that happen to be near each other rather than as a list — the
+   argument the section is making, stated in the layout.
+
+   There is deliberately no rail, no bracket and no grouping element on this
+   side. The absence of a connection is the point, and drawing one would be
+   arguing the opposite case. Rotation is anchored to the left edge so the type
+   stays on the column's own margin, and held near a degree: enough to feel
+   unsquared, not enough to read as a broken build. */
 .system__fragment {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
   line-height: 1.7;
+  transform: rotate(var(--tilt, 0deg));
+  transform-origin: left center;
+}
+
+.system__fragment:nth-child(1) {
+  --tilt: 1deg;
+  margin-bottom: 0.25rem;
+}
+
+.system__fragment:nth-child(2) {
+  --tilt: -1deg;
+  margin-bottom: 0.7rem;
+}
+
+.system__fragment:nth-child(3) {
+  --tilt: 0.5deg;
 }
 
 .system__fragment-title {
@@ -513,10 +982,20 @@
 
 /* New way: one continuous rail running through all three disciplines. */
 .system__chain {
+  /* The reveal fires at 12% visibility, which is the column just clearing the
+     bottom of the window — without a hold the rail had finished drawing before
+     it was properly on screen, and the whole sequence happened off-frame. This
+     is the wait before the draw starts, and every dot is offset by it too. */
+  --rail-delay: 550ms;
+
   position: relative;
   padding-left: var(--space-md);
 }
 
+/* The rail draws itself when the column comes into view, and each dot fires as
+   the line arrives at it — a signal running down a wire, not three decorations
+   that were always there. Scaled from the top rather than animating height, so
+   the whole draw stays on the compositor. */
 .system__chain::before {
   content: '';
   position: absolute;
@@ -525,6 +1004,13 @@
   bottom: 0.7rem;
   width: 2px;
   background: linear-gradient(180deg, var(--crimson) 0%, var(--crimson) 70%, rgba(200, 30, 58, 0.2) 100%);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.system__panel--new.is-visible .system__chain::before {
+  transform: scaleY(1);
+  transition: transform 800ms var(--ease-out) var(--rail-delay);
 }
 
 .system__chain-link {
@@ -544,6 +1030,61 @@
   height: 10px;
   border-radius: 50%;
   background: var(--crimson);
+  transform: scale(0);
+}
+
+.system__panel--new.is-visible .system__chain-link::before {
+  animation: chain-dot 380ms var(--ease-out) calc(var(--rail-delay) + var(--dot-delay, 0ms))
+    forwards;
+}
+
+/* Delays are the times at which the eased line actually passes each dot, not
+   an even stagger — the rail decelerates, so the cadence does too. Solved from
+   cubic-bezier(0.22, 1, 0.36, 1) over 800ms against the dots' measured
+   positions on the rail: 5.2%, 42.9% and 80.6%. Estimating those positions
+   instead of measuring them put the last dot at 465ms, which is 240ms after
+   the line had already passed it. Any further link fires with the last rather
+   than ahead of it. */
+.system__chain-link:nth-child(1) {
+  --dot-delay: 9ms;
+}
+
+.system__chain-link:nth-child(2) {
+  --dot-delay: 87ms;
+}
+
+.system__chain-link:nth-child(n + 3) {
+  --dot-delay: 223ms;
+}
+
+/* The global reduced-motion rule collapses durations but leaves delays alone,
+   so the last dot still sat invisible for three quarters of a second before
+   snapping in. A reader who asked for no motion gets the finished state, not
+   a shorter version of the sequence. !important to clear the nth-child rules
+   above, the same tool the global block already uses. */
+@media (prefers-reduced-motion: reduce) {
+  .system__chain {
+    --rail-delay: 0ms;
+  }
+
+  .system__chain-link {
+    --dot-delay: 0ms !important;
+  }
+}
+
+@keyframes chain-dot {
+  0% {
+    transform: scale(0);
+    box-shadow: 0 0 0 0 rgba(200, 30, 58, 0);
+  }
+  55% {
+    transform: scale(1.55);
+    box-shadow: 0 0 12px 3px rgba(200, 30, 58, 0.55);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(200, 30, 58, 0);
+  }
 }
 
 .system__chain-index {
@@ -560,6 +1101,55 @@
   color: var(--white);
 }
 
+/* Below the breakpoint the two panels share one cell and the switch chooses
+   between them. Hidden with visibility rather than display: the reveal that
+   draws the rail is driven by an IntersectionObserver, and a display:none
+   element has no box to intersect — the panel would never reveal, so the tab
+   would open on an invisible column. */
+@media (max-width: 899px) {
+  .system__switch {
+    display: flex;
+    gap: 2px;
+    margin-bottom: var(--space-md);
+    padding: 2px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+  }
+
+  .system__compare {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'lane';
+    gap: 0;
+  }
+
+  .system__panel--old,
+  .system__panel--new {
+    grid-area: lane;
+    transition: opacity var(--dur-mid) var(--ease-out);
+  }
+
+  .system__compare[data-lane='new'] .system__panel--old,
+  .system__compare[data-lane='old'] .system__panel--new {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The section signature is a tag on the heading, not a rail beside the copy.
+     At this width the heading block runs to 270px and the full-height line
+     read as a border that had escaped the timeline and was running down
+     through the old-way list. Capped, it marks the top of the block. */
+  .section--mark-line .section__head::before {
+    bottom: auto;
+    height: 2.75rem;
+  }
+
+  /* Nothing above to overlap once the pillars stop overlapping the hero. */
+  .system {
+    margin-top: 0;
+  }
+}
+
 .system__outcome {
   font-family: var(--font-display);
   font-weight: 500;
@@ -567,11 +1157,19 @@
   margin-top: var(--space-2xs);
 }
 
-/* The strikethrough is the whole point of this line — keep it. */
+/* The strikethrough is the whole point of this line — keep it, and put the
+   crimson on the strike rather than on the words.
+
+   Crimson is the accent that carries intensity, and here the intensity is the
+   cancelling, not the outcome. Setting the text crimson would have given the
+   rejected result the same standing as "One consistent output" two columns
+   over, which is the opposite of what the section argues. A muted line under
+   a crimson strike reads as struck out by the brand. */
 .system__outcome--old {
   color: var(--text-muted);
   text-decoration: line-through;
-  text-decoration-color: var(--gunmetal);
+  text-decoration-color: var(--crimson);
+  text-decoration-thickness: 2px;
 }
 
 .system__outcome--new {
@@ -607,19 +1205,22 @@
   max-width: 56ch;
 }
 
+/* Same rail as the pricing package tabs: a continuous hairline under the whole
+   row, with the active 2px underline sitting on it. */
 .portfolio__filters {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2xs);
+  gap: var(--space-sm);
 }
 
 /* Filters read as tabs: the active one is marked by a crimson underline
@@ -628,7 +1229,10 @@
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  padding: 0.5rem 0.15rem;
+  margin-bottom: -1px;
+  padding: 0.7rem 0.15rem;
+  min-height: 44px;
+  min-width: 44px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.82rem;
@@ -642,6 +1246,11 @@
 
 .filters__btn:hover {
   color: var(--white);
+  border-bottom-color: var(--hairline-strong);
+}
+
+.filters__btn:active {
+  border-bottom-color: var(--crimson);
 }
 
 .filters__btn.is-active {
@@ -649,24 +1258,56 @@
   border-bottom-color: var(--crimson);
 }
 
-.filters {
-  gap: var(--space-sm);
-}
-
 .filters__count {
+  padding-bottom: 0.7rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
+/* Wrapped, the rail broke: "Motion Branding" dropped to a second line and the
+   active underline ended up floating a row above the hairline it belongs to.
+   A tab rail that runs off the edge scrolls — it does not stack. */
+@media (max-width: 700px) {
+  .portfolio__filters {
+    display: block;
+    border-bottom: 0;
+  }
+
+  .filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filters__btn {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .filters__count {
+    display: block;
+    padding: var(--space-xs) 0 0;
+  }
+}
+
+/* Two up, not three. A portfolio is carried by its covers, and three columns
+   inside a 1240px container left each one 360px wide — a thumbnail. Two gives
+   the work close to twice the area and still stacks cleanly on a phone. */
 .portfolio__grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
   gap: var(--space-md);
 }
 
@@ -674,58 +1315,99 @@
   height: 100%;
 }
 
+/* Surface, spotlight and lift come from `.panel`. `overflow: hidden` clips the
+   cover to the card's radius, and the panel's own layers to it as well. */
 .work-card__hit {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   text-align: left;
-  background: none;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-md);
   padding: 0;
   overflow: hidden;
   cursor: pointer;
-  transition:
-    border-color var(--dur-mid) var(--ease-out),
-    transform var(--dur-mid) var(--ease-out);
 }
 
-.work-card__hit:hover {
-  border-color: var(--hairline-strong);
-  transform: translateY(-3px);
+/* A fixed crop the cover moves inside. Without the frame, scaling the image on
+   hover just makes the card bigger. */
+.work-card__frame {
+  display: block;
+  position: relative;
+  overflow: hidden;
 }
 
 .work-card__cover {
   width: 100%;
+  transition: transform 700ms var(--ease-out);
+}
+
+.work-card__hit:hover .work-card__cover,
+.work-card__hit.is-hot .work-card__cover {
+  transform: scale(1.05);
+}
+
+/* Grounds the numerals against whatever the cover happens to be doing in that
+   corner, and deepens on hover so the image reads as being entered. */
+.work-card__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(6, 10, 18, 0.85), transparent 55%);
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+
+.work-card__hit:hover .work-card__scrim,
+.work-card__hit.is-hot .work-card__scrim {
+  opacity: 0.75;
+}
+
+.work-card__index {
+  position: absolute;
+  left: var(--space-sm);
+  bottom: calc(var(--space-sm) - 0.28em);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-4);
+  line-height: 1;
+  color: var(--white);
+  /* 0.32 put the numeral at 2.7:1 over the cover — under the 3:1 floor even
+     for text this large. 0.42 clears it without turning a quiet marker loud. */
+  opacity: 0.42;
+  transition:
+    color var(--dur-mid) var(--ease-out),
+    opacity var(--dur-mid) var(--ease-out);
+}
+
+.work-card__hit:hover .work-card__index,
+.work-card__hit.is-hot .work-card__index {
+  color: var(--panel-accent);
+  opacity: 1;
+}
+
+.work-card__year {
+  position: absolute;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
 }
 
 .work-card__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
-  padding: var(--space-sm) var(--space-sm) var(--space-md);
+  gap: 0.3rem;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm);
   flex: 1;
-}
-
-.work-card__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-xs);
 }
 
 .work-card__client {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--step-1);
+  font-size: var(--step-2);
+  line-height: 1.1;
   color: var(--white);
-}
-
-.work-card__year {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--gunmetal);
 }
 
 .work-card__type {
@@ -733,16 +1415,20 @@
   font-size: 0.92rem;
 }
 
-.work-card__tags {
+/* Ruled off from the title above it, the way the tier cards separate scope
+   from the two ways out. */
+.work-card__foot {
+  margin-top: auto;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--hairline);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2xs);
-  margin-top: var(--space-2xs);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
 }
 
 .work-card__link {
-  margin-top: auto;
-  padding-top: var(--space-sm);
+  flex: none;
   font-family: var(--font-display);
   font-size: 0.76rem;
   font-weight: 600;
@@ -754,8 +1440,9 @@
   transition: color var(--dur-fast) var(--ease-out);
 }
 
-.work-card__hit:hover .work-card__link {
-  color: var(--crimson);
+.work-card__hit:hover .work-card__link,
+.work-card__hit.is-hot .work-card__link {
+  color: var(--panel-accent);
 }
 
 .work-card__hit:hover .btn__arrow {
@@ -797,10 +1484,15 @@
   color: var(--crimson);
 }
 
+.case__back:active {
+  opacity: 0.7;
+}
+
 .case__title {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  max-width: 20ch;
 }
 
 .case__client {
@@ -813,10 +1505,51 @@
   color: var(--white);
 }
 
+/* Year, discipline and scope as a band — the same device the pricing dialog
+   uses for its headline numbers, so "what is this at a glance" reads the same
+   way in both places. */
 .case__facts {
+  margin: var(--space-2xs) 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1px;
+  max-width: 46rem;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.case-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--obsidian-sunken);
+}
+
+.case-fact__value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-0);
+  color: var(--white);
+}
+
+.case-fact__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.case__note {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2xs);
+  align-items: baseline;
+  gap: var(--space-xs);
 }
 
 .case__cover-wrap {
@@ -834,90 +1567,196 @@
   gap: var(--space-lg);
 }
 
+/* Heading in a left rail, copy in a measured column beside it. Four headings
+   stacked straight on top of their paragraphs read as a memo, not a case. */
 .case__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: var(--space-xs) var(--space-lg);
   padding-top: var(--space-md);
   border-top: 1px solid var(--hairline);
+}
+
+.case__section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .case__section {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .case__section-title {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--step-2);
+  line-height: 1.15;
   color: var(--white);
 }
 
 .case__section-copy {
   font-size: var(--step-0);
+  /* The column is wide enough to run to 100 characters at this container
+     width, which is past the line length anyone tracks comfortably. */
+  max-width: 62ch;
 }
 
+/* Numbered rows rather than dashes: this is the handover list, and a reader
+   scanning it wants to know how many things are on it. */
 .case__deliverables {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-2xs) var(--space-sm);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 0 var(--space-lg);
   color: var(--text-secondary);
 }
 
 .case__deliverables li {
-  padding-left: 1.1rem;
-  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--hairline);
 }
 
-.case__deliverables li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.72em;
-  width: 6px;
-  height: 1px;
-  background: var(--crimson);
+.case__deliverable-index {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--crimson);
 }
 
 .case__footer {
   margin-top: var(--space-xl);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--hairline);
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
+/* The next project carries its cover. A bare text link at the foot of a case
+   study is the one place a portfolio can least afford to stop showing work. */
 .case__next {
-  background: none;
-  border: 0;
+  width: 100%;
   padding: 0;
   cursor: pointer;
   text-align: left;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.case__next-thumb {
+  display: block;
+  overflow: hidden;
+  align-self: stretch;
+}
+
+.case__next-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 700ms var(--ease-out);
+}
+
+.case__next:hover .case__next-thumb img,
+.case__next.is-hot .case__next-thumb img {
+  transform: scale(1.06);
+}
+
+.case__next-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
+  padding: var(--space-sm) 0;
+  min-width: 0;
 }
 
 .case__next-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .case__next-title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--step-1);
+  font-size: var(--step-2);
+  line-height: 1.1;
   color: var(--white);
   transition: color var(--dur-fast) var(--ease-out);
 }
 
-.case__next:hover .case__next-title {
-  color: var(--crimson);
+.case__next-type {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.case__next:hover .case__next-title,
+.case__next.is-hot .case__next-title {
+  color: var(--panel-accent);
+}
+
+.case__next-arrow {
+  padding-right: var(--space-md);
+  font-size: var(--step-2);
+  color: var(--text-muted);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.case__next:hover .case__next-arrow,
+.case__next.is-hot .case__next-arrow {
+  color: var(--panel-accent);
+  transform: translateX(4px);
+}
+
+/* After the base rules, not before them — as an earlier block this lost the
+   `display: block` further down and left the thumbnail in a two-column grid
+   that had no room for it, which pushed the arrow onto its own row. */
+@media (max-width: 700px) {
+  .case__next {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-sm);
+    padding-left: var(--space-sm);
+  }
+
+  .case__next-thumb {
+    display: none;
+  }
+
+  .case__next-arrow {
+    padding-right: var(--space-sm);
+  }
+}
+
+.case__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--hairline);
+}
+
+.case__cta-copy {
+  font-size: var(--step-1);
+  color: var(--text-secondary);
 }
 
 .case__missing {
@@ -940,17 +1779,23 @@
   margin-bottom: var(--space-md);
 }
 
-/* A plain pill control — no outer box around the two tabs. */
+/* A segmented control on a sunken track: the two options read as one switch
+   with a raised chip on the chosen side. */
 .toggle {
   display: inline-flex;
-  gap: var(--space-2xs);
+  gap: 0;
+  padding: 4px;
+  background: var(--obsidian-sunken);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
 }
 
 .toggle__btn {
   background: none;
-  border: 0;
-  border-radius: 2px;
-  padding: 0.7rem 1.35rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.35rem;
+  min-height: 40px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.82rem;
@@ -959,11 +1804,25 @@
   color: var(--text-secondary);
   transition:
     background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out);
 }
 
+.toggle__btn:hover:not(.is-active) {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.toggle__btn:active {
+  background: rgba(200, 30, 58, 0.12);
+}
+
+/* A crimson-stroked chip, not a crimson slab. Solid crimson fill is the hero
+   CTA's alone, and as a filled pill this control was the loudest thing in the
+   section — louder than the tier it is recommending. */
 .toggle__btn.is-active {
-  background: var(--crimson);
+  background: var(--obsidian);
+  border-color: var(--crimson);
   color: var(--white);
 }
 
@@ -972,21 +1831,29 @@
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
+/* A continuous rule under the whole row turns four buttons into a tab bar.
+   Without it each active underline was a 2px dash floating in space with
+   nothing to be the active part of. */
 .packages {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2xs);
-  margin-bottom: var(--space-sm);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .packages__btn {
+  position: relative;
   background: none;
   border: 0;
+  padding: 0.7rem 0.15rem;
+  margin-bottom: -1px;
   border-bottom: 2px solid transparent;
-  padding: 0.5rem 0.15rem;
+  min-height: 44px;
+  min-width: 44px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.82rem;
@@ -999,6 +1866,11 @@
 
 .packages__btn:hover {
   color: var(--white);
+  border-bottom-color: var(--hairline-strong);
+}
+
+.packages__btn:active {
+  border-bottom-color: var(--crimson);
 }
 
 .packages__btn.is-active {
@@ -1009,11 +1881,27 @@
 /* Electric Cyan appears only here, on the AI-context listing. */
 .packages__btn--ai.is-active {
   border-bottom-color: var(--cyan);
+  color: var(--cyan);
 }
 
-.packages {
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
+/* Four package names do not fit a phone. Same rule as the portfolio filters:
+   the rail scrolls rather than wrapping the active underline off its line. */
+@media (max-width: 700px) {
+  .packages {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .packages::-webkit-scrollbar {
+    display: none;
+  }
+
+  .packages__btn {
+    flex: none;
+    white-space: nowrap;
+  }
 }
 
 .pricing__summary {
@@ -1032,33 +1920,657 @@
   margin: 0;
   padding: 0;
   display: grid;
+  align-items: stretch;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--space-sm);
 }
 
+/* Surface, spotlight and lift come from `.panel`. */
+/* No gap: head, price, scope and footer each own their spacing, because the
+   rules between them have to land in specific places. */
 .tier {
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-md);
+  position: relative;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
-  background: var(--obsidian);
-  transition: border-color var(--dur-mid) var(--ease-out);
+  gap: 0;
 }
 
-.tier:hover {
-  border-color: var(--hairline-strong);
+/* The whole card is the target. A transparent button laid over it keeps that
+   clickable without nesting one button inside another, which is invalid and
+   which browsers resolve by dropping the inner one. Everything else in the
+   card sits above it on the panel's own z-index: 1. */
+.tier__open {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: inherit;
 }
 
+.tier__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.tier:hover .tier__more,
+.tier.is-hot .tier__more {
+  color: var(--panel-accent);
+}
+
+.tier:hover .tier__more .btn__arrow,
+.tier.is-hot .tier__more .btn__arrow {
+  transform: translateX(3px);
+}
+
+/* The CTA is a second action inside the card's own target, so it has to sit
+   above the overlay to receive its own clicks. Full width because a small
+   button parked at the left edge of a card left a third of the row empty and
+   read as an afterthought next to the price above it. */
+.tier__cta {
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+  align-self: stretch;
+  justify-content: center;
+  padding: 0.8rem 1.1rem;
+  --btn-accent: var(--panel-accent);
+}
+
+/* Hovering the card turns the button's stroke and label to the accent, the
+   same move the card's own border makes. Hovering the button itself fills it.
+   Two steps, so the card can say "this one" before the button says "go". */
+.tier:hover .tier__cta:not(:hover),
+.tier.is-hot .tier__cta:not(:hover) {
+  --btn-border: var(--panel-accent);
+  --btn-fg: var(--panel-accent);
+}
+
+/* --- Which tier is being recommended ------------------------------------- */
+/* "Most chosen" is scaled up so the recommendation is visible before the
+   prices are read. But a recommendation the visitor is currently ignoring
+   should not keep shouting: the moment they hover any other tier, the featured
+   one drops back to normal and the one under the cursor takes the emphasis
+   instead. The list answers the question the visitor is actually asking. */
+
+/* The accent bar is a background layer rather than an element: the card
+   already spends both its pseudo-elements on the panel spotlight and ring, and
+   a background is clipped by the border radius for free. */
 .tier--featured {
-  border-color: var(--crimson-line);
-  background: linear-gradient(180deg, var(--crimson-soft) 0%, rgba(200, 30, 58, 0) 45%);
+  border-color: var(--panel-accent);
+  background:
+    linear-gradient(var(--panel-accent), var(--panel-accent)) top center / 100% 2px no-repeat,
+    linear-gradient(180deg, var(--panel-accent-soft) 0%, transparent 45%),
+    var(--obsidian);
+  transform: scale(1.045);
+  z-index: 1;
 }
 
-.tier--ai.tier--featured {
-  border-color: rgba(34, 211, 238, 0.42);
-  background: linear-gradient(180deg, var(--cyan-soft) 0%, rgba(34, 211, 238, 0) 45%);
+.tiers:hover .tier--featured:not(:hover) {
+  transform: scale(1);
+  border-color: var(--text-muted);
+  background: var(--obsidian);
+}
+
+/* Whichever card the pointer is on inherits the recommendation's marker, so
+   the bar tracks attention instead of staying pinned to one card. */
+.tiers:hover .tier:hover {
+  background:
+    linear-gradient(var(--panel-accent), var(--panel-accent)) top center / 100% 2px no-repeat,
+    linear-gradient(180deg, var(--panel-accent-soft) 0%, transparent 45%),
+    var(--obsidian);
+}
+
+.tiers:hover .tier--featured:not(:hover) .tier__badge {
+  opacity: 0.35;
+}
+
+/* Any hovered tier takes the featured treatment — scale only, no lift.
+   Scaling from the centre pushes every edge outward, so a pointer inside the
+   card stays inside it. Adding the panel's translateY moved both edges up
+   together, which could drop the cursor out through the bottom and set off a
+   hover/unhover flicker right where the CTA sits. */
+.tier:hover,
+.tier.is-hot,
+.tier--featured:hover,
+.tier--featured.is-hot {
+  transform: scale(1.045);
+  z-index: 2;
+}
+
+/* Scaling a stack of cards on a phone just makes them collide. */
+@media (max-width: 700px) {
+  .tier--featured,
+  .tiers:hover .tier--featured:not(:hover),
+  .tier:hover,
+  .tier.is-hot,
+  .tier--featured:hover,
+  .tier--featured.is-hot {
+    transform: none;
+  }
+}
+
+/* --- Tier detail dialog --------------------------------------------------- */
+
+.tier-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: var(--space-sm);
+  background: rgba(6, 10, 18, 0.72);
+  backdrop-filter: blur(6px);
+  animation: tier-detail-in var(--dur-mid) var(--ease-out);
+}
+
+@keyframes tier-detail-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 16:9 on a landscape screen, 9:16 on a portrait one — the dialog matches the
+   shape of the device it opens on instead of being a tall slab on both. The
+   panel itself never scrolls; the body inside it does, so the border, the
+   spotlight and the close button stay put while the content moves. */
+.tier-detail__panel {
+  --detail-pad: clamp(1.5rem, 2.4vw, 2.25rem);
+
+  width: min(100%, 70rem);
+  aspect-ratio: 16 / 9;
+  max-height: 90vh;
+  padding: 0;
+  overflow: hidden;
+  /* Header / scrolling body / action bar. The body is the only part that
+     moves, so the price stays readable and the CTA stays reachable no matter
+     how long the spec sheet runs. */
+  display: flex;
+  flex-direction: column;
+  animation: tier-detail-rise var(--dur-mid) var(--ease-out);
+}
+
+/* A tier with no rate card and no add-ons has one short list to show. Held to
+   16:9 that is three bullets floating in 400px of nothing, so it drops the
+   ratio and takes the height its content asks for. */
+/* Doubled up deliberately: the portrait and short-window rules further down
+   also set the ratio, and this has to outrank both of them. */
+.tier-detail__panel.tier-detail__panel--lean {
+  width: min(100%, 40rem);
+  aspect-ratio: auto;
+  height: auto;
+}
+
+.tier-detail__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.tier-detail__scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Reserved rather than discovered: without a stable gutter the columns shift
+     sideways by 10px the moment a longer rate card makes the body scroll. */
+  scrollbar-gutter: stable;
+  padding: var(--space-sm) var(--detail-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  scrollbar-width: thin;
+  scrollbar-color: var(--crimson) transparent;
+}
+
+/* Three named columns rather than blocks flowing into a grid.
+   Three and not two: the scope list, the rate card and the add-ons were
+   stacked two-up before, which left one column twice the height of the other
+   and pushed the whole dialog into a scroll it did not need. */
+@media (min-width: 861px) and (orientation: landscape) {
+  .tier-detail__scroll {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 0;
+  }
+
+  /* Hairline gutters, not a bare gap. Three lists side by side with only
+     whitespace between them read as one wide paragraph of fragments. */
+  .tier-detail__col {
+    padding-inline: var(--space-md);
+  }
+
+  .tier-detail__col:first-of-type {
+    padding-inline-start: 0;
+  }
+
+  .tier-detail__col:last-of-type {
+    padding-inline-end: 0;
+  }
+
+  .tier-detail__col + .tier-detail__col {
+    border-left: 1px solid var(--hairline);
+  }
+
+  /* A lean panel has one column of content and no glance band, so both grids
+     would be splitting a narrow panel into thirds it has nothing to put in. */
+  .tier-detail__panel--lean .tier-detail__header,
+  .tier-detail__panel--lean .tier-detail__scroll {
+    display: flex;
+  }
+
+  .tier-detail__panel--lean .tier-detail__col {
+    padding-inline: 0;
+  }
+}
+
+.tier-detail__header,
+.tier-detail__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.tier-detail__header {
+  flex: none;
+  padding: var(--detail-pad) var(--detail-pad) var(--space-sm);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.tier-detail__id {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* Price block and the glance band share one row on a wide screen. Stacked,
+   they took 90px of height the rate card underneath needed. */
+@media (min-width: 861px) and (orientation: landscape) {
+  .tier-detail__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: end;
+    gap: var(--space-md);
+  }
+
+  .tier-detail__glance {
+    margin: 0;
+  }
+}
+
+/* Sits on the body wrapper, not the scroller, so it stays at the bottom edge
+   while the content moves beneath it. */
+.tier-detail__fade {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--space-md);
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(to top, var(--obsidian), transparent);
+}
+
+/* The retainer tiers carry no spec sheet and no add-ons, so those columns come
+   through as empty divs. Without this they still draw their divider. */
+.tier-detail__col:empty {
+  display: none;
+}
+
+/* Stacked, the columns lose the vertical rules that separated them and need
+   horizontal ones instead. The first sits under the header's own line. */
+@media (max-width: 860px), (orientation: portrait) {
+  .tier-detail__col + .tier-detail__col {
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--hairline);
+  }
+}
+
+/* The one band in the dialog allowed to be loud. Delivery time and revisions
+   are the two questions every brief opens with, and they were sitting in the
+   middle of a ten-row table at the same weight as "vector file". */
+.tier-detail__glance {
+  margin: var(--space-2xs) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.glance__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--obsidian-sunken);
+}
+
+.glance__value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.1rem, 0.85rem + 0.8vw, 1.6rem);
+  line-height: 1.1;
+  color: var(--white);
+}
+
+.glance__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tier-detail__footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding: var(--space-sm) var(--detail-pad);
+  border-top: 1px solid var(--hairline);
+  background: var(--obsidian-sunken);
+}
+
+.tier-detail__footer .tier-detail__rate {
+  flex: 1;
+  min-width: 16rem;
+  margin: 0;
+}
+
+.tier-detail__footer .tier-detail__cta {
+  margin-top: 0;
+  flex: none;
+}
+
+@media (max-width: 860px), (orientation: portrait) {
+  .tier-detail__panel {
+    width: min(100%, 27rem);
+    aspect-ratio: 9 / 16;
+  }
+
+  /* Three cells in a 27rem column is 100px of room each — the label has to
+     give up its letter-spacing before the number gives up its size. */
+  .glance__cell {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .glance__label {
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* In a 9:16 box the header and the action bar were taking two thirds of the
+     height between them, leaving the scroll body a 190px slot. Everything
+     fixed gives back what it can so the content has somewhere to live. */
+  .tier-detail__panel {
+    --detail-pad: 1.15rem;
+  }
+
+  .tier-detail__header,
+  .tier-detail__id {
+    gap: var(--space-2xs);
+  }
+
+  .tier-detail__price {
+    font-size: var(--step-3);
+  }
+
+  .tier-detail__summary {
+    font-size: 0.9rem;
+  }
+
+  .tier-detail__footer {
+    gap: var(--space-2xs);
+  }
+
+  .tier-detail__footer .tier-detail__rate {
+    min-width: 0;
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .tier-detail__footer .tier-detail__cta {
+    width: 100%;
+  }
+}
+
+/* Short landscape windows cannot hold a 16:9 dialog at a readable width. */
+@media (max-height: 620px) {
+  .tier-detail__panel {
+    aspect-ratio: auto;
+    height: 88vh;
+  }
+}
+
+/* --- Scrollbar ------------------------------------------------------------ */
+/* The platform bar is a light grey slab on an obsidian page — the one piece of
+   chrome the design never got to touch. Firefox takes the two-property form
+   above; WebKit and Blink need the pseudo-elements. */
+.tier-detail__scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.tier-detail__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tier-detail__scroll::-webkit-scrollbar-thumb {
+  background: var(--gunmetal);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.tier-detail__scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--panel-accent);
+  background-clip: content-box;
+}
+
+@keyframes tier-detail-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* It keeps the panel's spotlight and scanlines but not its lift — a dialog
+   that jumps 5px when the pointer crosses it is a dialog fighting the reader. */
+.tier-detail__panel,
+.tier-detail__panel:hover,
+.tier-detail__panel.is-hot {
+  transform: none;
+  border-color: var(--panel-accent);
+}
+
+.tier-detail__close {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  z-index: 4;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.tier-detail__close:hover {
+  color: var(--white);
+  border-color: var(--panel-accent);
+}
+
+.tier-detail__eyebrow {
+  padding-right: 3rem;
+}
+
+.tier-detail__price {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-4);
+  line-height: 1;
+  color: var(--white);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.tier-detail__meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tier-detail__summary {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  /* The panel is 70rem wide; a summary running the full width of it is a
+     single 140-character line nobody tracks to the end of. */
+  max-width: 52ch;
+}
+
+.tier-detail__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.tier-detail__block-title {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* Crimson by default, cyan inside the AI package — the accent variable
+     already carries that distinction, so the title does not restate it. */
+  color: var(--panel-accent);
+}
+
+.tier-detail__points,
+.tier-detail__addons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.tier-detail__points li {
+  display: flex;
+  gap: 0.65em;
+  line-height: 1.5;
+}
+
+.tier-detail__points li::before {
+  content: '—';
+  color: var(--panel-accent);
+  flex: none;
+}
+
+.tier-detail__addons li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--hairline);
+  line-height: 1.4;
+}
+
+.tier-detail__addons li:last-child {
+  border-bottom: 0;
+}
+
+.addons__price {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  white-space: nowrap;
+}
+
+.tier-detail__spec {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-detail__spec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: 0.44rem 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 0.9rem;
+}
+
+.tier-detail__spec-row:last-child {
+  border-bottom: 0;
+}
+
+.tier-detail__spec dt {
+  color: var(--text-muted);
+}
+
+.tier-detail__spec dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-align: right;
+}
+
+/* A dash means the tier does not carry that line — it should read as absent,
+   not as a value. */
+.tier-detail__spec dd.is-off {
+  color: var(--text-muted);
+}
+
+.tier-detail__rate {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.tier-detail__cta {
+  margin-top: var(--space-2xs);
+  justify-content: center;
+  --btn-accent: var(--panel-accent);
 }
 
 .tier__head {
@@ -1066,6 +2578,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-xs);
+  min-height: 1.6rem;
 }
 
 .tier__name {
@@ -1077,110 +2590,94 @@
   color: var(--text-secondary);
 }
 
+/* A label, not a loose word in the corner. It is the one recommendation the
+   section makes, and as bare 0.6rem mono it read as a footnote. */
 .tier__badge {
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--crimson);
+  color: var(--panel-accent);
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--panel-accent);
+  border-radius: var(--radius-sm);
+  background: var(--panel-accent-soft);
+  white-space: nowrap;
+  transition: opacity var(--dur-fast) var(--ease-out);
 }
 
-.tier--ai .tier__badge {
-  color: var(--cyan);
-}
-
+/* Price and hours on one baseline, ruled off from the scope below. */
 .tier__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.7rem;
+  margin: var(--space-2xs) 0 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--hairline);
   font-family: var(--font-display);
   font-weight: 900;
   font-size: var(--step-3);
   line-height: 1;
   color: var(--white);
-  margin-top: var(--space-2xs);
 }
 
 .tier__meta {
   font-family: var(--font-mono);
   font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gunmetal);
-  margin-bottom: var(--space-xs);
+  color: var(--text-muted);
 }
 
 .tier__points {
   list-style: none;
-  margin: 0 0 var(--space-sm);
+  margin: var(--space-sm) 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.6rem;
   flex: 1;
   color: var(--text-secondary);
   font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .tier__points li {
-  padding-left: 1.1rem;
+  padding-left: 1.15rem;
   position: relative;
 }
 
+/* 2px, not 1px. A hairline rule sitting at a fractional offset gets
+   antialiased across two device rows and renders as a grey smudge — which is
+   why the dashes came out different colours down the same card. */
 .tier__points li::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 0.7em;
-  width: 6px;
-  height: 1px;
-  background: var(--crimson);
+  top: 0.62em;
+  width: 7px;
+  height: 2px;
+  background: var(--panel-accent);
 }
 
-.tier--ai .tier__points li::before {
-  background: var(--cyan);
-}
-
-.tier__cta {
-  align-self: flex-start;
-  padding: 0.7rem 1.1rem;
-}
-
-.addons {
-  margin-top: var(--space-xl);
-}
-
-.addons__title {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--cyan);
-  display: block;
-  margin-bottom: var(--space-xs);
-}
-
-.addons__list {
-  list-style: none;
-  margin: var(--space-sm) 0 0;
-  padding: 0;
+/* `.panel > *` gives every direct child `z-index: 1`, so this wrapper is its
+   own stacking context and the CTA's `z-index: 3` no longer reaches past the
+   card overlay from inside it. The footer is lifted over the overlay instead
+   and made transparent to the pointer, so its dead space and the decorative
+   "see full details" line still open the dialog and only the button doesn't. */
+.tier__foot {
+  z-index: 3;
+  pointer-events: none;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
-}
-
-.addons__list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-sm);
-  padding: 0.7rem 0;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding-top: var(--space-sm);
   border-top: 1px solid var(--hairline);
-  color: var(--text-secondary);
-  font-size: 0.92rem;
-}
-
-.addons__price {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--white);
-  white-space: nowrap;
 }
 
 .pricing__footnote {
@@ -1208,59 +2705,64 @@
 .logo-strip__item {
   font-family: var(--font-display);
   font-weight: 500;
-  color: var(--gunmetal);
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
+/* Open text, not cards.
+   Three bordered boxes of very different lengths left two of them mostly
+   empty, and the frames pulled more attention than the quotes inside them. A
+   review is something to read, so what defines it is where it starts: a
+   crimson rule down the left of the quote, the same device the system section
+   uses to mark a block. Hovering brings one forward and steps the others
+   back — the grid doing what the reader's attention is already doing. */
 .reviews__grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: var(--space-xl) var(--space-lg);
+  align-items: start;
+  gap: var(--space-lg) var(--space-md);
 }
 
-/* Reviews are set as quotes in open space; the crimson quote mark anchors
-   each one instead of a card border. */
 .review {
   margin: 0;
   height: 100%;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
+  transition:
+    transform var(--dur-mid) var(--ease-out),
+    opacity var(--dur-mid) var(--ease-out);
 }
 
-.review__quote {
-  margin: 0;
-  flex: 1;
-  color: var(--text-primary);
-  font-size: var(--step-0);
-  position: relative;
-  padding-top: var(--space-sm);
+.reviews__grid:hover .review {
+  opacity: 0.45;
 }
 
-.review__quote::before {
-  content: '“';
-  position: absolute;
-  top: -0.3rem;
-  left: -0.1rem;
-  font-family: var(--font-body);
-  font-size: 2.5rem;
-  line-height: 1;
-  color: var(--crimson);
+.reviews__grid .review:hover {
+  opacity: 1;
+  transform: translateY(-4px);
 }
 
-.review__meta {
+@media (max-width: 700px) {
+  .reviews__grid:hover .review,
+  .reviews__grid .review:hover {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.review__head {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
 
 .review__avatar {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   flex: none;
   border-radius: 50%;
   border: 1px solid var(--hairline-strong);
@@ -1272,6 +2774,11 @@
   letter-spacing: 0.04em;
   color: var(--text-secondary);
   overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.review:hover .review__avatar {
+  border-color: var(--crimson);
 }
 
 .review__avatar img {
@@ -1283,13 +2790,15 @@
 .review__id {
   display: flex;
   flex-direction: column;
-  line-height: 1.35;
+  min-width: 0;
 }
 
 .review__name {
   font-family: var(--font-display);
   font-weight: 500;
+  font-size: 1rem;
   color: var(--white);
+  line-height: 1.3;
 }
 
 .review__company {
@@ -1297,11 +2806,142 @@
   color: var(--text-muted);
 }
 
+/* --- Rating --------------------------------------------------------------- */
+/* Amber is not in the palette, so the stars take the crimson. */
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+}
+
+.rating__stars {
+  display: inline-flex;
+  gap: 0.15em;
+}
+
+.rating__star {
+  color: var(--text-muted);
+  transform: scale(0.6);
+  transition:
+    transform var(--dur-mid) var(--ease-out),
+    color var(--dur-mid) var(--ease-out);
+}
+
+.rating__star.is-on {
+  color: var(--crimson);
+}
+
+/* The stars land one after another when the section comes into view — a rating
+   that assembles itself reads as earned rather than as five marks that were
+   always sitting there. */
+.reveal.is-visible .rating__star {
+  transform: scale(1);
+}
+
+.rating__star:nth-child(1) {
+  transition-delay: 0ms;
+}
+.rating__star:nth-child(2) {
+  transition-delay: 55ms;
+}
+.rating__star:nth-child(3) {
+  transition-delay: 110ms;
+}
+.rating__star:nth-child(4) {
+  transition-delay: 165ms;
+}
+.rating__star:nth-child(5) {
+  transition-delay: 220ms;
+}
+
+.rating__value {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+/* --- Quote ---------------------------------------------------------------- */
+
+.review__quote {
+  margin: 0;
+  flex: 1;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--crimson-line);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.review:hover .review__quote {
+  color: var(--text-primary);
+  border-left-color: var(--crimson);
+}
+
+.review__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+  flex-wrap: wrap;
+  padding-left: var(--space-sm);
+}
+
 .review__tags {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2xs);
 }
+
+/* Named, not a bare "Verify ↗". The destination is the point of the link, and
+   an arrow glyph alone was carrying that on its own. */
+.review__verify {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.review:hover .review__verify {
+  border-color: var(--crimson);
+  color: var(--crimson);
+}
+
+/* Scoped under `.review:hover` deliberately. The card-level rule above is
+   (0,3,0) and a bare `.review__verify:hover` is (0,2,0), so the label kept the
+   card's crimson colour on top of the button's crimson fill and disappeared.
+   The pointer cannot reach the button without being over the card anyway. */
+.review:hover .review__verify:hover {
+  background: var(--crimson);
+  border-color: var(--crimson);
+  color: var(--white);
+  box-shadow: 0 6px 20px -8px rgba(200, 30, 58, 0.7);
+}
+
+.review__verify:active {
+  box-shadow: none;
+}
+
+
 
 /* === Process ============================================================= */
 
@@ -1322,9 +2962,9 @@
   align-items: start;
 }
 
-.process__step:last-child {
-  border-bottom: 1px solid var(--hairline);
-}
+/* No rule under the last step. Each step's top border separates it from the
+   one before, so a closing line has nothing left to separate — it just draws a
+   box round the list and reads as an unfinished fifth row. */
 
 .process__number {
   font-family: var(--font-display);
@@ -1405,6 +3045,10 @@
 .faq__question:hover,
 .faq__item.is-open .faq__question {
   color: var(--white);
+}
+
+.faq__question:active {
+  color: var(--crimson);
 }
 
 .faq__sign {
@@ -1508,7 +3152,7 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.12em;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .contact__step.is-active .contact__step-index {
@@ -1545,7 +3189,7 @@
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .form__fields {
@@ -1577,22 +3221,35 @@
 .field__input {
   width: 100%;
   background: var(--obsidian);
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--stroke);
   border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   font-family: var(--font-body);
   font-size: var(--step-0);
   color: var(--white);
-  transition: border-color var(--dur-fast) var(--ease-out);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .field__input::placeholder {
   color: var(--text-muted);
 }
 
+.field__input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
 .field__input:focus {
   border-color: var(--crimson);
   outline: none;
+}
+
+/* `outline: none` leaves only a 1px colour change to carry focus, which is
+   under the non-text contrast bar on its own. The ring restores the weight
+   without the outline's square corners fighting the rounded field. */
+.field__input:focus-visible {
+  box-shadow: 0 0 0 3px rgba(200, 30, 58, 0.28);
 }
 
 .field__input--area {
@@ -1614,7 +3271,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--stroke);
   border-radius: var(--radius-sm);
   padding: 0.8rem 1rem;
   cursor: pointer;
@@ -1627,6 +3284,12 @@
 
 .option:hover {
   color: var(--white);
+  border-color: var(--hairline-strong);
+}
+
+.option:active {
+  border-color: var(--crimson);
+  background: rgba(200, 30, 58, 0.08);
 }
 
 .option:has(input:checked) {
@@ -1635,11 +3298,62 @@
   background: var(--crimson-soft);
 }
 
+/* Drawn rather than tinted. `accent-color` only colours the checked fill of
+   the platform control and leaves its shape and its unchecked state alone, so
+   what the visitor actually saw was a stock white pill with a crimson dot in
+   it — no brand at rest, and a shape borrowed from a different design
+   language. These are boxes with square corners, like everything else here. */
 .option input {
-  accent-color: var(--crimson);
-  width: 1rem;
-  height: 1rem;
+  appearance: none;
+  width: 1.05rem;
+  height: 1.05rem;
   flex: none;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  background: var(--obsidian);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.option input::after {
+  content: '';
+  width: 0.52rem;
+  height: 0.52rem;
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.option input:checked {
+  border-color: var(--crimson);
+}
+
+/* One selection: the box fills. */
+.option input[type='radio']:checked {
+  background: var(--crimson);
+}
+
+.option input[type='radio']::after {
+  background: var(--white);
+}
+
+/* Many selections: a tick, so the two steps still read as different questions
+   even though both controls are square. */
+.option input[type='checkbox']:checked {
+  background: var(--crimson);
+}
+
+.option input[type='checkbox']::after {
+  background: var(--white);
+  clip-path: polygon(14% 46%, 0 60%, 40% 100%, 100% 22%, 86% 10%, 38% 72%);
+}
+
+.option input:checked::after {
+  transform: scale(1);
 }
 
 .form__actions {
@@ -1682,10 +3396,23 @@
   background: var(--obsidian);
 }
 
+/* The brand block and the three lists all start on the same baseline, and the
+   lists share equal columns so their headings line up as a row rather than
+   drifting with their own content widths. */
 .footer__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
   gap: var(--space-lg) var(--space-md);
+  align-items: start;
+}
+
+.footer__brand,
+.footer__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  min-width: 0;
 }
 
 .footer__brand {
@@ -1695,10 +3422,20 @@
   align-items: flex-start;
 }
 
+/* The square 1080x1080 lockup was the wrong asset here: it is the avatar
+   variant, so at any usable width it rendered as a 200px block of logo above
+   two lines of copy and threw the brand column out of proportion with the
+   three link columns beside it. The banner lockup is 1080x359, which at the
+   same width is a third of the height and reads as a masthead.
+
+   Both variants bake an obsidian plate behind the artwork, which is why the
+   footer carries the same ground — otherwise the lockup shows its own
+   rectangle against the page. */
 .footer__logo {
-  width: 100%;
-  max-width: 260px;
+  display: block;
+  width: min(100%, 240px);
   height: auto;
+  margin-left: 0;
 }
 
 .footer__tagline {
@@ -1706,11 +3443,16 @@
 }
 
 .footer__positioning {
+  /* Was set at body size and wrapped to three mono lines, which made the role
+     list shout louder than the tagline above it. It is a caption under the
+     lockup, so it is sized and coloured like one. */
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  line-height: 1.8;
-  color: var(--gunmetal);
+  font-size: 0.62rem;
+  line-height: 1.7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  max-width: 30ch;
 }
 
 .footer__heading {
@@ -1719,7 +3461,7 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
   margin: 0 0 var(--space-sm);
 }
 
@@ -1735,7 +3477,7 @@
 .footer__link {
   background: none;
   border: 0;
-  padding: 0;
+  padding: 0.35rem 0;
   cursor: pointer;
   text-align: left;
   font-family: var(--font-display);
@@ -1751,12 +3493,52 @@
   color: var(--crimson);
 }
 
+.footer__link:active {
+  opacity: 0.7;
+}
+
+/* Thumb targets in the footer list. Padding alone left them at 43px — a pixel
+   short of the floor, which is exactly the kind of miss that only turns up
+   when you measure it. */
+@media (max-width: 900px) {
+  .footer__link {
+    padding: 0.6rem 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.footer__link--icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.footer__link--icon .icon {
+  flex: none;
+  margin-top: 0.15rem;
+  color: var(--text-muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.footer__link--icon:hover .icon {
+  color: var(--crimson);
+}
+
+.footer__link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
 .footer__platform {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .footer__base {
@@ -1770,11 +3552,11 @@
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 .footer__sys {
-  color: var(--gunmetal);
+  color: var(--text-muted);
 }
 
 @media (max-width: 860px) {
@@ -1787,26 +3569,61 @@
   }
 }
 
-/* === Kinetic highlight on reveal ========================================= */
-/* Section headings stay quiet; only the crimson word gets a short wipe-in. */
+/* One column on a phone, and every column starting on the same left edge as
+   the copy above it. "More work" was the widest list, so its column was the
+   one that visibly sat off the gutter when the grid balanced itself. */
+@media (max-width: 560px) {
+  .footer__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-.reveal .headline__word--hl {
-  background-image: linear-gradient(var(--crimson), var(--crimson));
-  background-repeat: no-repeat;
-  background-size: 0% 100%;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  transition: background-size var(--dur-slow) var(--ease-out) 260ms;
+  .footer__col,
+  .footer__brand {
+    grid-column: 1;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .footer__list {
+    align-items: flex-start;
+  }
+
+  .footer__logo {
+    width: min(100%, 200px);
+  }
 }
+
+/* === Kinetic highlight on reveal ========================================= */
+/* The crimson word used to wipe in left-to-right behind a background-clip
+   gradient. It read as a highlighter pen dragged across the type — a wholly
+   different vocabulary from the CRT readouts and the terminal scramble that
+   the rest of the page speaks in, and it fought the reveal it rode on.
+   The word now arrives crimson with the rest of the line and flickers once,
+   like a signal locking on — the same CRT vocabulary as the readouts, and it
+   costs nothing in layout because only opacity moves.
+
+   Deliberately on the word and not on the tear layers the hover uses. Sharing
+   those would put the two in a specificity fight the entrance wins, so the
+   first hover after a reveal would do nothing at all. */
 
 .reveal.is-visible .headline__word--hl {
-  background-size: 100% 100%;
+  animation: hl-lock 420ms steps(1, end) 240ms;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .reveal .headline__word--hl {
-    background-size: 100% 100%;
-    transition: none;
+@keyframes hl-lock {
+  0%,
+  24% {
+    opacity: 0.25;
+  }
+  25%,
+  44% {
+    opacity: 1;
+  }
+  45%,
+  59% {
+    opacity: 0.4;
+  }
+  60% {
+    opacity: 1;
   }
 }

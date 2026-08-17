@@ -10,30 +10,39 @@
   /* Core palette */
   --obsidian: #0d1526;
   --crimson: #c81e3a;
+  /* Edges only — card borders, the scrollbar thumb. It measures 2.19:1 on
+     obsidian, so it is not a text colour; anything readable uses --text-muted
+     or lighter. */
   --gunmetal: #4a4e58;
-  --cyan: #22d3ee;
 
-  /* Gunmetal is locked for secondary text, but at #4A4E58 on Obsidian it
-     measures 2.19:1 — well under the 4.5:1 needed for small type, and these
-     mono labels are the smallest text on the page. This is the same hue lifted
-     until it clears the threshold (measured 4.71:1); true --gunmetal stays in
-     use for structure, hairlines and non-text marks. */
-  --gunmetal-legible: #7a8191;
+  /* The border of anything you can click. WCAG puts the floor for a UI
+     component boundary at 3:1 and gunmetal sits at 2.19 — which is why the
+     hero's outlined "Start a project" read as bare text rather than a button.
+     3.0:1 on the lightest surface, 3.26:1 on obsidian. */
+  --stroke: #626875;
+  --cyan: #22d3ee;
 
   /* Derived neutrals, all mixed from the locked palette rather than invented */
   --obsidian-raised: #131d33;
   --obsidian-sunken: #0a1020;
+  /* Obsidian with 6% gunmetal mixed in. Alternating sections sit on this so
+     the page reads as depth rather than as one unbroken sheet — small enough
+     that the step registers as light, not as a block of a different colour. */
+  --obsidian-tint: #111828;
   --hairline: rgba(74, 78, 88, 0.34);
   --hairline-strong: rgba(74, 78, 88, 0.62);
 
   --white: #f2f2f2;
   --text-primary: var(--white);
   --text-secondary: #9aa0ad;
-  --text-muted: #6f757f;
+  /* Tuned against the lightest surface on the site — the contact panel at
+     #131d33, not the section tint — where it measures 4.63:1, so it clears
+     WCAG AA for normal text everywhere it lands (5.03:1 on plain obsidian).
+     The previous #6f757f measured 3.82:1 and failed on every background. */
+  --text-muted: #808792;
 
   --crimson-soft: rgba(200, 30, 58, 0.14);
   --crimson-line: rgba(200, 30, 58, 0.42);
-  --cyan-soft: rgba(34, 211, 238, 0.12);
 
   /* Type families */
   --font-display: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -68,6 +77,13 @@
 
   --radius-sm: 2px;
   --radius-md: 4px;
+  /* Checkboxes and radios.
+     The audit asked for 0.875rem here, but on a 17px control that is 14px of
+     radius — very nearly the full round it was meant to replace, and the
+     opposite of the "sharp/precision" language the same line asks for. Set to
+     match the rest of the UI instead; raise it if the literal value was
+     intended. */
+  --radius-control: var(--radius-sm);
 
   /* Motion — precision timing is where the futurism lives */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

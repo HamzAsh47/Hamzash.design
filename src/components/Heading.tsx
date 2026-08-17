@@ -67,6 +67,9 @@ export function Heading({
             key={index}
             className={`headline__word${token.highlighted ? ' headline__word--hl' : ''}`}
             style={{ '--word-index': index } as React.CSSProperties}
+            /* The tear layers are drawn from this, so they carry the word's own
+               trailing space and never close a gap between two words. */
+            data-word={token.highlighted ? token.word : undefined}
           >
             {token.word}
           </span>

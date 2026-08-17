@@ -1,6 +1,7 @@
-import logoLockup from '../assets/logo/Logo_Dark_BG.svg'
+import logoLockup from '../assets/logo/Logo_Vertical_Dark_BG.svg'
 import { footer, navLinks } from '../content'
 import { goToSection } from '../lib/scroll'
+import { Icon, type IconName } from './Icon'
 
 export function Footer() {
   return (
@@ -8,7 +9,17 @@ export function Footer() {
       <div className="container footer__inner">
         <div className="footer__brand">
           {/* Real vector lockup — never redrawn. */}
-          <img className="footer__logo" src={logoLockup} alt="Hamza Ashraf" />
+          {/* 45KB of vector at the very bottom of the page — no reason for it
+              to be in the first paint. */}
+          <img
+            className="footer__logo"
+            src={logoLockup}
+            alt="Hamza Ashraf"
+            width={240}
+            height={80}
+            loading="lazy"
+            decoding="async"
+          />
           <p className="lede footer__tagline">{footer.tagline}</p>
           <p className="footer__positioning">{footer.positioning}</p>
         </div>
@@ -31,8 +42,19 @@ export function Footer() {
           <ul className="footer__list">
             {footer.socials.map((social) => (
               <li key={social.href}>
-                <a className="footer__link" href={social.href} target="_blank" rel="noreferrer">
-                  {social.label}
+                <a
+                  className="footer__link footer__link--icon"
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Icon name={social.icon as IconName} />
+                  <span className="footer__link-text">
+                    {social.network}
+                    {/* The handle is the detail, the network is the label —
+                        "@hamzash.47" alone does not say where it goes. */}
+                    <span className="footer__platform">{social.label}</span>
+                  </span>
                 </a>
               </li>
             ))}
@@ -44,9 +66,17 @@ export function Footer() {
           <ul className="footer__list">
             {footer.portfolioLinks.map((link) => (
               <li key={link.href}>
-                <a className="footer__link" href={link.href} target="_blank" rel="noreferrer">
-                  {link.label}
-                  <span className="footer__platform">{link.platform}</span>
+                <a
+                  className="footer__link footer__link--icon"
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Icon name={link.icon as IconName} />
+                  <span className="footer__link-text">
+                    {link.label}
+                    <span className="footer__platform">{link.platform}</span>
+                  </span>
                 </a>
               </li>
             ))}

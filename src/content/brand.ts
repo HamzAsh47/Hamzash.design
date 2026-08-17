@@ -21,40 +21,53 @@ export const brand = {
     cyan: '#22D3EE',
   },
 
+  /* `network` names the platform so the footer can show it alongside the
+     handle — "@hamzash.47" on its own says nothing about where it points. */
   handles: {
-    instagram: { label: '@hamzash.47', href: 'https://instagram.com/hamzash.47' },
-    youtube: { label: '@hamzash.47', href: 'https://youtube.com/@HamzAshArts' },
-    facebook: { label: '@hamzash.47', href: 'https://facebook.com/hamzash.47' },
-    x: { label: '@hamzash_47', href: 'https://x.com/hamzash_47' },
-    linkedin: { label: 'in/hamzash47', href: 'https://linkedin.com/in/hamzash47' },
+    linkedin: { network: 'LinkedIn', icon: 'linkedin', label: 'in/hamzash47', href: 'https://linkedin.com/in/hamzash47' },
+    instagram: { network: 'Instagram', icon: 'instagram', label: '@hamzash.47', href: 'https://instagram.com/hamzash.47' },
+    youtube: { network: 'YouTube', icon: 'youtube', label: '@hamzash.47', href: 'https://youtube.com/@HamzAshArts' },
+    x: { network: 'X', icon: 'x', label: '@hamzash_47', href: 'https://x.com/hamzash_47' },
+    facebook: { network: 'Facebook', icon: 'facebook', label: '@hamzash.47', href: 'https://facebook.com/hamzash.47' },
   },
 
   portfolioLinks: [
-    { label: 'UI/UX & Game Design', platform: 'Figma', href: 'https://figma.com/design/zH429oDMwezoditunlFtDV' },
-    { label: 'Video & Motion Graphics', platform: 'YouTube', href: 'https://youtube.com/@HamzAshArts' },
-    { label: 'Illustration (2D)', platform: 'ArtStation', href: 'https://artstation.com/ashrafhamza1' },
-    { label: 'Branding', platform: 'Behance', href: 'https://behance.net/Hamza_Ashraf' },
+    { label: 'UI/UX & Game Design', platform: 'Figma', icon: 'figma', href: 'https://figma.com/design/zH429oDMwezoditunlFtDV' },
+    { label: 'Video & Motion Graphics', platform: 'YouTube', icon: 'youtube', href: 'https://youtube.com/@HamzAshArts' },
+    { label: 'Illustration (2D)', platform: 'ArtStation', icon: 'artstation', href: 'https://artstation.com/ashrafhamza1' },
+    { label: 'Branding', platform: 'Behance', icon: 'behance', href: 'https://behance.net/Hamza_Ashraf' },
   ],
 } as const
 
 export const site = {
-  title: 'Hamza Ashraf — Senior Art Director, UI/UX & Motion',
+  title: 'Hamza Ashraf — Brand Identity, UI/UX & Motion Branding as One System',
   description:
-    'Brand identity, product UI/UX and motion built as one connected system by a single senior designer — instead of three separate vendors.',
+    'Senior art director building brand identity, product UI/UX and motion branding as one connected design system for funded startups and edtech teams — instead of three separate vendors.',
 
   /**
-   * TODO (open item): set the real business inbox before launch.
-   * While this is empty the contact form stays in review-only mode and tells
-   * the visitor to reach out on LinkedIn instead of silently losing leads.
+   * Absolute origin, needed by canonical tags, Open Graph and the sitemap —
+   * all three are meaningless relative. This is the primary domain, so it is
+   * the default rather than something the build has to be told: an unset env
+   * var ships the right canonical instead of a GitHub Pages URL. Override with
+   * VITE_SITE_URL only for a preview deployment on another origin.
    */
-  contactEmail: '',
+  url: (import.meta.env.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, ''),
 
   /**
-   * Optional POST endpoint for the contact form (Formspree, Basin, Netlify
-   * Forms, a Worker, etc). When set it takes priority over the mailto
-   * fallback. Leave empty to use mailto with `contactEmail`.
+   * Both read from the environment first so the inbox can be wired without a
+   * code change — set them in `.env.local` for a local run and in the host's
+   * environment for a deploy. See `.env.example`.
+   *
+   * While both are empty the form stays in review-only mode and points the
+   * visitor at LinkedIn rather than silently swallowing a lead.
    */
-  formEndpoint: '',
+  contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? '',
+
+  /**
+   * POST endpoint for the contact form (Formspree, Basin, Netlify Forms, a
+   * Worker). Takes priority over the mailto fallback when set.
+   */
+  formEndpoint: import.meta.env.VITE_CONTACT_ENDPOINT ?? '',
 
   /**
    * Portfolio and reviews currently ship with dummy content. While this is
