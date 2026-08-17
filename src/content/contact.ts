@@ -49,14 +49,22 @@ export const contact = {
   ],
 
   submitLabel: 'Send project brief',
-  successMessage:
-    'Brief received. You will get a reply within two business days with next steps for the discovery call.',
+
+  /**
+   * Two success messages, because the two routes end in different places and
+   * telling the visitor the wrong one loses the brief.
+   *
+   * Posted straight through, the brief has arrived and there is nothing left
+   * to do. Handed to a mail client, it is sitting in a draft — saying "got it"
+   * there would be a lie, and the visitor would close the window on an unsent
+   * email. So that copy ends on the instruction, not the reassurance.
+   */
+  successHeading: 'Brief received',
+  successMessage: "Got it — I'll get back to you within 24 hours.",
+
+  mailtoHeading: 'Brief ready to send',
   mailtoMessage:
-    'Your email client will open with the brief filled in — send it and it lands directly in my inbox.',
-  /** Shown when neither a form endpoint nor a contact email is configured. */
-  unconfiguredMessage:
-    'The brief form is not connected to an inbox yet. In the meantime, the fastest route is a direct message on LinkedIn.',
-  /** Secondary route, offered under a working form rather than instead of it. */
-  altRoutePrompt: 'Prefer LinkedIn?',
-  altRouteLink: 'Message me directly.',
+    'Your email client is opening with the brief filled in and addressed. Hit send and it lands in my inbox — I reply within 24 hours.',
+
+  errorMessage: 'That did not send. Give it another try — or email the brief to',
 } as const

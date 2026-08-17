@@ -3178,6 +3178,16 @@
   gap: var(--space-sm);
 }
 
+/* The confirmation carries the weight the submit button used to — it is the
+   last thing the visitor reads, and it should look like an answer, not a
+   footnote. Display face, same size as a subsection heading. */
+.contact__done-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
 .form {
   display: flex;
   flex-direction: column;

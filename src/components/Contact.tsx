@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { brand, contact, site } from '../content'
+import { contact, site } from '../content'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
@@ -19,19 +19,36 @@ type Status = 'idle' | 'submitting' | 'success' | 'error'
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
+/* One brief, one shape. Both routes are built from this, so a field can never
+   be carried by the mailto body and quietly dropped from the POST — which is
+   exactly the kind of divergence that loses the Details answer, the only part
+   of the brief written in the visitor's own words. */
+function buildBrief(form: FormState) {
+  return {
+    subject: `Project brief — ${form.company || form.name}`,
+    name: form.name,
+    company: form.company || '—',
+    email: form.email,
+    budget: form.budget || '—',
+    scope: form.scope.length ? form.scope.join(', ') : '—',
+    details: form.details.trim() || '—',
+  }
+}
+
 function buildMailto(form: FormState) {
-  const lines = [
-    `Name: ${form.name}`,
-    `Company: ${form.company || '—'}`,
-    `Email: ${form.email}`,
-    `Budget: ${form.budget || '—'}`,
-    `Scope: ${form.scope.length ? form.scope.join(', ') : '—'}`,
+  const brief = buildBrief(form)
+  const body = [
+    `Name: ${brief.name}`,
+    `Company: ${brief.company}`,
+    `Email: ${brief.email}`,
+    `Budget: ${brief.budget}`,
+    `Scope: ${brief.scope}`,
     '',
     'Details:',
-    form.details || '—',
-  ]
-  const subject = `Project brief — ${form.company || form.name}`
-  return `mailto:${site.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`
+    brief.details,
+  ].join('\n')
+
+  return `mailto:${site.contactEmail}?subject=${encodeURIComponent(brief.subject)}&body=${encodeURIComponent(body)}`
 }
 
 export function Contact() {
@@ -90,10 +107,14 @@ export function Contact() {
     if (site.formEndpoint) {
       setStatus('submitting')
       try {
+        /* Flat scalars, not the raw form state: `scope` is an array, and the
+           hosted form backends each flatten arrays differently — one of them
+           silently keeps only the last checkbox. Joining it here means the
+           brief reads the same whichever backend is behind the endpoint. */
         const response = await fetch(site.formEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(form),
+          body: JSON.stringify(buildBrief(form)),
         })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         setStatus('success')
@@ -136,6 +157,9 @@ export function Contact() {
           {status === 'success' ? (
             <div className="contact__done" role="status">
               <Eyebrow>SYS :: RECEIVED</Eyebrow>
+              <p className="contact__done-heading">
+                {site.formEndpoint ? contact.successHeading : contact.mailtoHeading}
+              </p>
               <p className="lede">
                 {site.formEndpoint ? contact.successMessage : contact.mailtoMessage}
               </p>
@@ -235,15 +259,6 @@ export function Contact() {
                     />
                   </label>
 
-                  {/* Connected, LinkedIn is an alternative offered under the
-                      form. Unconnected, it is the only route there is, so it
-                      says so instead of letting a brief go nowhere. */}
-                  <p className="form__notice">
-                    {isConnected ? contact.altRoutePrompt : contact.unconfiguredMessage}{' '}
-                    <a href={brand.handles.linkedin.href} target="_blank" rel="noreferrer">
-                      {isConnected ? contact.altRouteLink : brand.handles.linkedin.label}
-                    </a>
-                  </p>
                 </div>
               )}
 
@@ -255,7 +270,8 @@ export function Contact() {
 
               {status === 'error' && (
                 <p className="form__error" role="alert">
-                  That did not send. Try again, or reach out on LinkedIn.
+                  {contact.errorMessage}{' '}
+                  <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
                 </p>
               )}
 

@@ -1,6 +1,15 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "hamzash47-github-io",
+
+  // Must match the Worker that actually holds the custom domains. Cloudflare
+  // named it after the repo *and* the branch when the repository was imported,
+  // hence the "-main" suffix — and the workers.dev hostname
+  // (hamzash47-github-io-main.newgene26.workers.dev) is what confirms it.
+  //
+  // Get this wrong and nothing errors: wrangler happily creates a second,
+  // separate Worker under the other name and deploys there, leaving
+  // hamzash47.com pointed at the original one, still empty.
+  "name": "hamzash47-github-io-main",
   "compatibility_date": "2026-08-17",
 
   // Assets only — no "main". Nothing here renders on demand: Vite emits a

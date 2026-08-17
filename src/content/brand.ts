@@ -54,18 +54,24 @@ export const site = {
   url: (import.meta.env.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, ''),
 
   /**
-   * Both read from the environment first so the inbox can be wired without a
-   * code change — set them in `.env.local` for a local run and in the host's
-   * environment for a deploy. See `.env.example`.
+   * The brief form's destination. Routed through Cloudflare Email Routing,
+   * which forwards it to the real inbox — so the published address can stay
+   * stable even if the mailbox behind it moves.
    *
-   * While both are empty the form stays in review-only mode and points the
-   * visitor at LinkedIn rather than silently swallowing a lead.
+   * This is the default rather than an env var because an unset variable used
+   * to leave the form with nowhere to send, and a contact form that silently
+   * drops briefs is worse than no form at all.
    */
-  contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? '',
+  contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
 
   /**
-   * POST endpoint for the contact form (Formspree, Basin, Netlify Forms, a
-   * Worker). Takes priority over the mailto fallback when set.
+   * POST endpoint for the brief form (Formspree, Web3Forms, Basin, a Worker
+   * route). Optional, and takes priority over the mailto route when set.
+   *
+   * Without it the form still works — it hands the completed brief to the
+   * visitor's mail client, already addressed and filled in. With it, the brief
+   * posts straight through and the visitor never leaves the page. Setting
+   * VITE_CONTACT_ENDPOINT is the whole upgrade; no code changes.
    */
   formEndpoint: import.meta.env.VITE_CONTACT_ENDPOINT ?? '',
 
