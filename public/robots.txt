@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hamzash47.github.io/HamzAsh47.github.io-/sitemap.xml
+Sitemap: https://hamzash47.com/sitemap.xml

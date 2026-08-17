@@ -46,14 +46,12 @@ export const site = {
 
   /**
    * Absolute origin, needed by canonical tags, Open Graph and the sitemap —
-   * all three are meaningless relative. The default is the GitHub Pages
-   * project URL; set VITE_SITE_URL when a custom domain is attached and the
-   * sitemap will regenerate against it on the next build.
+   * all three are meaningless relative. This is the primary domain, so it is
+   * the default rather than something the build has to be told: an unset env
+   * var ships the right canonical instead of a GitHub Pages URL. Override with
+   * VITE_SITE_URL only for a preview deployment on another origin.
    */
-  url: (import.meta.env.VITE_SITE_URL ?? 'https://hamzash47.github.io/HamzAsh47.github.io-').replace(
-    /\/+$/,
-    '',
-  ),
+  url: (import.meta.env.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, ''),
 
   /**
    * Both read from the environment first so the inbox can be wired without a

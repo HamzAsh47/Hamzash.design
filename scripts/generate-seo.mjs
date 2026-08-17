@@ -23,9 +23,9 @@ const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '..')
 const publicDir = resolve(root, 'public')
 
-/** Matches the default in brand.ts; override for a custom domain. */
-const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://hamzash47.github.io/HamzAsh47.github.io-')
-  .replace(/\/+$/, '')
+/** Must match the default in brand.ts, or the sitemap and the canonical tags
+ *  disagree about which origin the site lives on. */
+const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, '')
 
 /* --- Case-study slugs, read straight from the content file ---------------- */
 /* Parsed rather than imported: this is a plain node script and the content
