@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import logoLockup from '../assets/logo/logo-lockup-header.svg'
+import logoLockup from '../assets/logo/Header logo.svg'
 import { navCta, navLinks } from '../content'
 import { goToSection } from '../lib/scroll'
 

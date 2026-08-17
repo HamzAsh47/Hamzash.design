@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env.local
+
+# Wrangler local dev state (miniflare caches, trace store)
+.wrangler/

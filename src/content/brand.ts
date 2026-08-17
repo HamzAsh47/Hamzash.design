@@ -65,15 +65,18 @@ export const site = {
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
 
   /**
-   * POST endpoint for the brief form (Formspree, Web3Forms, Basin, a Worker
-   * route). Optional, and takes priority over the mailto route when set.
+   * Where the brief posts. Defaults to this site's own Worker route, which
+   * emails the brief on — see `worker/index.ts`.
    *
-   * Without it the form still works — it hands the completed brief to the
-   * visitor's mail client, already addressed and filled in. With it, the brief
-   * posts straight through and the visitor never leaves the page. Setting
-   * VITE_CONTACT_ENDPOINT is the whole upgrade; no code changes.
+   * It is same-origin on purpose: no third-party form service, no public API
+   * key in the bundle, and nothing for the visitor to do after they submit.
+   * The earlier mailto route only ever opened a draft in their mail client,
+   * so a visitor without one saw a confirmation and sent nothing.
+   *
+   * Point VITE_CONTACT_ENDPOINT elsewhere to use a hosted backend instead, or
+   * set it empty to fall back to mailto.
    */
-  formEndpoint: import.meta.env.VITE_CONTACT_ENDPOINT ?? '',
+  formEndpoint: import.meta.env.VITE_CONTACT_ENDPOINT ?? '/api/brief',
 
   /**
    * Portfolio and reviews currently ship with dummy content. While this is

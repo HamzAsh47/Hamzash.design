@@ -101,8 +101,24 @@ options, both one-line changes in `src/content/brand.ts`:
   a Worker). The form submits JSON and shows the success state in place.
 - Or set `site.contactEmail`, and the form composes a pre-filled email instead.
 
-Until one of them is set, the last step tells the visitor to reach out on
-LinkedIn rather than silently dropping leads.
+The brief posts to `/api/brief`, which sends it on with Cloudflare's
+`send_email` binding — no third-party form service and no API key.
+
+Two constraints come with that binding, and both are already satisfied:
+
+- **From** must be on a domain with Email Routing enabled on the account —
+  `contact@hamzash47.com`.
+- **To** must be an address already *verified* on the account. The binding is
+  pinned to that one address in `wrangler.jsonc`, so a bug here cannot turn the
+  endpoint into a relay aimed somewhere else.
+
+The visitor's own address goes in `Reply-To`, so replying from the inbox
+reaches them rather than the site's own routing rule.
+
+A honeypot field named `website` sits off-screen in the form. It is invisible
+to people and to screen readers, so anything that arrives with it filled came
+from a bot; the Worker answers those with a plain `200` rather than explaining
+which check they failed.
 
 ## Deploying
 
@@ -113,8 +129,10 @@ repository is the fastest way to lose track of what is actually live.
 
 `wrangler.jsonc` is what makes the deploy work — Workers Builds has no
 convention for "where is the build output", so without it a connected Worker
-has nothing to publish. It declares an assets-only Worker: no `main`, because
-nothing renders on demand.
+has nothing to publish.
+
+One route runs code: `/api/brief`, in `worker/index.ts`, which emails the
+contact form's brief. Everything else is the static build, served from `dist`.
 
 Workers Builds settings, in the dashboard:
 

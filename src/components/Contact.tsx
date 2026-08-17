@@ -11,9 +11,19 @@ type FormState = {
   budget: string
   scope: string[]
   details: string
+  /** Honeypot — hidden from people, so anything in it came from a bot. */
+  website: string
 }
 
-const EMPTY: FormState = { name: '', company: '', email: '', budget: '', scope: [], details: '' }
+const EMPTY: FormState = {
+  name: '',
+  company: '',
+  email: '',
+  budget: '',
+  scope: [],
+  details: '',
+  website: '',
+}
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
@@ -32,6 +42,7 @@ function buildBrief(form: FormState) {
     budget: form.budget || '—',
     scope: form.scope.length ? form.scope.join(', ') : '—',
     details: form.details.trim() || '—',
+    website: form.website,
   }
 }
 
@@ -259,6 +270,22 @@ export function Contact() {
                     />
                   </label>
 
+                  {/* Off-screen rather than display:none — a bot reading the
+                      DOM fills it, a screen reader is told to skip it, and a
+                      browser autofilling "website" cannot reach a field it
+                      never renders in the tab order. */}
+                  <div className="form__trap" aria-hidden="true">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={form.website}
+                      onChange={(event) => update('website', event.target.value)}
+                    />
+                  </div>
                 </div>
               )}
 

@@ -12,12 +12,28 @@
   "name": "hamzash47-github-io-main",
   "compatibility_date": "2026-08-17",
 
-  // Assets only — no "main". Nothing here renders on demand: Vite emits a
-  // finished static build and Cloudflare serves it. An assets-only Worker also
-  // must not declare "assets.binding", which is only valid alongside a Worker
-  // script.
+  // One route runs code — /api/brief, which emails the contact form's brief.
+  // Everything else is the static Vite build, served straight from ./dist.
+  "main": "./worker/index.ts",
+
+  // Sends the brief to an address already verified on this account, which is
+  // the same mailbox the Email Routing rules forward to. Restricting the
+  // binding to that one address means a bug here cannot turn the Worker into
+  // an open relay pointed at somebody else's inbox.
+  "send_email": [
+    {
+      "name": "SEND_EMAIL",
+      "destination_address": "hamzash4798@gmail.com"
+    }
+  ],
+
   "assets": {
     "directory": "./dist",
+
+    // Assets are served ahead of the Worker by default, so only this path
+    // needs to jump the queue. Naming it explicitly also means a future
+    // dist/api/... file could never shadow the endpoint.
+    "run_worker_first": ["/api/*"],
 
     // Deliberately NOT "single-page-application".
     //
