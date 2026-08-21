@@ -3585,10 +3585,32 @@
   }
 }
 
+/* Row, not column. `.footer__link` sets flex-direction: column for the plain
+   nav links, and this variant never reset it — so the glyph stacked on top of
+   its own label instead of sitting beside it, and the whole list read as a
+   column of orphaned icons. The text keeps the column; the row is between the
+   icon and that text. */
 .footer__link--icon {
   display: flex;
+  flex-direction: row;
+  /* Aligned to the label line, not centred on the two-line block. Centred, the
+     glyph floats in the gap between the network name and the handle and reads
+     as belonging to neither. */
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: 0.65rem;
+}
+
+.footer__link--icon .icon {
+  flex: none;
+  /* Optically centres the 16px glyph on the cap height of the line beside it. */
+  margin-top: 0.18em;
+}
+
+.footer__link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
 .footer__link--icon .icon {
@@ -3750,10 +3772,13 @@
 /* The glyph carries this control on its own once the label is gone, so it is
    sized as the subject of the bubble rather than as a 16px list icon like the
    footer set it borrows its geometry from. */
+/* Lighter than the 16px footer set it borrows its geometry from. A stroke that
+   reads correctly at 16px looks heavy blown up to 30, and these two are the
+   only marks on the page at this size. */
 .wa-fab .icon {
   width: 30px;
   height: 30px;
-  stroke-width: 1.2;
+  stroke-width: 1;
 }
 
 /* Crimson is the accent the palette spends on intent, so it arrives on hover
@@ -3830,6 +3855,7 @@
 .assistant-launch .icon {
   width: 26px;
   height: 26px;
+  stroke-width: 1;
 }
 
 /* Cyan is the palette's AI/system colour, and this control is the AI. It is
