@@ -62,7 +62,9 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
   /* Derived from the entry, not authored: the year it ran, the pillars it was
      filed under, and how many things were handed over. */
   const facts = [
-    { label: 'Year', value: study.year },
+    /* Dropped rather than filled with a guess when the dates are not
+       established — an invented year on a portfolio is a claim, not a gap. */
+    ...(study.year ? [{ label: 'Year', value: study.year }] : []),
     { label: 'Discipline', value: study.pillars.map(pillarLabel).join(' · ') },
     { label: 'Scope', value: `${study.deliverables.length} deliverables` },
   ]

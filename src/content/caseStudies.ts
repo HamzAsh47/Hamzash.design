@@ -13,7 +13,8 @@ export type CaseStudy = {
   projectType: string
   /** Pillars this project belongs to — drives the portfolio filter. */
   pillars: Pillar[]
-  year: string
+  /** Omitted when the run dates are not established — never guessed. */
+  year?: string
   cover: string
   coverAlt: string
   /** One-line headline result. Keep it verifiable — no invented numbers. */
@@ -216,6 +217,123 @@ export const caseStudies: CaseStudy[] = [
       'Animated LED menu screens',
       'Advertising assets, motion and animation',
       'Social media strategy, content and every asset',
+    ],
+  },
+  {
+    slug: 'culturelancer',
+    client: 'CultureLancer',
+    projectType: 'UI/UX & Product Design System',
+    pillars: ['uiux'],
+    cover: figuresFor('culturelancer', 'hero')[0] ?? cover02,
+    coverAlt: 'CultureLancer job-matching platform interface',
+    resultStat: 'Live and operating — a two-sided platform built from a design system, not screen by screen',
+    plannedClient: 'CultureLancer',
+    isPlaceholder: false,
+    body: {
+      problem: {
+        copy: 'CultureLancer set out to solve a real problem: Black professionals were consistently facing barriers to job access, and existing platforms were not built with that audience or that problem in mind. The concept was a freelancer and hiring platform connecting Black job seekers with employers through a fairer, more direct matching system.',
+        more: [
+          'By the time the project reached me, CultureLancer already had a brand identity — a logo, typography, a colour palette. What it did not have was a product. No defined target audience for the interface itself, no UX direction, and no design system to build from: no rules for icons, textures or shapes, and nothing describing how components should behave and repeat across a real, functioning site.',
+        ],
+        figures: [
+          {
+            slot: 'brand-starting-point',
+            alt: "CultureLancer's existing brand guideline before UI/UX design began",
+            caption: 'What existed at the start: a brand, and no product to put it on.',
+          },
+        ],
+      },
+      systemBuilt: {
+        copy: 'Two product realities shaped the direction from day one. This was never a single-sided app — it needed two distinct experiences, one for job seekers and one for employers, each with its own dashboard, its own data, and its own relationship to the other side. And the brand had to read as bold and forward-looking rather than soft or generic, to stand out in a crowded hiring-platform space.',
+        more: [
+          'That produced two core visual decisions. Icon architecture was built on sharp, angular edges rather than rounded ones, to project a confident, new-tech feel instead of a safe, approachable one. And rather than illustrations or a mascot, the platform leans entirely on real human photography — signup screens, empty states, hero sections — because a platform built on trust between real people benefits more from real faces than from stylised art. AI image generation was not mature enough at the time to be a credible substitute, so every photograph used is genuine.',
+          'The site was then built around a component system rather than screen by screen. Navigation bars, cards, buttons, form fields and typography styles were each defined once and reused with variants and states across every page, on a consistent type scale. New pages could be assembled instead of redesigned, and it is what keeps over a dozen distinct page types reading as one coherent product rather than a patchwork of screens.',
+        ],
+        figures: [
+          {
+            slot: 'icon-shape-language',
+            alt: "CultureLancer's sharp-edged icon system",
+          },
+          {
+            slot: 'photography-usage',
+            alt: 'Real photography used across CultureLancer to build trust',
+          },
+          {
+            slot: 'component-library',
+            alt: 'CultureLancer component library and design system overview',
+            caption: 'Defined once, reused everywhere — the reason a dozen page types read as one product.',
+            wide: true,
+          },
+          {
+            slot: 'navbar-states',
+            alt: 'CultureLancer navigation bar states across user roles',
+          },
+        ],
+      },
+      deliverable: {
+        copy: 'The entry point had to work for two audiences without feeling like two products. Job seekers and employers each get their own path from the very first screen, with the choice presented clearly upfront rather than buried in a settings toggle later.',
+        more: [
+          'For job seekers the platform front-loads profile information deliberately: personal details, experience, education, portfolio projects, awards and certifications, specialisations and social links, all collected in a structured multi-step flow. That is not friction for its own sake — richer profile data upfront is what makes the matching sharper later. Once the profile exists, the seeker gets a dashboard with a skills assessment, a match-based job feed, and messaging with the employers who responded to their application, rather than the other way round.',
+          'The employer dashboard is built around candidate discovery rather than job browsing: best-matched candidates, applied candidates per job, and analytics on job performance and applications over time. Posting a job includes an AI-assisted description tool, so an employer with a rough idea still ends up with a complete, well-matched listing. Candidates apply to specific postings rather than messaging cold, which keeps the employer inbox to people who actually fit.',
+          'Three shared systems tie the two sides together: direct messaging between matched employers and candidates, a courses and certifications section that lets job seekers build verifiable skills on-platform, and a tiered membership structure for employers who need more postings or advanced search.',
+        ],
+        figures: [
+          {
+            slot: 'signup-flow',
+            alt: 'CultureLancer signup flow for job seekers and employers',
+            caption: 'The fork comes first, on screen one — not as a setting found later.',
+          },
+          {
+            slot: 'profile-builder',
+            alt: 'CultureLancer job seeker profile builder flow',
+          },
+          {
+            slot: 'jobseeker-dashboard',
+            alt: 'CultureLancer job seeker dashboard',
+            wide: true,
+          },
+          {
+            slot: 'job-listing-detail',
+            alt: 'CultureLancer job listing detail page',
+          },
+          {
+            slot: 'employer-dashboard',
+            alt: 'CultureLancer employer dashboard',
+            wide: true,
+          },
+          {
+            slot: 'post-job-flow',
+            alt: 'CultureLancer job posting flow with AI assistance',
+          },
+          {
+            slot: 'candidate-profile',
+            alt: 'CultureLancer candidate profile view for employers',
+          },
+          {
+            slot: 'messaging',
+            alt: 'CultureLancer messaging interface',
+          },
+          {
+            slot: 'courses',
+            alt: 'CultureLancer courses and certifications section',
+          },
+          {
+            slot: 'membership-plans',
+            alt: 'CultureLancer employer membership plans',
+          },
+        ],
+      },
+      result: {
+        copy: 'The project delivered more than a UI layer. It delivered the product\u2019s actual interaction logic, translated into a design system the client could understand and build from with confidence. CultureLancer is live and operating today.',
+      },
+    },
+    deliverables: [
+      'Design system architecture and component library',
+      'Two-sided onboarding and signup flows',
+      'Job seeker profile builder and dashboard',
+      'Employer dashboard, posting flow and candidate views',
+      'Messaging, courses and membership systems',
+      'Icon system and photography direction',
     ],
   },
   {
