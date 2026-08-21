@@ -17,6 +17,7 @@ export type IconName =
   | 'artstation'
   | 'behance'
   | 'whatsapp'
+  | 'assistant'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   linkedin: (
@@ -72,6 +73,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
   /* Speech bubble with the tail bottom-left, and the handset inside it. Drawn
      to the same monoline rules as the rest of the set — schematic enough to
      read at 16px, never a redraw of the trademark. */
+  /* A speech bubble with a four-point spark inside it: the conversation, and
+     the thing that is generating it. Reads at 24px without needing the word
+     "AI" spelled out beside it, which is what it replaced. */
+  assistant: (
+    <>
+      <path d="M3 8.4A3.4 3.4 0 0 1 6.4 5h7.2A3.4 3.4 0 0 1 17 8.4v3.9a3.4 3.4 0 0 1-3.4 3.4H8.2L4.6 18.3a.4.4 0 0 1-.6-.35v-2.5A3.4 3.4 0 0 1 3 12.3Z" />
+      <path d="M10 7.8l.85 2.1 2.1.85-2.1.85L10 13.7l-.85-2.1-2.1-.85 2.1-.85Z" />
+    </>
+  ),
   whatsapp: (
     <>
       <path d="M10 2.8a7.2 7.2 0 0 0-6.2 10.9L2.8 17.2l3.6-1a7.2 7.2 0 1 0 3.6-13.4Z" />

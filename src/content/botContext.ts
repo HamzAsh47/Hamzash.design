@@ -101,6 +101,9 @@ export const botKnowledge = [
   `FAQ`,
   ...faq.map((f) => `Q: ${f.question}\nA: ${f.answer}`),
   '',
+  `LANGUAGES`,
+  `Hamza works in English and Urdu. Client-facing work — writing, presentations, calls — is in English.`,
+  '',
   `HOW TO GET IN TOUCH`,
   `Brief form on the site (four short steps, best for real enquiries — it reaches ${site.contactEmail}). WhatsApp ${site.whatsapp.display} for quick questions. LinkedIn: ${brand.handles.linkedin.href}.`,
 ].join('\n')

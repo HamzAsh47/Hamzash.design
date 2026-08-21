@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { site } from '../content'
+import { Icon } from './Icon'
 
 type Turn = { role: 'user' | 'assistant'; content: string }
 
@@ -24,14 +25,66 @@ export function Assistant() {
 
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const launchRef = useRef<HTMLButtonElement>(null)
 
   // Follow the conversation down as it grows.
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
   }, [turns, busy])
 
+  /* Guards the effect below against its own first run. Without it, mounting
+     counted as "closed" and the launcher grabbed focus on page load — every
+     visitor arrived with a focused floating button lit in its focus colour,
+     and a keyboard user started the page inside a widget they never opened. */
+  const wasOpen = useRef(false)
+
   useEffect(() => {
-    if (open) inputRef.current?.focus()
+    if (open) {
+      inputRef.current?.focus()
+      wasOpen.current = true
+      return
+    }
+    /* Closing must hand focus back to the control that opened it, or a keyboard
+       user is dropped at the top of the document with no idea where they were.
+       Only on a real close, though — never on mount. */
+    if (wasOpen.current) {
+      launchRef.current?.focus()
+      wasOpen.current = false
+    }
+  }, [open])
+
+  /* On a phone the panel is a sheet covering most of the screen. Letting the
+     page scroll underneath it means a swipe aimed at the conversation moves the
+     site instead, which is the classic broken-modal feeling. */
+  useEffect(() => {
+    if (!open) return
+    const sheet = window.matchMedia('(max-width: 620px)').matches
+    if (!sheet) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [open])
+
+  /* The on-screen keyboard shrinks the visual viewport without changing the
+     layout viewport, so a bottom-anchored sheet ends up underneath it. Track
+     the difference and lift the sheet by exactly that much. */
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!open || !vv) return
+    const sync = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      panelRef.current?.style.setProperty('--keyboard-inset', `${inset}px`)
+    }
+    sync()
+    vv.addEventListener('resize', sync)
+    vv.addEventListener('scroll', sync)
+    return () => {
+      vv.removeEventListener('resize', sync)
+      vv.removeEventListener('scroll', sync)
+    }
   }, [open])
 
   useEffect(() => {
@@ -40,6 +93,13 @@ export function Assistant() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  /* Grow with the message rather than making the visitor scroll a one-line
+     box to re-read what they typed. Capped in CSS. */
+  const autoGrow = (el: HTMLTextAreaElement) => {
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+
   const send = async (text: string) => {
     const message = text.trim()
     if (!message || busy) return
@@ -47,6 +107,9 @@ export function Assistant() {
     const next: Turn[] = [...turns, { role: 'user', content: message }]
     setTurns(next)
     setDraft('')
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+    }
     setError('')
     setBusy(true)
 
@@ -69,6 +132,7 @@ export function Assistant() {
   return (
     <>
       <button
+        ref={launchRef}
         className={`assistant-launch${open ? ' is-open' : ''}`}
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
@@ -76,31 +140,34 @@ export function Assistant() {
         aria-label={open ? 'Close the assistant' : 'Ask about pricing, services or process'}
       >
         <span className="assistant-launch__glyph" aria-hidden="true">
-          {open ? '×' : 'AI'}
+          {open ? '×' : <Icon name="assistant" />}
         </span>
-        <span className="assistant-launch__label">Ask</span>
       </button>
 
       <div
+        ref={panelRef}
         id="assistant-panel"
         className={`assistant${open ? ' is-open' : ''}`}
         hidden={!open}
         role="dialog"
+        aria-modal="true"
         aria-label="Site assistant"
       >
         <header className="assistant__head">
           <p className="assistant__title">
+            {/* Cyan is reserved for AI and system context, and this is exactly
+                that — so the glyph carries it, here and on the launcher. */}
+            <span className="assistant__title-glyph" aria-hidden="true">
+              <Icon name="assistant" />
+            </span>
             Ask about the work
-            {/* The one sanctioned cyan on the page is AI context, and this is
-                literally that. */}
-            <span className="assistant__badge">AI</span>
           </p>
           <button className="assistant__close" onClick={() => setOpen(false)} aria-label="Close">
             ×
           </button>
         </header>
 
-        <div className="assistant__log" ref={logRef}>
+        <div className="assistant__log" ref={logRef} role="log" aria-live="polite" aria-atomic="false">
           <p className="assistant__msg assistant__msg--bot">{GREETING}</p>
 
           {turns.map((turn, index) => (
@@ -113,8 +180,13 @@ export function Assistant() {
           ))}
 
           {busy && (
-            <p className="assistant__msg assistant__msg--bot assistant__msg--thinking" aria-live="polite">
-              Thinking…
+            <p className="assistant__msg assistant__msg--bot assistant__msg--thinking">
+              <span className="assistant__dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="visually-hidden">Thinking</span>
             </p>
           )}
 
@@ -149,7 +221,10 @@ export function Assistant() {
             rows={1}
             maxLength={900}
             placeholder="Ask a question…"
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value)
+              autoGrow(event.target)
+            }}
             /* Enter sends, Shift+Enter breaks the line — the convention every
                chat input already trains people to expect. */
             onKeyDown={(event) => {
