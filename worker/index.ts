@@ -14,8 +14,11 @@
  * service, an API key, or anything for the visitor to do after clicking send.
  */
 
+import { botKnowledge } from '../src/content/botContext'
+
 interface Env {
   SEND_EMAIL: SendEmail
+  AI: Ai
 }
 
 /** Mirrors buildBrief() on the client. Everything here reaches the inbox. */
@@ -83,9 +86,91 @@ function asHtml(brief: Brief) {
   ].join('')
 }
 
+
+/* --- Assistant ------------------------------------------------------------ */
+
+/* Llama 3.3 70B on Workers AI. Picked over the 8B models because the job is
+   reading a rate card and reasoning about which tier fits a described project,
+   which the small models get wrong often enough to matter when the wrong
+   answer is a price. Still inside the free daily allocation at this site's
+   traffic. */
+const CHAT_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+
+/* A brief is a paragraph; a question is a sentence. Anything past these is not
+   a visitor asking about design work, and both caps protect a shared free
+   allocation from a single scripted caller. */
+const MAX_CHARS = 900
+const MAX_TURNS = 12
+
+const SYSTEM_PROMPT = `You are the assistant on Hamza Ashraf's portfolio site, hamzash47.com. You answer questions from prospective clients about his work, his services, his pricing, and how to start a project.
+
+RULES, IN ORDER OF IMPORTANCE:
+
+1. Answer ONLY from the reference below. It is the complete and current source of truth about Hamza.
+2. NEVER invent, estimate, round, discount or negotiate a price. Quote the exact figures from the reference. If someone asks for a price that is not in it, or asks for a custom quote or a discount, say that needs Hamza directly and point them to the brief form or WhatsApp.
+3. NEVER commit Hamza to a deadline, a start date, or availability. Delivery times listed against a tier are what that tier includes, not a promise about when he can start.
+4. If the reference does not answer something, say so plainly and point them to Hamza. Do not guess, and do not fill the gap with what is generally true of designers.
+5. You are not Hamza. Refer to him in the third person.
+
+STYLE:
+- Short. Two or three sentences for most questions. No preamble, no "great question".
+- Plain sentences, no markdown headers, no bullet lists unless you are listing tiers or prices.
+- Concrete. If a tier answers the question, name it and its price.
+- When someone describes their project and asks what it would cost, match it to the closest package and tier, give that figure, and say the brief form is how it gets scoped properly.
+- Never use emoji.
+
+REFERENCE:
+${botKnowledge}`
+
+type ChatTurn = { role: 'user' | 'assistant'; content: string }
+
+async function handleChat(request: Request, env: Env): Promise<Response> {
+  if (request.method !== 'POST') return json(405, { error: 'Method not allowed' })
+
+  let body: { messages?: ChatTurn[] }
+  try {
+    body = (await request.json()) as { messages?: ChatTurn[] }
+  } catch {
+    return json(400, { error: 'Malformed request' })
+  }
+
+  const history = Array.isArray(body.messages) ? body.messages.slice(-MAX_TURNS) : []
+  if (history.length === 0) return json(400, { error: 'No message' })
+
+  /* Trust nothing about the shape that arrived: a caller can send any roles it
+     likes, and an injected "system" turn would sit above the rules above. */
+  const messages = [
+    { role: 'system' as const, content: SYSTEM_PROMPT },
+    ...history
+      .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) })),
+  ]
+
+  try {
+    const result = (await env.AI.run(CHAT_MODEL, {
+      messages,
+      max_tokens: 400,
+      temperature: 0.3,
+    })) as { response?: string }
+
+    const reply = result.response?.trim()
+    if (!reply) throw new Error('Empty completion')
+    return json(200, { reply })
+  } catch (error) {
+    console.error('chat failed', error)
+    /* Out of free allocation, model cold, anything else: the visitor still
+       needs a route to a human, so failure names one instead of apologising. */
+    return json(503, {
+      error:
+        'The assistant is unavailable right now. WhatsApp +92 318 3749996 reaches Hamza directly, or use the brief form on this page.',
+    })
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url)
+    if (pathname === '/api/chat') return handleChat(request, env)
     if (pathname !== '/api/brief') return new Response('Not found', { status: 404 })
     if (request.method !== 'POST') {
       return json(405, { error: 'Method not allowed' })

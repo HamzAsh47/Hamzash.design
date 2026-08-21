@@ -51,7 +51,7 @@ export const site = {
    * var ships the right canonical instead of a GitHub Pages URL. Override with
    * VITE_SITE_URL only for a preview deployment on another origin.
    */
-  url: (import.meta.env.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, ''),
+  url: (import.meta.env?.VITE_SITE_URL ?? 'https://hamzash47.com').replace(/\/+$/, ''),
 
   /**
    * The brief form's destination. Routed through Cloudflare Email Routing,
@@ -62,7 +62,7 @@ export const site = {
    * to leave the form with nowhere to send, and a contact form that silently
    * drops briefs is worse than no form at all.
    */
-  contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
+  contactEmail: import.meta.env?.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
 
   /**
    * Direct WhatsApp route, offered alongside the brief form rather than
@@ -91,7 +91,7 @@ export const site = {
    * Point VITE_CONTACT_ENDPOINT elsewhere to use a hosted backend instead, or
    * set it empty to fall back to mailto.
    */
-  formEndpoint: import.meta.env.VITE_CONTACT_ENDPOINT ?? '/api/brief',
+  formEndpoint: import.meta.env?.VITE_CONTACT_ENDPOINT ?? '/api/brief',
 
   /**
    * Portfolio and reviews currently ship with dummy content. While this is

@@ -3791,3 +3791,280 @@
     transform: none;
   }
 }
+
+/* === Site assistant ====================================================== */
+
+/* Sits directly above the WhatsApp bubble in the same rail. Two persistent
+   controls in one corner is the most this page should ever carry. */
+.assistant-launch {
+  position: fixed;
+  right: max(var(--space-sm), env(safe-area-inset-right));
+  bottom: calc(max(var(--space-sm), env(safe-area-inset-bottom)) + 64px + var(--space-2xs));
+  z-index: 90;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 64px;
+  height: 64px;
+
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  background: rgba(13, 21, 38, 0.92);
+  backdrop-filter: blur(10px);
+  color: var(--text-secondary);
+  cursor: pointer;
+
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.assistant-launch:hover {
+  color: var(--white);
+  border-color: var(--crimson);
+  transform: translateY(-2px);
+}
+
+.assistant-launch.is-open {
+  font-size: 1.5rem;
+}
+
+/* The glyph alone carries it; the word would need a wider pill than the
+   WhatsApp bubble it stacks on, and two different widths in one rail reads as
+   a mistake. */
+.assistant-launch__label {
+  display: none;
+}
+
+/* `display: flex` below beats the `hidden` attribute — without this the panel
+   is laid out and painted from first load, which is how it shipped cyan into
+   the closed page and put a 380px surface into the layout nobody asked for. */
+.assistant[hidden] {
+  display: none;
+}
+
+.assistant {
+  position: fixed;
+  right: max(var(--space-sm), env(safe-area-inset-right));
+  bottom: calc(max(var(--space-sm), env(safe-area-inset-bottom)) + 138px);
+  z-index: 91;
+
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 2 * var(--space-sm)));
+  max-height: min(560px, calc(100vh - 200px));
+
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: rgba(13, 21, 38, 0.97);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.assistant__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.assistant__title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+/* Electric Cyan is reserved for AI and system context. This is the one place
+   on the page that is literally that, so it is the one place it appears. */
+.assistant__badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+}
+
+.assistant__close {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.2rem;
+}
+
+.assistant__close:hover {
+  color: var(--white);
+}
+
+.assistant__log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+/* 4px, like every other surface here. Chat UIs default to pill-shaped
+   bubbles; on this site that would be the only rounded thing on the page. */
+.assistant__msg {
+  max-width: 92%;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+}
+
+.assistant__msg--bot {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+}
+
+.assistant__msg--user {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--crimson) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--crimson) 40%, transparent);
+  color: var(--white);
+}
+
+.assistant__msg--thinking {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.assistant__error {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--crimson);
+}
+
+.assistant__starters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.assistant__starter {
+  text-align: left;
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.7rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.assistant__starter:hover {
+  color: var(--white);
+  border-color: var(--crimson);
+}
+
+.assistant__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.assistant__input {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.65rem;
+  color: var(--white);
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.assistant__input:focus {
+  outline: none;
+  border-color: var(--crimson);
+}
+
+.assistant__send {
+  flex: none;
+  background: var(--crimson);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.9rem;
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.assistant__send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.assistant__foot {
+  padding: 0 1rem 0.8rem;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.assistant__foot a {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--hairline-strong);
+}
+
+.assistant__foot a:hover {
+  color: var(--white);
+  border-bottom-color: var(--crimson);
+}
+
+/* On a phone the panel takes the width it needs and sits above both bubbles. */
+@media (max-width: 520px) {
+  .assistant {
+    left: max(var(--space-sm), env(safe-area-inset-left));
+    right: max(var(--space-sm), env(safe-area-inset-right));
+    width: auto;
+    max-height: min(70vh, 520px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-launch {
+    transition: none;
+  }
+
+  .assistant-launch:hover {
+    transform: none;
+  }
+}

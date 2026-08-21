@@ -12,9 +12,16 @@
   "name": "hamzash47-github-io-main",
   "compatibility_date": "2026-08-17",
 
-  // One route runs code — /api/brief, which emails the contact form's brief.
-  // Everything else is the static Vite build, served straight from ./dist.
+  // Two routes run code: /api/brief emails the contact form, /api/chat answers
+  // visitor questions. Everything else is the static Vite build from ./dist.
   "main": "./worker/index.ts",
+
+  // Workers AI powers the site assistant on /api/chat. A binding, not an API
+  // key: nothing to store as a secret, nothing to rotate, and it draws on this
+  // account's own free daily allocation.
+  "ai": {
+    "binding": "AI"
+  },
 
   // Sends the brief to an address already verified on this account, which is
   // the same mailbox the Email Routing rules forward to. Restricting the
