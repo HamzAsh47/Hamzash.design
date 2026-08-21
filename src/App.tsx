@@ -12,6 +12,7 @@ import { Reviews } from './components/Reviews'
 import { Services } from './components/Services'
 import { SystemSection } from './components/SystemSection'
 import { StructuredData } from './components/StructuredData'
+import { WhatsAppFab } from './components/WhatsAppFab'
 import { brand, caseStudies, site } from './content'
 import { useDocumentMeta } from './hooks/useDocumentMeta'
 import { useHashRoute } from './hooks/useHashRoute'
@@ -88,6 +89,7 @@ export default function App() {
       </main>
 
       <Footer />
+      <WhatsAppFab />
     </>
   )
 }

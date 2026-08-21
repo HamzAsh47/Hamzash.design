@@ -3703,3 +3703,87 @@
     opacity: 1;
   }
 }
+
+/* === WhatsApp FAB ======================================================== */
+
+/* Pinned bottom-right on every page. z-index sits under the mobile drawer (99)
+   and the nav (100) on purpose: an open menu should cover it, not fight it.
+   Inset uses safe-area so it clears the home indicator on a notched phone. */
+.wa-fab {
+  position: fixed;
+  right: max(var(--space-sm), env(safe-area-inset-right));
+  bottom: max(var(--space-sm), env(safe-area-inset-bottom));
+  z-index: 90;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  /* Square at rest so the glyph sits dead centre; the label expands it. */
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0 1rem;
+
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  background: rgba(13, 21, 38, 0.92);
+  backdrop-filter: blur(10px);
+  color: var(--text-secondary);
+
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.wa-fab__glyph {
+  display: inline-flex;
+  flex: none;
+}
+
+.wa-fab .icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Crimson is the accent the palette spends on intent, so it arrives on hover
+   rather than sitting lit the whole time competing with "Start a project". */
+.wa-fab:hover {
+  color: var(--white);
+  border-color: var(--crimson);
+  transform: translateY(-2px);
+}
+
+.wa-fab:active {
+  transform: translateY(0);
+}
+
+/* No cursor, no hover: the label can never be revealed, so it would only be
+   dead weight and a wider tap target than the glyph needs. */
+@media (hover: none), (pointer: coarse) {
+  .wa-fab__label {
+    display: none;
+  }
+
+  .wa-fab {
+    padding: 0;
+    justify-content: center;
+    width: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-fab {
+    transition: none;
+  }
+
+  .wa-fab:hover {
+    transform: none;
+  }
+}

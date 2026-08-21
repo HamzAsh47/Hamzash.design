@@ -16,6 +16,7 @@ export type IconName =
   | 'figma'
   | 'artstation'
   | 'behance'
+  | 'whatsapp'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   linkedin: (
@@ -66,6 +67,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M2.6 5.6h4.1a2.2 2.2 0 0 1 0 4.4H2.6zM2.6 10h4.6a2.4 2.4 0 0 1 0 4.8H2.6z" />
       <path d="M12.2 12.1h5.2a2.6 2.6 0 1 0-5.2 0 2.6 2.6 0 0 0 4.7 1.6" />
       <path d="M13 5.9h3.6" />
+    </>
+  ),
+  /* Speech bubble with the tail bottom-left, and the handset inside it. Drawn
+     to the same monoline rules as the rest of the set — schematic enough to
+     read at 16px, never a redraw of the trademark. */
+  whatsapp: (
+    <>
+      <path d="M10 2.8a7.2 7.2 0 0 0-6.2 10.9L2.8 17.2l3.6-1a7.2 7.2 0 1 0 3.6-13.4Z" />
+      <path d="M7.4 7.1c.3-.1.6 0 .8.3l.6 1c.1.2.1.5-.1.7l-.4.4a4.6 4.6 0 0 0 2.2 2.2l.4-.4c.2-.2.5-.2.7-.1l1 .6c.3.2.4.5.3.8-.2.6-.8 1-1.5 1-2.4-.1-4.7-2.4-4.8-4.8 0-.7.3-1.3 1-1.5Z" />
     </>
   ),
 }

@@ -65,6 +65,21 @@ export const site = {
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
 
   /**
+   * Direct WhatsApp route, offered alongside the brief form rather than
+   * instead of it — some enquiries are a two-line question, and a four-step
+   * form is the wrong shape for those.
+   *
+   * `wa.me` wants the number in full international form with no punctuation.
+   * The prefilled text only opens the conversation; it is editable before
+   * sending, and it saves the visitor writing the same first line every time.
+   */
+  whatsapp: {
+    number: '923183749996',
+    display: '+92 318 3749996',
+    prefill: 'Hi Hamza — I found you through hamzash47.com and wanted to ask about a project.',
+  },
+
+  /**
    * Where the brief posts. Defaults to this site's own Worker route, which
    * emails the brief on — see `worker/index.ts`.
    *
