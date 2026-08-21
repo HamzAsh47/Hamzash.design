@@ -53,7 +53,7 @@ export default function App() {
     study
       ? {
           title: `${study.client} — ${study.projectType} case study | ${brand.name}`,
-          description: study.body.problem,
+          description: study.body.problem.copy,
           url: `${site.url}/#/case/${study.slug}`,
         }
       : route.name === 'case'

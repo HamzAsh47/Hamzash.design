@@ -1603,6 +1603,61 @@
   /* The column is wide enough to run to 100 characters at this container
      width, which is past the line length anyone tracks comfortably. */
   max-width: 62ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Photography sits under the paragraph it illustrates, inside the measured
+   column, so the case study reads as an argument with evidence rather than a
+   wall of text followed by a contact sheet. */
+.case__figure {
+  margin: var(--space-sm) 0 0;
+}
+
+/* A storefront or a full lockup loses its point at text width. These span both
+   grid tracks of the section — the heading rail as well as the copy column —
+   which is the whole available width and, unlike a viewport-width breakout,
+   cannot overflow the page. */
+.case__figure--wide {
+  grid-column: 1 / -1;
+  max-width: none;
+  width: 100%;
+  margin-top: var(--space-xs);
+}
+
+.case__figure-caption {
+  margin-top: var(--space-2xs, 0.5rem);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
+/* Sits under the result line in the case head, reading as a secondary route
+   out rather than a call to action competing with "Start a project". */
+.case__external {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: var(--space-xs, 0.75rem);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--hairline-strong);
+  padding-bottom: 2px;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.case__external:hover {
+  color: var(--white);
+  border-bottom-color: var(--crimson);
 }
 
 /* Numbered rows rather than dashes: this is the handover list, and a reader

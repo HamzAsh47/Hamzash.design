@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import type { CaseStudy as CaseStudyType } from '../content'
-import { caseStudies, caseStudySections, pillarFilters, site } from '../content'
+import type { CaseFigureSlot, CaseStudy as CaseStudyType } from '../content'
+import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from '../content'
 import { navigateHome, navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
@@ -10,6 +10,40 @@ import { Reveal } from './Reveal'
 
 const pillarLabel = (value: string) =>
   pillarFilters.find((option) => option.value === value)?.label ?? value
+
+/**
+ * Renders whatever images exist for one slot, or nothing at all.
+ *
+ * A slot names a file that may not have been supplied yet, so the empty case
+ * is the normal case, not an error — the section simply reads as text until the
+ * photograph arrives. Several files sharing a slot stack in variant order under
+ * the paragraph they illustrate, which is where they explain something; a
+ * gallery bolted to the end of the page explains nothing.
+ */
+function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot }) {
+  const sources = figuresFor(study, figure.slot)
+  if (sources.length === 0) return null
+
+  return (
+    <>
+      {sources.map((src, index) => (
+        <figure
+          className={`case__figure${figure.wide ? ' case__figure--wide' : ''}`}
+          key={src}
+        >
+          <CrtImage
+            src={src}
+            /* One alt string across a stacked set would have a screen reader
+               read the same sentence three times. */
+            alt={sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt}
+            aspectRatio="16 / 10"
+          />
+          {figure.caption && <figcaption className="case__figure-caption">{figure.caption}</figcaption>}
+        </figure>
+      ))}
+    </>
+  )
+}
 
 /**
  * Full case study, always in the locked order:
@@ -67,6 +101,20 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
             <span className="draft-chip">Draft</span>
           )}
         </p>
+
+        {/* The published gallery, where there is one. A portfolio claim the
+            reader can go and verify is worth more than one they cannot. */}
+        {study.externalUrl && (
+          <a
+            className="case__external"
+            href={study.externalUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {study.externalLabel ?? 'View the full gallery'}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )}
       </div>
 
       <div className="container case__cover-wrap">
@@ -82,7 +130,29 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
               <Eyebrow>{section.eyebrow}</Eyebrow>
               <h2 className="case__section-title">{section.label}</h2>
             </div>
-            <p className="body case__section-copy">{study.body[section.key]}</p>
+            <div className="case__section-copy">
+              <p className="body">{study.body[section.key].copy}</p>
+              {study.body[section.key].more?.map((paragraph) => (
+                <p className="body" key={paragraph.slice(0, 40)}>
+                  {paragraph}
+                </p>
+              ))}
+              {study.body[section.key].figures
+                ?.filter((figure) => !figure.wide)
+                .map((figure) => (
+                  <CaseFigures key={figure.slot} study={study.slug} figure={figure} />
+                ))}
+            </div>
+
+            {/* Wide figures are grid children of the section, not of the
+                measured column, so they span the heading rail as well. Doing
+                this with a viewport-width breakout instead pushed the page
+                296px wider than the screen. */}
+            {study.body[section.key].figures
+              ?.filter((figure) => figure.wide)
+              .map((figure) => (
+                <CaseFigures key={figure.slot} study={study.slug} figure={figure} />
+              ))}
           </Reveal>
         ))}
 
