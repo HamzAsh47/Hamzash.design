@@ -104,12 +104,12 @@ export const caseStudies: CaseStudy[] = [
     client: "Josef's Buffalo Wings",
     projectType: 'Full System — Brand, Space, Motion & Social',
     pillars: ['brand', 'uiux', 'motion'],
-    year: '2023—present',
+    year: '2023—2026',
     /* The supplied hero, the moment it is dropped in; the placeholder plate
        until then, so a real case study never sits behind a broken image. */
     cover: figuresFor('josefs', 'hero')[0] ?? cover01,
     coverAlt: "Josef's Buffalo Wings brand hero image",
-    resultStat: '0 to ~5,000 followers and one location to two, over two years',
+    resultStat: '0 to ~5,000 followers and one location to two, 2023—2026',
     plannedClient: "Josef's Buffalo Wings",
     isPlaceholder: false,
     externalUrl:
@@ -202,9 +202,9 @@ export const caseStudies: CaseStudy[] = [
         ],
       },
       result: {
-        copy: '@josefs_hamburg grew from zero to roughly five thousand followers over two years, built entirely on original content and brand assets created from the ground up. In the same period the business went from one location to two, opening at Europa Passage Hamburg alongside the original at Phoenix Center Harburg — funded by the success of the first location rather than outside investment.',
+        copy: '@josefs_hamburg grew from zero to roughly five thousand followers between 2023 and 2026, built entirely on original content and brand assets created from the ground up. In the same period the business went from one location to two, opening at Europa Passage Hamburg alongside the original at Phoenix Center Harburg — funded by the success of the first location rather than outside investment.',
         more: [
-          'Throughout that growth I remained the sole creative across the brand: identity, packaging, interior, motion and social. No team, no outsourcing, for two continuous years.',
+          'Throughout that growth I remained the sole creative across the brand: identity, packaging, interior, motion and social. No team, no outsourcing, continuously from 2023 until the engagement closed in March 2026.',
           'These figures describe the growth of the brand over the period I led its creative direction. They speak to the consistency and reach of the work rather than a claim of direct causation on revenue.',
         ],
       },
@@ -224,6 +224,7 @@ export const caseStudies: CaseStudy[] = [
     client: 'CultureLancer',
     projectType: 'UI/UX & Product Design System',
     pillars: ['uiux'],
+    year: '2024',
     cover: figuresFor('culturelancer', 'hero')[0] ?? cover02,
     coverAlt: 'CultureLancer job-matching platform interface',
     resultStat: 'Live and operating — a two-sided platform built from a design system, not screen by screen',
