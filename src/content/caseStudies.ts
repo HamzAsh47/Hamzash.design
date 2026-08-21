@@ -338,22 +338,90 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    slug: 'case-01',
-    client: 'Client Name',
-    projectType: 'Brand Identity & Visual System',
-    pillars: ['brand'],
-    year: '2026',
-    cover: cover01,
-    coverAlt: 'Placeholder cover for a brand identity case study',
-    resultStat: 'result coming soon',
+    slug: 'waca',
+    client: 'WACA — WA Cricket',
+    projectType: 'Interactive Tournament Guide & Design System',
+    pillars: ['brand', 'uiux'],
+    year: '2024',
+    cover: figuresFor('waca', 'hero')[0] ?? cover01,
+    coverAlt: 'WACA ANZPCC 2024 tournament guide cover',
+    resultStat: 'A 64-page interactive guide in three to four days, then a matching A5 print edition in another 48 hours',
     plannedClient: 'WACA',
-    isPlaceholder: true,
-    body: PLACEHOLDER_BODY,
+    isPlaceholder: false,
+    body: {
+      problem: {
+        copy: 'The project began small. A police-affiliated cricket body connected to WACA needed a member catalogue for their police cricket club — a quick, low-stakes job.',
+        more: [
+          'They liked it, and that changed the scope entirely. What came back was a request for something far bigger: a large interactive guide for the Australia & New Zealand Police Cricket Championships in Perth, scoped at roughly 150 pages, covering match schedules, venue profiles, official merchandise, team rosters and championship rules. WACA had a brand to start from — a yellow and black colour system built around a custom typeface — but no precedent for a document this size that still had to feel fast in someone\u2019s hand on the sidelines of a match.',
+          'The real constraint was time. The client needed it complete within three to four days. I brought in Sheraz Nawaz to execute under my direction and led the build as art director rather than as the sole hand on every page. The interactive version landed inside that window. Roughly 48 hours later came a second request: an A5 printable version of the same design, in another 48 hours.',
+        ],
+      },
+      systemBuilt: {
+        copy: 'A document this size cannot be designed page by page, not on this timeline. Every section — match schedules, team rosters, merchandise — had to share the same visual grammar, or the guide would read as dozens of pages stitched together rather than one product.',
+        more: [
+          'So the work went into a repeatable system first: a consistent header treatment, a colour and type language pulled directly from WACA\u2019s brand guideline, and a page architecture that could absorb any number of teams, venues or match days without being reinvented each time. That system is the only reason a second, A5 edition of the whole thing was possible inside 48 hours.',
+          'A guide this size is also easy to get lost in, especially when someone needs one fact quickly in the middle of a live tournament. It is built around a central navigation hub: a full interactive index linking straight to 13 major sections, each reachable in a single tap rather than a long scroll.',
+        ],
+        figures: [
+          {
+            slot: 'index',
+            alt: 'The tournament guide\u2019s interactive index, linking to all 13 sections',
+            caption: 'One tap to any of 13 sections — the alternative was scrolling a 64-page document mid-match.',
+            wide: true,
+          },
+        ],
+      },
+      deliverable: {
+        copy: 'Every good guide earns trust before it turns functional. The opening pages carry a welcome letter from the WA Cricket CEO, giving the document a sense of occasion before the reader reaches schedules and logistics.',
+        more: [
+          'Match schedules are the pages people return to most, usually in a hurry. They are laid out to read instantly: clear match-ups, ground assignments and start times at high contrast, so nothing is missed at a glance.',
+          'Beyond logistics the guide carries real editorial weight. Venue pages tell the story of each participating club, some with a century behind them, paired with photography of the grounds. Team pages introduce every squad with player photography and short personal bios, giving the tournament a human face beyond the fixtures.',
+          'It doubles as a retail touchpoint: official merchandise is presented in the same visual system as everything else, product photography against bold typography and pricing, so buying reads as part of the guide rather than a catalogue bolted to the back. The final third holds the full championship rules — a dense reference section that still had to stay legible and on-brand across dozens of pages of regulation text.',
+        ],
+        figures: [
+          {
+            slot: 'welcome',
+            alt: 'Welcome letter page from the WA Cricket CEO',
+          },
+          {
+            slot: 'schedule',
+            alt: 'ANZPCC match schedule page',
+            caption: 'The page people open under pressure, built to be read at a glance.',
+            wide: true,
+          },
+          {
+            slot: 'venue',
+            alt: 'Venue profile page for a participating cricket club',
+          },
+          {
+            slot: 'team',
+            alt: 'Team and player profile page with photography and bios',
+          },
+          {
+            slot: 'merch',
+            alt: 'Official ANZPCC tournament merchandise page',
+          },
+          {
+            slot: 'rules',
+            alt: 'ANZPCC championship rules reference page',
+          },
+        ],
+      },
+      result: {
+        copy: 'What started as a small member catalogue became a full digital ecosystem: a 64-page interactive guide with instant section navigation, followed by a matching A5 print edition delivered within 48 hours of the second request. Together the two came to roughly 100-plus pages of consistent, on-brand material.',
+        more: [
+          'Built and delivered across roughly two weeks in the lead-up to the tournament, working as art director alongside a collaborator, on a timeline that left no room for a second draft.',
+        ],
+      },
+    },
     deliverables: [
-      'Logo system and brand architecture',
-      'Colour and type system',
-      'Brand guidelines document',
-      'Asset handoff pack',
+      'Interactive 64-page tournament guide',
+      'Matching A5 printable edition',
+      'Design system and page architecture',
+      'Interactive index across 13 sections',
+      'Venue and team profile layouts',
+      'Merchandise and commercial pages',
+      'Championship rules reference section',
     ],
   },
   {
