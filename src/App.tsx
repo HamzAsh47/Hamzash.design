@@ -80,10 +80,13 @@ export default function App() {
         {route.name === 'home' ? (
           <HomePage />
         ) : (
-          /* No fallback markup: the chunk is small and same-origin, and a
-             flash of skeleton between two dark pages reads worse than the
-             extra beat. */
-          <Suspense fallback={null}>
+          /* Nothing to look at, but it has to take up room. A null fallback
+             is zero-height, so the footer paints near the top of the window
+             and is thrown off-screen when the chunk lands a few hundred
+             milliseconds later — one shift worth 0.64 CLS, on every case
+             study. An empty block the height of the viewport holds the page
+             open with no skeleton to flash. */
+          <Suspense fallback={<div className="route-hold" aria-hidden="true" />}>
             {study ? <CaseStudy study={study} /> : <CaseStudyNotFound />}
           </Suspense>
         )}

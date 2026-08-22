@@ -767,7 +767,11 @@
   gap: var(--space-xs);
   align-items: flex-start;
   text-align: left;
-  padding: var(--space-sm);
+  /* More below than above. "SEE THE WORK" is the last thing in the card and it
+     was sitting on the border with the same 20px the eyebrow gets at the top —
+     but a link reads as needing room under it in a way a label does not, and
+     an even box round uneven content looks tighter at the end than the start. */
+  padding: var(--space-sm) var(--space-sm) var(--space-md);
   cursor: pointer;
 }
 
@@ -808,7 +812,10 @@
   opacity: 0.7;
 }
 
+/* Pushed to the foot of the card, so the three links align across the row
+   whatever length the copy above them runs to. */
 .service-card__link {
+  margin-top: auto;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
@@ -823,7 +830,10 @@
 /* The whole call to action takes the crimson, arrow included — on a card whose
    stroke has just gone crimson too, a white label read as the odd one out. */
 .service-card:hover .service-card__link,
-.service-card.is-hot .service-card__link {
+.service-card.is-hot /* Pushed to the foot of the card, so the three links align across the row
+   whatever length the copy above them runs to. */
+.service-card__link {
+  margin-top: auto;
   color: var(--crimson);
 }
 
@@ -1621,15 +1631,36 @@
   margin: var(--space-sm) 0 0;
 }
 
-/* A storefront or a full lockup loses its point at text width. These span both
-   grid tracks of the section — the heading rail as well as the copy column —
-   which is the whole available width and, unlike a viewport-width breakout,
-   cannot overflow the page. */
+/* A 2.3-and-wider asset loses its point at text width, so these span both grid
+   tracks of the section — the heading rail as well as the copy column. Wide
+   assets are also short at any given width, so they get a taller ceiling: the
+   width is what constrains them, never the height.
+
+   Which figures get this is decided per asset from its measured ratio, not by
+   habit. Roughly: 1.8 and wider runs full bleed, everything squarer stays in
+   the reading column where it does not leave half the row empty. */
 .case__figure--wide {
   grid-column: 1 / -1;
   max-width: none;
   width: 100%;
   margin-top: var(--space-xs);
+  --figure-cap: var(--figure-cap-tall);
+}
+
+/* A wide figure that is also a pair takes the pair ceiling, not the tall one.
+   Naming the base token explicitly here matters: `--figure-cap: var(--figure-cap)`
+   is a self-reference, which is invalid at computed-value time, so the rule
+   was silently dropped and both halves kept the tall ceiling — a 9:16 reel
+   rendered 989px high next to a landscape clip. */
+.case__figure--wide.case__figure--grid {
+  --figure-cap: var(--figure-cap-grid);
+}
+
+/* Portrait assets — phone reels, tall screens — are capped harder than
+   anything else. At the standard ceiling a 0.56 reel is twice the height of
+   the landscape clip beside it and drags the whole row out of proportion. */
+.case__figure-items :is(img, video).case__media:not(.case__media--sized) {
+  max-height: var(--figure-cap);
 }
 
 .case__figure-caption {
@@ -4188,27 +4219,71 @@ body:has(.assistant.is-open) .assistant-launch {
 }
 
 
-/* Case-study media: the work at its own proportions.
-   No fixed aspect-ratio and no object-fit. Every one of these arrives a
-   different shape — square mascot marks at 1.00, document spreads at 2.56 —
-   and a single shared box can only serve that range by cutting most of it up.
-   width/height on the element carry the intrinsic ratio, so the browser holds
-   the correct space before the file arrives and nothing shifts. */
+/* --- Case-study media ----------------------------------------------------
+   An invisible container, and the work sized to fill it at its own ratio.
+
+   Two failures came before this. Forcing a shared 16/10 box cropped a third
+   off thirteen of twenty-one assets. Removing the box entirely fixed the
+   cropping but replaced it with the opposite problem: a 1.00 square ran as
+   tall as it was wide while a 2.56 spread became a thin strip, so the page
+   lurched between enormous and tiny with no rhythm at all.
+
+   The container bounds both dimensions. Width is the column; height is capped.
+   A wide asset hits the width first and sits short; a tall one hits the height
+   first and sits narrow, centred. Neither is ever cut, and neither can
+   dominate the page. That is the whole rule. */
+.case__figure-items {
+  display: grid;
+  grid-template-columns: repeat(var(--figure-columns, 1), minmax(0, 1fr));
+  gap: var(--space-sm);
+  align-items: center;
+  justify-items: center;
+}
+
 .case__media {
   display: block;
-  width: 100%;
+  max-width: 100%;
+  max-height: var(--figure-cap);
+  width: auto;
   height: auto;
   background: var(--obsidian);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
 }
 
-/* Wide spreads on a narrow phone become unreadable strips. Capping the height
-   and letting the image sit inside its own frame keeps them legible without
-   cropping anything away. */
-@media (max-width: 620px) {
-  .case__media {
-    max-height: 70vh;
-    object-fit: contain;
+/* Same container, arrived at by arithmetic instead of by measuring the loaded
+   bitmap. `width: auto` cannot size an image that has not decoded yet, so the
+   box was 0 high until the file landed and everything below it jumped. With
+   the ratio known at build time the width is whichever comes first — the
+   column, or the width at which the height reaches the ceiling — and the
+   height follows from it. Identical result once loaded, correct before.
+
+   `min()` is doing the bounding: hit the column first and the asset sits
+   short of the ceiling; hit the ceiling first and it sits narrower than the
+   column, centred. No letterbox either way, because the box is always the
+   asset's own shape rather than a frame the asset is fitted into. */
+.case__media--sized {
+  width: min(100%, calc(var(--figure-cap) * var(--media-ar)));
+  height: auto;
+  aspect-ratio: var(--media-ar);
+  max-height: none;
+}
+
+/* Artwork that is genuinely tall — a full sitemap, a stacked wireframe sheet —
+   is unreadable shrunk to the standard ceiling, so it gets a taller one. */
+.case__figure--tall {
+  --figure-cap: var(--figure-cap-tall);
+}
+
+/* Side by side, each half bounded by the same rules. A pair shares one cap so
+   two assets of different shapes still line up on a common centre. */
+.case__figure--grid {
+  --figure-cap: var(--figure-cap-grid);
+}
+
+@media (max-width: 720px) {
+  /* Two columns of a document spread on a phone is two unreadable strips. */
+  .case__figure--grid .case__figure-items {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -968,3 +968,10 @@ html {
     display: none;
   }
 }
+
+/* Placeholder for a route whose code has not arrived yet. It draws nothing;
+   its only job is to be as tall as the page it is standing in for, so the
+   footer stays below the fold instead of painting and then being pushed. */
+.route-hold {
+  min-height: 100vh;
+}

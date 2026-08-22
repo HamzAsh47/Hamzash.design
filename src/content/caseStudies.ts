@@ -64,6 +64,19 @@ export type CaseFigureSlot = {
   caption?: string
   /** Runs the full container width instead of the measured text column. */
   wide?: boolean
+  /**
+   * Force a column count. Left unset, a slot with two or more files lays them
+   * side by side and a single file takes the whole frame — which is usually
+   * right, because supplying two of something is itself the signal that they
+   * are meant to be compared.
+   */
+  columns?: number
+  /**
+   * Raises the height ceiling for artwork that is genuinely tall — a full
+   * sitemap, a stacked wireframe sheet — where the default cap would shrink it
+   * past the point of being readable.
+   */
+  tall?: boolean
 }
 
 export const portfolioIntro = {
@@ -152,7 +165,14 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'mascot-sketches',
             alt: "Early sketches of the Josef's buffalo mascot development",
+            /* A 2.36 strip: the whole point is reading the explorations left
+               to right, so it gets the full width. */
+            wide: true,
           },
+          /* Both marks are square, and the argument in the copy is about how
+             they differ — the primary against the badge. Two 1.00 assets each
+             taking a full frame would say the opposite: unrelated, one after
+             the other. */
           {
             slot: 'mascot-final',
             alt: "Final Josef's buffalo mascot logo mark",
@@ -161,11 +181,11 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'emblem-logo',
             alt: "Josef's emblem-style badge logo with construction breakdown",
+            caption: 'The badge, for the places the primary mark reads too casual.',
           },
           {
             slot: 'logo-lockup',
             alt: "Josef's primary logo lockup on brand green background",
-            wide: true,
           },
         ],
       },
@@ -184,12 +204,16 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'storefront',
             alt: "Josef's Buffalo Wings storefront at Phoenix Center and Europa Passage, Hamburg",
+            caption: 'Two locations, one system: Phoenix Center Harburg and Europa Passage.',
+            /* Two files in this slot, so they pair automatically — which is the
+               comparison the paragraph is making. */
             wide: true,
           },
           {
             slot: 'menu-screens',
             alt: "Animated LED menu screens inside Josef's Buffalo Wings",
             caption: 'Motion on the boards, because static signage loses to a moving crowd.',
+            wide: true,
           },
           {
             slot: 'interior',
@@ -203,6 +227,8 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'social-content',
             alt: "Sample social media content created for Josef's Buffalo Wings",
+            caption: 'Content built for the feed, not cut down from something else.',
+            wide: true,
           },
         ],
       },
@@ -415,7 +441,9 @@ export const caseStudies: CaseStudy[] = [
             slot: 'index',
             alt: 'The tournament guide\u2019s interactive index, linking to all 13 sections',
             caption: 'One tap to any of 13 sections — the alternative was scrolling a 64-page document mid-match.',
-            wide: true,
+            /* 1.15 and dense with type. Full width would only add empty page
+               either side; the extra height is what makes it readable. */
+            tall: true,
           },
         ],
       },
@@ -430,6 +458,7 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'welcome',
             alt: 'Welcome letter page from the WA Cricket CEO',
+            wide: true,
           },
           {
             slot: 'schedule',
@@ -440,18 +469,22 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'venue',
             alt: 'Venue profile page for a participating cricket club',
+            wide: true,
           },
           {
             slot: 'team',
             alt: 'Team and player profile page with photography and bios',
+            wide: true,
           },
           {
             slot: 'merch',
             alt: 'Official ANZPCC tournament merchandise page',
+            wide: true,
           },
           {
             slot: 'rules',
             alt: 'ANZPCC championship rules reference page',
+            wide: true,
           },
         ],
       },

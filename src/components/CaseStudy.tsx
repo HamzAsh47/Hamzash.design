@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { CaseFigureSlot, CaseStudy as CaseStudyType } from '../content'
+import { CrtImage } from './CrtImage'
 import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from '../content'
 import { navigateHome, navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
@@ -23,66 +24,82 @@ function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot 
   const sources = figuresFor(study, figure.slot)
   if (sources.length === 0) return null
 
+  /* Content decides the layout, not a global rule. One asset gets the full
+     frame; two or three of the same thing — the two storefronts, a set of
+     document spreads — read better side by side than stacked, because the
+     point of supplying more than one is the comparison between them. */
+  const columns = figure.columns ?? (sources.length >= 2 ? Math.min(sources.length, 2) : 1)
+  const grid = columns > 1
+
   return (
-    <>
-      {sources.map((item, index) => {
-        /* One alt string across a stacked set would have a screen reader read
-           the same sentence three times. */
-        const alt =
-          sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt
-        /* A caption parsed out of the filename beats the authored one — it is
-           the thing that distinguishes this shot from its siblings. */
-        const caption = item.caption ?? figure.caption
+    <figure
+      className={[
+        'case__figure',
+        figure.wide ? 'case__figure--wide' : '',
+        grid ? 'case__figure--grid' : '',
+        figure.tall ? 'case__figure--tall' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={grid ? ({ '--figure-columns': columns } as React.CSSProperties) : undefined}
+    >
+      <div className="case__figure-items">
+        {sources.map((item, index) => {
+          const alt =
+            sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt
 
-        return (
-          <figure
-            className={`case__figure${figure.wide ? ' case__figure--wide' : ''}`}
-            key={item.src}
-          >
-            {item.kind === 'video' ? (
-              /* Muted, looping and inline so it behaves like the animated
-                 stills beside it rather than like a video player. */
-              <video
-                className="case__media"
-                src={item.src}
-                aria-label={alt}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-              />
-            ) : (
-              /* A plain image, deliberately, and at its own proportions.
-                 Two things were wrong before.
+          /* The measured ratio, handed to CSS so the box exists before the
+             bitmap does. Without it a lazy image is 0x0 until it decodes, the
+             figure below it slides up the page as you scroll past, and the
+             reading position moves under the reader — the jerk you feel
+             scrolling a case study. `width`/`height` attributes alone do not
+             fix it here, because the bounded-container rule sizes on `auto`
+             and an undecoded image has no intrinsic size to be auto about. */
+          const sized = item.width && item.height
+          const style = sized
+            ? ({ '--media-ar': (item.width! / item.height!).toFixed(4) } as React.CSSProperties)
+            : undefined
+          const className = sized ? 'case__media case__media--sized' : 'case__media'
 
-                 It went through CrtImage, which is the photography treatment —
-                 scanlines, vignette, RGB split. These are PDF page exports and
-                 UI screenshots: text and interface, exactly what that treatment
-                 is scoped never to touch, and running it over small type makes
-                 the work harder to read rather than more atmospheric.
+          return item.kind === 'video' ? (
+            <video
+              key={item.src}
+              className={className}
+              style={style}
+              src={item.src}
+              aria-label={alt}
+              width={item.width}
+              height={item.height}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <img
+              key={item.src}
+              className={className}
+              style={style}
+              src={item.src}
+              alt={alt}
+              width={item.width}
+              height={item.height}
+              loading="lazy"
+              decoding="async"
+            />
+          )
+        })}
+      </div>
 
-                 And every one was forced into a 16/10 box with object-fit:
-                 cover. The real range here is 1.00 to 2.56 — square logo marks
-                 through to wide document spreads — so thirteen of twenty-one
-                 were having a third of themselves cropped away. Intrinsic width
-                 and height let the browser hold each one's own shape and still
-                 reserve the box before it loads. */
-              <img
-                className="case__media"
-                src={item.src}
-                alt={alt}
-                width={item.width}
-                height={item.height}
-                loading="lazy"
-                decoding="async"
-              />
-            )}
-            {caption && <figcaption className="case__figure-caption">{caption}</figcaption>}
-          </figure>
-        )
-      })}
-    </>
+      {/* One caption for the set. Repeating it under each half of a pair says
+          the same thing twice about two different things. */}
+      {(figure.caption ?? sources.find((s) => s.caption)?.caption) && (
+        <figcaption className="case__figure-caption">
+          {figure.caption ?? sources.find((s) => s.caption)?.caption}
+        </figcaption>
+      )}
+    </figure>
   )
 }
 
@@ -166,18 +183,22 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
       </div>
 
       <div className="container case__cover-wrap">
-        {/* The cover is a work sample like every figure below it, so it gets
-            the same treatment: its own proportions, no CRT. Forced to 16/10 the
-            two supplied thumbnails (1.28 and 1.20) were losing a quarter of
-            their height before anyone saw them. */}
-        <img
-          className="case__media case__cover"
+        {/* The cover carries the CRT treatment; the figures below it do not.
+            That split is deliberate rather than inconsistent. The cover is the
+            one place a case study is being *presented* — it sets the tone the
+            same way the hero portrait does — while every figure under it is
+            evidence, and scanlines over a rate card or a wireframe make the
+            work harder to read. Its own ratio either way; the thumbnails are
+            1.28 and 1.20 and were losing a quarter of their height to 16/10. */}
+        <CrtImage
           src={study.cover}
           alt={study.coverAlt}
-          width={coverSize?.width}
-          height={coverSize?.height}
-          fetchPriority="high"
-          decoding="async"
+          aspectRatio={
+            coverSize?.width && coverSize?.height
+              ? `${coverSize.width} / ${coverSize.height}`
+              : undefined
+          }
+          priority
         />
       </div>
 

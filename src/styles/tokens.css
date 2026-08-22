@@ -108,4 +108,12 @@
 
   --header-height: 72px;
 
+  /* Height ceilings for case-study media. The width of the column and these
+     three values together are the invisible container every asset is fitted
+     into: whichever bound it reaches first decides its size, and it keeps its
+     own ratio getting there. */
+  --figure-cap: clamp(20rem, 52vh, 34rem);
+  --figure-cap-tall: clamp(26rem, 78vh, 52rem);
+  --figure-cap-grid: clamp(14rem, 34vh, 22rem);
+
 }

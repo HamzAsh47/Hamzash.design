@@ -46,5 +46,13 @@
   "storefront (Phoenix Center Harburg).webp": {
     "w": 1023,
     "h": 740
+  },
+  "social-content-1.mp4": {
+    "w": 720,
+    "h": 1280
+  },
+  "social-content-2.mp4": {
+    "w": 900,
+    "h": 720
   }
 }

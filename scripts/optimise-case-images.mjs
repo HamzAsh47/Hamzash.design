@@ -13,7 +13,7 @@
  *
  * Run: npm run images
  */
-import { readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve, parse } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -27,6 +27,47 @@ const base = join(root, 'src/assets/case-studies')
 const MAX_STATIC = 1600
 /* Motion costs a frame at a time, so it gets a tighter box. */
 const MAX_ANIMATED = 900
+
+/**
+ * Reads a video track's presentation size out of an MP4's `tkhd` box.
+ *
+ * Videos need intrinsic dimensions for the same reason images do — without
+ * them the element collapses and the page shows an empty bordered box, which
+ * is exactly what the two social clips were doing. No ffmpeg here, but the
+ * box tree is walkable directly: tkhd stores width and height as 16.16
+ * fixed-point after the time block, the layer/volume reserved bytes and the
+ * 36-byte display matrix.
+ */
+function mp4Dimensions(buf) {
+  let best = null
+
+  const walk = (start, end) => {
+    let off = start
+    while (off + 8 <= end) {
+      const size = buf.readUInt32BE(off)
+      if (size < 8) break
+      const type = buf.toString('latin1', off + 4, off + 8)
+      const bodyStart = off + 8
+      const bodyEnd = Math.min(off + size, end)
+
+      if (type === 'tkhd') {
+        const version = buf[bodyStart]
+        const base = bodyStart + 4 + (version === 1 ? 32 : 20)
+        const w = buf.readUInt32BE(base + 52) / 65536
+        const h = buf.readUInt32BE(base + 56) / 65536
+        /* Largest track wins — audio tracks carry a zeroed size. */
+        if (w > 0 && h > 0 && (!best || w * h > best.w * best.h)) {
+          best = { w: Math.round(w), h: Math.round(h) }
+        }
+      }
+      if (['moov', 'trak', 'mdia', 'minf', 'stbl', 'edts'].includes(type)) walk(bodyStart, bodyEnd)
+      off += size
+    }
+  }
+
+  walk(0, buf.length)
+  return best
+}
 
 const kb = (n) => `${(n / 1024).toFixed(0)} KB`
 const mb = (n) => `${(n / 1024 / 1024).toFixed(1)} MB`
@@ -46,6 +87,32 @@ for (const study of await readdir(base)) {
   for (const file of await readdir(dir)) {
     const { name, ext } = parse(file)
     const lower = ext.toLowerCase()
+
+    /* A container check, not a codec check, but it catches the failure that
+       actually happened: a raw MPEG-TS stream renamed .mp4. Every real MP4
+       carries an `ftyp` box in its first bytes; this one started with 0x47,
+       the transport-stream sync byte, and played as an empty black frame. */
+    if (lower === '.mp4') {
+      const head = await readFile(join(dir, file))
+      if (!head.subarray(0, 64).includes(Buffer.from('ftyp'))) {
+        const parked = join(dir, '_unplayable')
+        await mkdir(parked, { recursive: true })
+        await rename(join(dir, file), join(parked, file))
+        console.log(`  PARKED ${file} — no ftyp box, not a playable MP4`)
+        continue
+      }
+
+      const size = mp4Dimensions(head)
+      if (size) {
+        dimensions[study] ??= {}
+        dimensions[study][file] = size
+        console.log(`  ${name.padEnd(34)} video ${size.w}x${size.h}`)
+      } else {
+        console.log(`  ${file}: could not read dimensions — it will render collapsed`)
+      }
+      continue
+    }
+
     if (!['.png', '.jpg', '.jpeg', '.gif'].includes(lower)) continue
 
     const source = join(dir, file)
