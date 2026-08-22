@@ -253,6 +253,9 @@ export const caseStudies: CaseStudy[] = [
         copy: 'Two product realities shaped the direction from day one. This was never a single-sided app — it needed two distinct experiences, one for job seekers and one for employers, each with its own dashboard, its own data, and its own relationship to the other side. And the brand had to read as bold and forward-looking rather than soft or generic, to stand out in a crowded hiring-platform space.',
         more: [
           'That produced two core visual decisions. Icon architecture was built on sharp, angular edges rather than rounded ones, to project a confident, new-tech feel instead of a safe, approachable one. And rather than illustrations or a mascot, the platform leans entirely on real human photography — signup screens, empty states, hero sections — because a platform built on trust between real people benefits more from real faces than from stylised art. AI image generation was not mature enough at the time to be a credible substitute, so every photograph used is genuine.',
+          'None of it was designed straight into high fidelity. The project started in FigJam, where I mapped the full structure before a single real screen existed: a layout-instructions mindmap splitting the platform into its branches — Job Seekers, Employers, and the shared systems for support, mobile and onboarding — with every page each branch would need laid out underneath it.',
+          'That mindmap became a sitemap: a flowchart running from the home page down through every page either side could reach, with role and location tagged on each node. Two annotated flow boards followed, one per journey, carrying UX recommendations directly on the diagram — guided profile setup and career-path suggestions for seekers, role templates and candidate comparison for employers. A timeline ran alongside in two-to-three day sprints, from setup through wireframes, client reviews, prototypes and final adjustments.',
+          'Before anything went to high fidelity I built low-fidelity wireframes for both sides myself, as a structuring tool: a way to lock layout and page logic and get sign-off before investing in visual design. That kept revisions cheap, and meant every high-fidelity screen that followed was already validated in structure.',
           'The site was then built around a component system rather than screen by screen. Navigation bars, cards, buttons, form fields and typography styles were each defined once and reused with variants and states across every page, on a consistent type scale. New pages could be assembled instead of redesigned, and it is what keeps over a dozen distinct page types reading as one coherent product rather than a patchwork of screens.',
         ],
         figures: [
@@ -263,6 +266,39 @@ export const caseStudies: CaseStudy[] = [
           {
             slot: 'photography-usage',
             alt: 'Real photography used across CultureLancer to build trust',
+          },
+          {
+            slot: 'figjam-mindmap',
+            alt: 'CultureLancer FigJam layout instructions mindmap',
+            caption: 'Structure first: every branch of the platform, and every page under it.',
+            wide: true,
+          },
+          {
+            slot: 'project-timeline',
+            alt: 'CultureLancer project timeline in FigJam',
+          },
+          {
+            slot: 'sitemap-tree',
+            alt: 'CultureLancer full sitemap and page hierarchy',
+            wide: true,
+          },
+          {
+            slot: 'jobseeker-flow-annotated',
+            alt: 'CultureLancer job seeker user flow with UX annotations',
+            wide: true,
+          },
+          {
+            slot: 'employer-flow-annotated',
+            alt: 'CultureLancer employer user flow with UX annotations',
+            wide: true,
+          },
+          {
+            slot: 'lowfi-jobseeker',
+            alt: 'CultureLancer job seeker low-fidelity wireframes',
+          },
+          {
+            slot: 'lowfi-employer',
+            alt: 'CultureLancer employer low-fidelity wireframes',
           },
           {
             slot: 'component-library',
@@ -330,10 +366,12 @@ export const caseStudies: CaseStudy[] = [
         ],
       },
       result: {
-        copy: 'The project delivered more than a UI layer. It delivered the product\u2019s actual interaction logic, translated into a design system the client could understand and build from with confidence. CultureLancer is live and operating today.',
+        copy: 'The project delivered more than a UI layer. It delivered the product\u2019s actual interaction logic — planned in FigJam, validated through low-fidelity wireframes, and translated into a design system the client could understand and build from with confidence. CultureLancer is live and operating today.',
       },
     },
     deliverables: [
+      'Sitemap, user flows and annotated UX recommendations',
+      'Low-fidelity wireframes, both sides, for client sign-off',
       'Design system architecture and component library',
       'Two-sided onboarding and signup flows',
       'Job seeker profile builder and dashboard',

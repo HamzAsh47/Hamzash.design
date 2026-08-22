@@ -13,7 +13,7 @@
  *
  * Run: npm run images
  */
-import { readdir, stat, unlink, writeFile } from 'node:fs/promises'
+import { readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve, parse } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -33,6 +33,11 @@ const mb = (n) => `${(n / 1024 / 1024).toFixed(1)} MB`
 
 let before = 0
 let after = 0
+
+/* Intrinsic sizes, written out beside the files. The page needs them to
+   reserve the right box before an image loads — without them every figure is
+   a layout shift, and with a guessed aspect ratio every figure is a crop. */
+const dimensions = {}
 
 for (const study of await readdir(base)) {
   const dir = join(base, study)
@@ -70,6 +75,12 @@ for (const study of await readdir(base)) {
          silently keeps only the first frame — which is how a 24 MB GIF
          became a 582-byte still. */
       await writeFile(target, buffer)
+
+      const meta = await sharp(buffer, { animated, limitInputPixels: 2_000_000_000 }).metadata()
+      /* An animated WebP reports the height of every frame stacked. */
+      const height = meta.pages && meta.pages > 1 ? meta.height / meta.pages : meta.height
+      dimensions[study] ??= {}
+      dimensions[study][`${name}.webp`] = { w: meta.width, h: Math.round(height) }
       before += size
       after += buffer.byteLength
       console.log(
@@ -82,5 +93,20 @@ for (const study of await readdir(base)) {
   }
 }
 
-void existsSync
+/* Merge rather than overwrite: a run that only converts one new file must not
+   forget the sizes of everything already converted. */
+for (const [study, sizes] of Object.entries(dimensions)) {
+  const file = join(base, study, 'dimensions.json')
+  let existing = {}
+  if (existsSync(file)) {
+    try {
+      existing = JSON.parse(await readFile(file, 'utf8'))
+    } catch {
+      existing = {}
+    }
+  }
+  await writeFile(file, `${JSON.stringify({ ...existing, ...sizes }, null, 2)}\n`)
+  console.log(`  wrote ${study}/dimensions.json`)
+}
+
 console.log(`\ntotal ${mb(before)} -> ${mb(after)}  (${(100 - (after / before) * 100).toFixed(0)}% smaller)`)

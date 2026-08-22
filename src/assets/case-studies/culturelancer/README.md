@@ -15,6 +15,13 @@ them down — thin type in a product screenshot falls apart at 1x.
 | `brand-starting-point`| The inherited brand guideline: logo, typography, colour palette          |
 | `icon-shape-language` | The sharp-edged icon set / shape language                                |
 | `photography-usage`   | Real human photography in place — signup split-screen, hero sections     |
+| `figjam-mindmap`      | FigJam layout-instructions mindmap: the platform's branches               |
+| `project-timeline`    | Sprint timeline board — setup through wireframes, reviews, prototypes     |
+| `sitemap-tree`        | Full sitemap flowchart, home page down through both sides                 |
+| `jobseeker-flow-annotated` | Job Seeker flow board with UX recommendations on the diagram         |
+| `employer-flow-annotated`  | Employer flow board with UX recommendations on the diagram           |
+| `lowfi-jobseeker`     | Low-fidelity wireframes, Job Seeker side                                  |
+| `lowfi-employer`      | Low-fidelity wireframes, Employer side                                    |
 | `component-library`   | Wide design-system sheet: navbars, buttons, cards, text styles together  |
 | `navbar-states`       | Nav variants by role — guest, job seeker, employer, with notifications   |
 | `signup-flow`         | "Job Seeker or Employer" choice screen and the split-image signup form   |

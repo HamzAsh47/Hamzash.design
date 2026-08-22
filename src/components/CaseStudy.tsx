@@ -4,7 +4,6 @@ import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from 
 import { navigateHome, navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
-import { CrtImage } from './CrtImage'
 import { Eyebrow } from './Eyebrow'
 import { Reveal } from './Reveal'
 
@@ -42,11 +41,9 @@ function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot 
           >
             {item.kind === 'video' ? (
               /* Muted, looping and inline so it behaves like the animated
-                 stills beside it rather than like a video player. No controls:
-                 there is nothing to scrub, and a control bar over a five-second
-                 loop is chrome for its own sake. */
+                 stills beside it rather than like a video player. */
               <video
-                className="case__video"
+                className="case__media"
                 src={item.src}
                 aria-label={alt}
                 autoPlay
@@ -56,7 +53,30 @@ function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot 
                 preload="metadata"
               />
             ) : (
-              <CrtImage src={item.src} alt={alt} aspectRatio="16 / 10" />
+              /* A plain image, deliberately, and at its own proportions.
+                 Two things were wrong before.
+
+                 It went through CrtImage, which is the photography treatment —
+                 scanlines, vignette, RGB split. These are PDF page exports and
+                 UI screenshots: text and interface, exactly what that treatment
+                 is scoped never to touch, and running it over small type makes
+                 the work harder to read rather than more atmospheric.
+
+                 And every one was forced into a 16/10 box with object-fit:
+                 cover. The real range here is 1.00 to 2.56 — square logo marks
+                 through to wide document spreads — so thirteen of twenty-one
+                 were having a third of themselves cropped away. Intrinsic width
+                 and height let the browser hold each one's own shape and still
+                 reserve the box before it loads. */
+              <img
+                className="case__media"
+                src={item.src}
+                alt={alt}
+                width={item.width}
+                height={item.height}
+                loading="lazy"
+                decoding="async"
+              />
             )}
             {caption && <figcaption className="case__figure-caption">{caption}</figcaption>}
           </figure>
@@ -66,16 +86,21 @@ function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot 
   )
 }
 
-/**
- * Full case study, always in the locked order:
- * Business Problem -> The System Built -> The Deliverable -> Result / Value.
- */
 export function CaseStudy({ study }: { study: CaseStudyType }) {
   const { hot, handlers } = useSpotlight()
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [study.slug])
+
+  /* The cover is resolved through the same index as the figures, so it carries
+     intrinsic dimensions too. */
+  const coverSize = [
+    ...figuresFor(study.slug, 'thumbnail'),
+    ...figuresFor(study.slug, 'thumb'),
+    ...figuresFor(study.slug, 'thum'),
+    ...figuresFor(study.slug, 'hero'),
+  ].find((item) => item.src === study.cover)
 
   const currentIndex = caseStudies.findIndex((item) => item.slug === study.slug)
   const next = caseStudies[(currentIndex + 1) % caseStudies.length]
@@ -141,7 +166,19 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
       </div>
 
       <div className="container case__cover-wrap">
-        <CrtImage src={study.cover} alt={study.coverAlt} aspectRatio="16 / 10" priority />
+        {/* The cover is a work sample like every figure below it, so it gets
+            the same treatment: its own proportions, no CRT. Forced to 16/10 the
+            two supplied thumbnails (1.28 and 1.20) were losing a quarter of
+            their height before anyone saw them. */}
+        <img
+          className="case__media case__cover"
+          src={study.cover}
+          alt={study.coverAlt}
+          width={coverSize?.width}
+          height={coverSize?.height}
+          fetchPriority="high"
+          decoding="async"
+        />
       </div>
 
       <div className="container case__body">

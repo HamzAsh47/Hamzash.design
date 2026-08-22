@@ -19,7 +19,31 @@ const media = import.meta.glob<string>(
   { eager: true, import: 'default' },
 )
 
-export type Figure = { src: string; kind: 'image' | 'video'; caption?: string }
+export type Figure = {
+  src: string
+  kind: 'image' | 'video'
+  caption?: string
+  /* Intrinsic size, so the page can reserve the right box before the file
+     loads. Without it every figure is a layout shift; guessing one shared
+     ratio instead is what cropped thirteen of these in half. */
+  width?: number
+  height?: number
+}
+
+/** Written by `npm run images`, one per case-study folder. */
+const sizes = import.meta.glob<Record<string, { w: number; h: number }>>(
+  '../assets/case-studies/*/dimensions.json',
+  { eager: true, import: 'default' },
+)
+
+const sizeIndex = new Map<string, { w: number; h: number }>()
+for (const [path, entries] of Object.entries(sizes)) {
+  const study = path.match(/case-studies\/([^/]+)\//)?.[1]?.toLowerCase()
+  if (!study) continue
+  for (const [file, size] of Object.entries(entries)) {
+    sizeIndex.set(`${study}/${file.toLowerCase()}`, size)
+  }
+}
 
 /**
  * Filenames arrive however the design tool exported them, so the parser is
@@ -56,6 +80,7 @@ function parse(path: string) {
   return {
     study: study.toLowerCase(),
     slot: name.toLowerCase(),
+    file: `${rawName}.${ext}`.toLowerCase(),
     order,
     caption,
     kind: ext.toLowerCase() === 'mp4' ? ('video' as const) : ('image' as const),
@@ -69,12 +94,15 @@ for (const [path, src] of Object.entries(media)) {
   const parsed = parse(path)
   if (!parsed) continue
   const list = byStudy.get(parsed.study) ?? []
+  const size = sizeIndex.get(`${parsed.study}/${parsed.file}`)
   list.push({
     slot: parsed.slot,
     order: parsed.order,
     src,
     kind: parsed.kind,
     caption: parsed.caption,
+    width: size?.w,
+    height: size?.h,
   })
   byStudy.set(parsed.study, list)
 }
@@ -87,7 +115,7 @@ export function figuresFor(study: string, slot: string): Figure[] {
   return (byStudy.get(study.toLowerCase()) ?? [])
     .filter((entry) => entry.slot === slot.toLowerCase())
     .sort((a, b) => a.order - b.order)
-    .map(({ src, kind, caption }) => ({ src, kind, caption }))
+    .map(({ src, kind, caption, width, height }) => ({ src, kind, caption, width, height }))
 }
 
 /**

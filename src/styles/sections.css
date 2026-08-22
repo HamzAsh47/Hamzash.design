@@ -482,7 +482,7 @@
    figure's own inset so it lines up with the copy. */
 .hero__readout {
   z-index: 30;
-  bottom: var(--space-sm);
+  bottom: var(--space-md);
   left: calc(var(--hero-bleed) + var(--gutter));
   right: calc(var(--hero-bleed) + var(--gutter));
 }
@@ -721,7 +721,13 @@
 .services-slide {
   position: relative;
   z-index: 30;
-  margin-top: -12vh;
+  /* Clamped so the overlap can never exceed the padding that absorbs it.
+     -12vh alone scales with window height while the padding does not: on a
+     1200px-tall window it pulled the section up 144px into a 112px cushion,
+     which put "SYS.02 | PILLARS" directly on top of the hero's
+     "VIEWPORT :: 01" readout. max() keeps the shorter of the two, so the
+     overlap stays a design flourish instead of eating the section above it. */
+  margin-top: max(-12vh, calc(-1 * var(--space-2xl)));
   padding-block: var(--space-2xl);
 }
 
@@ -3880,7 +3886,11 @@
 .assistant {
   position: fixed;
   right: max(var(--space-sm), env(safe-area-inset-right));
-  bottom: calc(max(var(--space-sm), env(safe-area-inset-bottom)) + 138px);
+  /* Sits in the corner the launcher occupies rather than hovering above a
+     stack of two buttons. Floating clear of them left three separate objects
+     in a column with nothing tying them together, which is what read as the
+     panel hanging in mid-air. */
+  bottom: max(var(--space-sm), env(safe-area-inset-bottom));
   z-index: 91;
 
   display: flex;
@@ -4154,18 +4164,17 @@
     border-bottom: 0;
   }
 
-  /* The sheet covers the corner both bubbles live in, and its own close button
-     is right there in the header — leaving them stacked underneath just puts
-     two dead controls behind a panel. */
-  .assistant.is-open ~ .wa-fab,
-  body:has(.assistant.is-open) .wa-fab,
-  body:has(.assistant.is-open) .assistant-launch {
-    display: none;
-  }
-
   .assistant__log {
     padding-bottom: 1.4rem;
   }
+}
+
+/* The panel now occupies the corner both controls live in, and it carries its
+   own close button in the header. Leaving them visible underneath would stack
+   two dead buttons behind a panel — on every viewport, not just touch. */
+body:has(.assistant.is-open) .wa-fab,
+body:has(.assistant.is-open) .assistant-launch {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4178,15 +4187,28 @@
   }
 }
 
-/* Looping clips sit in the same frame as the stills beside them. No CRT
-   treatment: the scanline and RGB layers are built around a static plate, and
-   running them over 30fps of video is cost with nothing to show for it. */
-.case__video {
+
+/* Case-study media: the work at its own proportions.
+   No fixed aspect-ratio and no object-fit. Every one of these arrives a
+   different shape — square mascot marks at 1.00, document spreads at 2.56 —
+   and a single shared box can only serve that range by cutting most of it up.
+   width/height on the element carry the intrinsic ratio, so the browser holds
+   the correct space before the file arrives and nothing shifts. */
+.case__media {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
+  height: auto;
   background: var(--obsidian);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
+}
+
+/* Wide spreads on a narrow phone become unreadable strips. Capping the height
+   and letting the image sit inside its own frame keeps them legible without
+   cropping anything away. */
+@media (max-width: 620px) {
+  .case__media {
+    max-height: 70vh;
+    object-fit: contain;
+  }
 }
