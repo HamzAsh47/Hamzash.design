@@ -1588,7 +1588,7 @@
 .case__section {
   display: grid;
   grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
-  gap: var(--space-xs) var(--space-lg);
+  gap: var(--space-sm) var(--space-lg);
   padding-top: var(--space-md);
   border-top: 1px solid var(--hairline);
 }
@@ -1614,7 +1614,12 @@
   color: var(--white);
 }
 
+/* Copy runs stay in the second track beside the heading rail; bands span
+   both. A section is now a stack of alternating runs and bands rather than
+   all the words followed by all the pictures, so the explicit column keeps
+   each run under the previous one instead of drifting into the rail. */
 .case__section-copy {
+  grid-column: 2;
   font-size: var(--step-0);
   /* The column is wide enough to run to 100 characters at this container
      width, which is past the line length anyone tracks comfortably. */
@@ -1624,43 +1629,10 @@
   gap: var(--space-sm);
 }
 
-/* Photography sits under the paragraph it illustrates, inside the measured
-   column, so the case study reads as an argument with evidence rather than a
-   wall of text followed by a contact sheet. */
-.case__figure {
-  margin: var(--space-sm) 0 0;
-}
-
-/* A 2.3-and-wider asset loses its point at text width, so these span both grid
-   tracks of the section — the heading rail as well as the copy column. Wide
-   assets are also short at any given width, so they get a taller ceiling: the
-   width is what constrains them, never the height.
-
-   Which figures get this is decided per asset from its measured ratio, not by
-   habit. Roughly: 1.8 and wider runs full bleed, everything squarer stays in
-   the reading column where it does not leave half the row empty. */
-.case__figure--wide {
-  grid-column: 1 / -1;
-  max-width: none;
-  width: 100%;
-  margin-top: var(--space-xs);
-  --figure-cap: var(--figure-cap-tall);
-}
-
-/* A wide figure that is also a pair takes the pair ceiling, not the tall one.
-   Naming the base token explicitly here matters: `--figure-cap: var(--figure-cap)`
-   is a self-reference, which is invalid at computed-value time, so the rule
-   was silently dropped and both halves kept the tall ceiling — a 9:16 reel
-   rendered 989px high next to a landscape clip. */
-.case__figure--wide.case__figure--grid {
-  --figure-cap: var(--figure-cap-grid);
-}
-
-/* Portrait assets — phone reels, tall screens — are capped harder than
-   anything else. At the standard ceiling a 0.56 reel is twice the height of
-   the landscape clip beside it and drags the whole row out of proportion. */
-.case__figure-items :is(img, video).case__media:not(.case__media--sized) {
-  max-height: var(--figure-cap);
+@media (max-width: 860px) {
+  .case__section-copy {
+    grid-column: 1;
+  }
 }
 
 .case__figure-caption {
@@ -4222,51 +4194,116 @@ body:has(.assistant.is-open) .assistant-launch {
 /* --- Case-study media ----------------------------------------------------
    An invisible container, and the work sized to fill it at its own ratio.
 
-   Two failures came before this. Forcing a shared 16/10 box cropped a third
-   off thirteen of twenty-one assets. Removing the box entirely fixed the
-   cropping but replaced it with the opposite problem: a 1.00 square ran as
-   tall as it was wide while a 2.56 spread became a thin strip, so the page
-   lurched between enormous and tiny with no rhythm at all.
+   Three failures came before this. Forcing a shared 16/10 box cropped a third
+   off thirteen of twenty-one assets. Removing the box fixed the cropping and
+   replaced it with the opposite problem: a 1.00 square ran as tall as it was
+   wide while a 2.56 spread became a thin strip. Bounding both dimensions
+   fixed the rhythm but left the band itself inconsistent — some sitting in
+   the text column with a hole down one side, others running edge to edge —
+   so the page had no centre line to read down.
 
-   The container bounds both dimensions. Width is the column; height is capped.
-   A wide asset hits the width first and sits short; a tall one hits the height
-   first and sits narrow, centred. Neither is ever cut, and neither can
-   dominate the page. That is the whole rule. */
+   What is here now: the band is exactly as wide as its contents need, and
+   always centred on the container. Width comes out of the height ceiling
+   multiplied by the combined shape of what is inside, capped at the
+   container. A square mark and a full-width strip therefore share an axis,
+   and whatever space is left over falls evenly on both sides instead of all
+   on one. Nothing is ever cropped to achieve it. */
+.case__figure {
+  grid-column: 1 / -1;
+
+  /* The width the contents want: the height ceiling times their combined
+     shape, plus the gaps between them. */
+  --band-natural: calc(
+    var(--figure-cap) * var(--row-ar, 1.5) + var(--space-sm) * var(--row-gaps, 0)
+  );
+  /* The widest the same contents may go before they break the tall ceiling.
+     This is what stops a floor width from turning a 1:1 mark into a
+     1200px-high wall. */
+  --band-ceiling: calc(var(--figure-cap-tall) * var(--row-ar, 1.5));
+  /* A floor, so a squarer asset is not a small picture stranded in the middle
+     of an empty row. Without it a 1.08 sheet came out 506px inside a 1241px
+     container and left 367px of nothing down each side — which reads as an
+     accident, not as space. */
+  --band-floor: min(var(--figure-min), var(--band-ceiling));
+
+  width: min(100%, max(var(--band-floor), var(--band-natural)));
+  margin: var(--space-xs) auto;
+}
+
+/* Items share a height, not a width. Growing each one by its own ratio
+   against a zero basis distributes the row in proportion to shape, which is
+   the arithmetic that lines a 1:1 mark up with a 4:3 lockup along both the
+   top and the bottom edge — without either being cut to get there. */
 .case__figure-items {
-  display: grid;
-  grid-template-columns: repeat(var(--figure-columns, 1), minmax(0, 1fr));
+  display: flex;
   gap: var(--space-sm);
-  align-items: center;
-  justify-items: center;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.case__slot {
+  flex: var(--media-ar) 1 0%;
+  min-width: 0;
+}
+
+.case__frame {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+.case__frame--zoom {
+  cursor: zoom-in;
+}
+
+.case__frame--zoom:focus-visible {
+  outline: 2px solid var(--crimson);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
 }
 
 .case__media {
   display: block;
-  max-width: 100%;
-  max-height: var(--figure-cap);
-  width: auto;
+  width: 100%;
   height: auto;
+  aspect-ratio: var(--media-ar);
+  object-fit: contain;
   background: var(--obsidian);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
+  /* The artwork is not the click target — its frame is. That keeps the
+     browser's own image menu (save, copy, open in new tab) off it on both
+     right-click and long-press, and it is why the zoom button can be wrapped
+     round the image without the image swallowing the press. */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
 }
 
-/* Same container, arrived at by arithmetic instead of by measuring the loaded
-   bitmap. `width: auto` cannot size an image that has not decoded yet, so the
-   box was 0 high until the file landed and everything below it jumped. With
-   the ratio known at build time the width is whichever comes first — the
-   column, or the width at which the height reaches the ceiling — and the
-   height follows from it. Identical result once loaded, correct before.
+/* A hint that there is more to see, on the pointers that can show one. */
+@media (hover: hover) {
+  .case__frame--zoom .case__media {
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
 
-   `min()` is doing the bounding: hit the column first and the asset sits
-   short of the ceiling; hit the ceiling first and it sits narrower than the
-   column, centred. No letterbox either way, because the box is always the
-   asset's own shape rather than a frame the asset is fitted into. */
-.case__media--sized {
-  width: min(100%, calc(var(--figure-cap) * var(--media-ar)));
-  height: auto;
-  aspect-ratio: var(--media-ar);
-  max-height: none;
+  .case__frame--zoom:hover .case__media {
+    border-color: var(--gunmetal);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case__frame--zoom:hover .case__media {
+    transform: none;
+  }
 }
 
 /* Artwork that is genuinely tall — a full sitemap, a stacked wireframe sheet —
@@ -4275,15 +4312,270 @@ body:has(.assistant.is-open) .assistant-launch {
   --figure-cap: var(--figure-cap-tall);
 }
 
-/* Side by side, each half bounded by the same rules. A pair shares one cap so
-   two assets of different shapes still line up on a common centre. */
-.case__figure--grid {
+/* Two or more on a line, so each gets less of the ceiling. Without this a
+   pair is twice the height of the single figure above it and the page lurches
+   again — the exact fault the bounded container was meant to remove. */
+.case__figure--set {
   --figure-cap: var(--figure-cap-grid);
 }
 
+/* Past a combined ratio the component stacks the band instead, and a stacked
+   band is back to one asset per line — so it takes the solo ceiling back. */
+.case__figure--stack {
+  --figure-cap: var(--figure-cap-solo);
+}
+
+.case__figure--stack .case__figure-items {
+  flex-direction: column;
+  align-items: center;
+}
+
+.case__figure--stack .case__slot {
+  flex: 0 0 auto;
+  width: min(100%, calc(var(--figure-cap) * var(--media-ar)));
+}
+
 @media (max-width: 720px) {
-  /* Two columns of a document spread on a phone is two unreadable strips. */
-  .case__figure--grid .case__figure-items {
-    grid-template-columns: minmax(0, 1fr);
+  /* Two document spreads side by side on a phone are two unreadable strips,
+     whatever their combined ratio says. */
+  .case__figure--set .case__figure-items {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .case__figure--set .case__slot {
+    flex: 0 0 auto;
+    width: min(100%, calc(var(--figure-cap) * var(--media-ar)));
+  }
+
+  .case__figure--set {
+    --figure-cap: var(--figure-cap-solo);
+  }
+}
+
+
+/* --- Figure viewer -------------------------------------------------------
+   A case study shows a 64-page guide at 400px tall. That is the right size
+   for the argument the page is making and the wrong size for reading the
+   work, so any still opens here at whatever magnification the reader wants. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: color-mix(in srgb, var(--obsidian) 94%, black);
+  animation: lightbox-in var(--dur-fast) var(--ease-out);
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox {
+    animation: none;
+  }
+}
+
+/* Covers the whole surface so a click anywhere but the artwork and the
+   controls closes. It sits under both because it comes first in the stack. */
+.lightbox__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: zoom-out;
+}
+
+.lightbox__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--gutter);
+}
+
+.lightbox__count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.lightbox__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xs, 0.35rem);
+  margin-left: auto;
+}
+
+.lightbox__tool {
+  display: grid;
+  place-items: center;
+  /* 44px: the smallest target a thumb hits reliably. */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.lightbox__tool svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lightbox__tool:hover:not(:disabled),
+.lightbox__tool:focus-visible {
+  color: var(--white);
+  border-color: var(--hairline);
+}
+
+.lightbox__tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.lightbox__zoom {
+  min-width: 4.5rem;
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.lightbox__zoom:hover,
+.lightbox__zoom:focus-visible {
+  color: var(--white);
+}
+
+.lightbox__stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  cursor: zoom-in;
+  /* The stage handles its own gestures. Without this the browser claims the
+     drag for scrolling and panning a zoomed image never starts. */
+  touch-action: none;
+}
+
+.lightbox__stage.is-zoomed {
+  cursor: grab;
+}
+
+.lightbox__stage.is-zoomed:active {
+  cursor: grabbing;
+}
+
+/* Stretched to the stage by its insets, then letterboxed by `object-fit`.
+   Percentages were the obvious way to write this and neither `max-height:
+   100%` nor `height: 100%` holds: the stage is a grid item in a `1fr` row,
+   so the percentage resolves against an indefinite base while that row is
+   still being sized, and a 1600px sheet came out 1235px tall inside a 773px
+   stage and ran off both ends. Four insets against a positioned ancestor are
+   definite whatever the row is doing — but only once the size is asked for
+   explicitly. An `<img>` is a replaced element, so four insets alone leave it
+   at its intrinsic size instead of stretching the way a div would. */
+.lightbox__img {
+  position: absolute;
+  top: var(--space-2xs, 0.5rem);
+  left: var(--gutter);
+  width: calc(100% - var(--gutter) * 2);
+  height: calc(100% - var(--space-2xs, 0.5rem) * 2);
+  object-fit: contain;
+  transform-origin: center;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+/* Sits over the artwork so a long-press or a right-click lands on an empty
+   element. It stops the casual save; it is not a claim of protection. */
+.lightbox__shield {
+  position: absolute;
+  inset: 0;
+}
+
+.lightbox__step {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--obsidian) 80%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.lightbox__step svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lightbox__step:hover,
+.lightbox__step:focus-visible {
+  color: var(--white);
+  border-color: var(--gunmetal);
+}
+
+.lightbox__step--prev {
+  left: var(--gutter);
+}
+
+.lightbox__step--next {
+  right: var(--gutter);
+}
+
+.lightbox__caption {
+  position: relative;
+  /* The global 65ch measure applies to every `p` and is right for body copy.
+     Here it left a one-line caption in a 449px box pinned to the left edge of
+     a 1440px row, so `text-align: center` centred it against the wrong box. */
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: var(--space-xs) var(--gutter) max(var(--space-xs), env(safe-area-inset-bottom));
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: center;
+  /* Clicks pass through to the scrim; the text itself is still selectable. */
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .lightbox__step {
+    display: none;
   }
 }

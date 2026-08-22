@@ -54,7 +54,7 @@ export type CaseStudy = {
 export type CaseSection = {
   copy: string
   more?: string[]
-  figures?: CaseFigureSlot[]
+  figures?: CaseFigureRow[]
 }
 
 export type CaseFigureSlot = {
@@ -62,15 +62,32 @@ export type CaseFigureSlot = {
   slot: string
   alt: string
   caption?: string
-  /** Runs the full container width instead of the measured text column. */
-  wide?: boolean
+}
+
+/**
+ * One band of imagery, anchored to the paragraph it belongs under.
+ *
+ * `after` is the whole point of this type. Figures used to be listed per
+ * section and rendered in a block at the end of it, which is why a packaging
+ * photograph could land four paragraphs below the sentence about packaging,
+ * under copy about social media. An image that is not beside its argument is
+ * decoration. Naming the paragraph makes the pairing explicit and makes a
+ * wrong one visible in the source.
+ *
+ * `slots` is a list because two or three things that are being discussed
+ * together belong on one line — the two storefronts, the three marks in the
+ * logo system. They are laid out to a common height, so the row reads as one
+ * comparison rather than three separate exhibits.
+ */
+export type CaseFigureRow = {
   /**
-   * Force a column count. Left unset, a slot with two or more files lays them
-   * side by side and a single file takes the whole frame — which is usually
-   * right, because supplying two of something is itself the signal that they
-   * are meant to be compared.
+   * Index into the section's paragraphs: 0 is `copy`, 1 is `more[0]`, and so
+   * on. Past the end is clamped to the last paragraph.
    */
-  columns?: number
+  after: number
+  slots: CaseFigureSlot[]
+  /** One caption for the row — the row is one idea, so it gets one line. */
+  caption?: string
   /**
    * Raises the height ceiling for artwork that is genuinely tall — a full
    * sitemap, a stacked wireframe sheet — where the default cap would shrink it
@@ -137,14 +154,14 @@ export const caseStudies: CaseStudy[] = [
         ],
         figures: [
           {
-            slot: 'hero',
-            alt: "Josef's Buffalo Wings brand identity in motion",
-            wide: true,
-          },
-          {
-            slot: 'moodboard',
-            alt: "Early moodboard and inspiration references for Josef's brand development",
+            after: 0,
             caption: 'The starting point: references and product shots, no brand assets yet.',
+            slots: [
+              {
+                slot: 'moodboard',
+                alt: "Early moodboard and inspiration references for Josef's brand development",
+              },
+            ],
           },
         ],
       },
@@ -153,82 +170,115 @@ export const caseStudies: CaseStudy[] = [
         more: [
           'The halal positioning became the anchor for the entire colour system. Green was chosen deliberately, because it carries an immediate association with halal trust for this audience. The point was to make the promise visible at a glance rather than something a customer had to read to understand.',
           'One early call shaped everything downstream: this had to feel warm and family friendly, not loud or sports-bar coded. That single decision guided the mascot, the typography and the shape language across the whole system.',
-          'The mascot went through several rounds before it landed. Two decisions defined it. I used the buffalo\u2019s face rather than its full body, which kept the mark distinctive in the category and clean at small sizes — packaging, app icons. And I chose rounded forms over angular ones, since sharp edges read as aggressive where rounded ones feel approachable. Wings were worked into the mascot itself to tie it back to the product.',
-          'Alongside the primary mark I designed a second, emblem-style logo: a more classical tray-inspired badge, used where the primary mark felt too casual — packaging seals, select in-store signage — to give the brand a sense of heritage and quality.',
+          'The mascot went through several rounds before it landed. Two decisions defined it. I used the buffalo’s face rather than its full body, which kept the mark distinctive in the category and clean at small sizes — packaging, app icons. And I chose rounded forms over angular ones, since sharp edges read as aggressive where rounded ones feel approachable. Wings were worked into the mascot itself to tie it back to the product.',
+          'Alongside the primary mark I designed a second, emblem-style logo: a more classical tray-inspired badge, used where the primary mark felt too casual — packaging seals, select in-store signage — to give the brand a sense of heritage and quality. Those two, together with the full lockup that carries the name, are the three marks the rest of the system is built on.',
         ],
         figures: [
           {
-            slot: 'palette',
-            alt: "Josef's brand colour palette, built on a halal-associated green system",
+            after: 1,
             caption: 'Green as the anchor: the halal promise, made visible before it is read.',
+            slots: [
+              {
+                slot: 'palette',
+                alt: "Josef's brand colour palette, built on a halal-associated green system",
+              },
+            ],
           },
           {
-            slot: 'mascot-sketches',
-            alt: "Early sketches of the Josef's buffalo mascot development",
-            /* A 2.36 strip: the whole point is reading the explorations left
-               to right, so it gets the full width. */
-            wide: true,
+            after: 3,
+            caption: 'Rounds of exploration, left to right: full body to face, angular to rounded.',
+            slots: [
+              {
+                slot: 'mascot-sketches',
+                alt: "Early sketches of the Josef's buffalo mascot development",
+              },
+            ],
           },
-          /* Both marks are square, and the argument in the copy is about how
-             they differ — the primary against the badge. Two 1.00 assets each
-             taking a full frame would say the opposite: unrelated, one after
-             the other. */
+          /* Three marks discussed in one paragraph, so they share one line.
+             Separately they read as three unrelated green tiles; together at a
+             common height they read as what they are — one system, three
+             registers. */
           {
-            slot: 'mascot-final',
-            alt: "Final Josef's buffalo mascot logo mark",
-            caption: 'Face over full body, rounded over angular — distinctive small, warm at any size.',
-          },
-          {
-            slot: 'emblem-logo',
-            alt: "Josef's emblem-style badge logo with construction breakdown",
-            caption: 'The badge, for the places the primary mark reads too casual.',
-          },
-          {
-            slot: 'logo-lockup',
-            alt: "Josef's primary logo lockup on brand green background",
+            after: 4,
+            caption:
+              'One system, three registers: the mascot for small sizes, the badge where the brand needs heritage, the lockup where the name has to carry.',
+            slots: [
+              {
+                slot: 'mascot-final',
+                alt: "Final Josef's buffalo mascot logo mark",
+              },
+              {
+                slot: 'emblem-logo',
+                alt: "Josef's emblem-style badge logo",
+              },
+              {
+                slot: 'logo-lockup',
+                alt: "Josef's primary logo lockup on brand green background",
+              },
+            ],
           },
         ],
       },
       deliverable: {
         copy: 'Designing for a screen is one thing. Designing a storefront that has to hold attention inside a moving mall crowd is another.',
         more: [
-          'I extended the identity into the packaging system — boxes, bags and wing tubs built to stay practical for takeout while reading as one brand across every touchpoint. The interior and facade followed the same logic, with signage, lighting and colour coordinated so the storefront would be recognisable from a distance: first at Phoenix Center Harburg, later at Europa Passage Hamburg.',
+          'I extended the identity into the packaging system — boxes, bags and wing tubs, built to stay practical for takeout while reading as one brand across every touchpoint. Packaging is the part of a restaurant that leaves the building, so it had to hold up as a brand surface long after the meal was finished.',
+          'The interior and facade followed the same logic, with signage, lighting and colour coordinated so the storefront would be recognisable from a distance: first at Phoenix Center Harburg, later at Europa Passage Hamburg. The second build was not a second design. The system already existed, so opening a location became a matter of applying it.',
           'The animated LED menu screens were a deliberate choice, not a decorative one. In a mall, foot traffic never stops moving and static graphics get looked past. Motion holds attention in a way flat signage cannot, and it let the boards carry more content in the same amount of screen space.',
           'Beyond the physical brand I built and ran the social presence from scratch — strategy, content, and every asset that went out. Gen Z and Gen Alpha are the core audience for a fast-casual concept like this, and they find new places through what looks good online. Social was not an add-on to the brand; it was one of the most direct routes to the people the business needed to reach.',
+          'The content itself was made for the feed rather than cut down from something else. Vertical first, shot and edited around the platform it was going to live on, and built from the same mascot, colour and type system as the packaging and the walls — so a reel and a wing box read as the same brand.',
         ],
         figures: [
           {
-            slot: 'packaging',
-            alt: "Josef's Buffalo Wings final packaging design",
+            after: 1,
+            slots: [
+              {
+                slot: 'packaging',
+                alt: "Josef's Buffalo Wings final packaging design",
+              },
+            ],
           },
+          /* Two files in this slot, so the pair lands on one line — which is
+             the comparison the paragraph is making. */
           {
-            slot: 'storefront',
-            alt: "Josef's Buffalo Wings storefront at Phoenix Center and Europa Passage, Hamburg",
+            after: 2,
             caption: 'Two locations, one system: Phoenix Center Harburg and Europa Passage.',
-            /* Two files in this slot, so they pair automatically — which is the
-               comparison the paragraph is making. */
-            wide: true,
+            slots: [
+              {
+                slot: 'storefront',
+                alt: "Josef's Buffalo Wings storefront in Hamburg",
+              },
+            ],
           },
           {
-            slot: 'menu-screens',
-            alt: "Animated LED menu screens inside Josef's Buffalo Wings",
+            after: 3,
             caption: 'Motion on the boards, because static signage loses to a moving crowd.',
-            wide: true,
+            slots: [
+              {
+                slot: 'menu-screens',
+                alt: "Animated LED menu screens inside Josef's Buffalo Wings",
+              },
+            ],
           },
           {
-            slot: 'interior',
-            alt: "Interior view of Josef's Buffalo Wings restaurant counter and menu displays",
-            wide: true,
+            after: 4,
+            caption: 'The profile as a designed surface: grid, highlights and bio, not an afterthought.',
+            slots: [
+              {
+                slot: 'social-grid',
+                alt: "Josef's Buffalo Wings Instagram profile and content grid",
+              },
+            ],
           },
           {
-            slot: 'social-grid',
-            alt: "Josef's Buffalo Wings Instagram profile and content grid",
-          },
-          {
-            slot: 'social-content',
-            alt: "Sample social media content created for Josef's Buffalo Wings",
+            after: 5,
             caption: 'Content built for the feed, not cut down from something else.',
-            wide: true,
+            slots: [
+              {
+                slot: 'social-content',
+                alt: "Sample social media content created for Josef's Buffalo Wings",
+              },
+            ],
           },
         ],
       },
@@ -237,6 +287,18 @@ export const caseStudies: CaseStudy[] = [
         more: [
           'Throughout that growth I remained the sole creative across the brand: identity, packaging, interior, motion and social. No team, no outsourcing, continuously from September 2023 until the engagement closed in March 2026.',
           'These figures describe the growth of the brand over the period I led its creative direction. They speak to the consistency and reach of the work rather than a claim of direct causation on revenue.',
+        ],
+        figures: [
+          {
+            after: 0,
+            caption: 'The finished system, in the places a customer actually meets it.',
+            slots: [
+              {
+                slot: 'hero',
+                alt: "Josef's Buffalo Wings brand identity across street, product and menu boards",
+              },
+            ],
+          },
         ],
       },
     },
@@ -269,9 +331,14 @@ export const caseStudies: CaseStudy[] = [
         ],
         figures: [
           {
-            slot: 'brand-starting-point',
-            alt: "CultureLancer's existing brand guideline before UI/UX design began",
+            after: 1,
             caption: 'What existed at the start: a brand, and no product to put it on.',
+            slots: [
+              {
+                slot: 'brand-starting-point',
+                alt: "CultureLancer's existing brand guideline before UI/UX design began",
+              },
+            ],
           },
         ],
       },
@@ -280,119 +347,203 @@ export const caseStudies: CaseStudy[] = [
         more: [
           'That produced two core visual decisions. Icon architecture was built on sharp, angular edges rather than rounded ones, to project a confident, new-tech feel instead of a safe, approachable one. And rather than illustrations or a mascot, the platform leans entirely on real human photography — signup screens, empty states, hero sections — because a platform built on trust between real people benefits more from real faces than from stylised art. AI image generation was not mature enough at the time to be a credible substitute, so every photograph used is genuine.',
           'None of it was designed straight into high fidelity. The project started in FigJam, where I mapped the full structure before a single real screen existed: a layout-instructions mindmap splitting the platform into its branches — Job Seekers, Employers, and the shared systems for support, mobile and onboarding — with every page each branch would need laid out underneath it.',
-          'That mindmap became a sitemap: a flowchart running from the home page down through every page either side could reach, with role and location tagged on each node. Two annotated flow boards followed, one per journey, carrying UX recommendations directly on the diagram — guided profile setup and career-path suggestions for seekers, role templates and candidate comparison for employers. A timeline ran alongside in two-to-three day sprints, from setup through wireframes, client reviews, prototypes and final adjustments.',
+          'That mindmap became a sitemap: a flowchart running from the home page down through every page either side could reach, with role and location tagged on each node.',
+          'Two annotated flow boards followed, one per journey, carrying UX recommendations directly on the diagram — guided profile setup and career-path suggestions for seekers, role templates and candidate comparison for employers.',
+          'A timeline ran alongside the whole thing in two-to-three day sprints, from setup through wireframes, client reviews, prototypes and final adjustments.',
           'Before anything went to high fidelity I built low-fidelity wireframes for both sides myself, as a structuring tool: a way to lock layout and page logic and get sign-off before investing in visual design. That kept revisions cheap, and meant every high-fidelity screen that followed was already validated in structure.',
           'The site was then built around a component system rather than screen by screen. Navigation bars, cards, buttons, form fields and typography styles were each defined once and reused with variants and states across every page, on a consistent type scale. New pages could be assembled instead of redesigned, and it is what keeps over a dozen distinct page types reading as one coherent product rather than a patchwork of screens.',
         ],
         figures: [
+          /* Two decisions named in one paragraph, so they are shown as one
+             comparison rather than two separate exhibits. */
           {
-            slot: 'icon-shape-language',
-            alt: "CultureLancer's sharp-edged icon system",
+            after: 1,
+            caption: 'Sharp over rounded, real faces over illustration — the two calls the rest of the UI inherits.',
+            slots: [
+              {
+                slot: 'icon-shape-language',
+                alt: "CultureLancer's sharp-edged icon system",
+              },
+              {
+                slot: 'photography-usage',
+                alt: 'Real photography used across CultureLancer to build trust',
+              },
+            ],
           },
           {
-            slot: 'photography-usage',
-            alt: 'Real photography used across CultureLancer to build trust',
-          },
-          {
-            slot: 'figjam-mindmap',
-            alt: 'CultureLancer FigJam layout instructions mindmap',
+            after: 2,
             caption: 'Structure first: every branch of the platform, and every page under it.',
-            wide: true,
+            slots: [
+              {
+                slot: 'figjam-mindmap',
+                alt: 'CultureLancer FigJam layout instructions mindmap',
+              },
+            ],
           },
           {
-            slot: 'project-timeline',
-            alt: 'CultureLancer project timeline in FigJam',
+            after: 3,
+            tall: true,
+            slots: [
+              {
+                slot: 'sitemap-tree',
+                alt: 'CultureLancer full sitemap and page hierarchy',
+              },
+            ],
           },
           {
-            slot: 'sitemap-tree',
-            alt: 'CultureLancer full sitemap and page hierarchy',
-            wide: true,
+            after: 4,
+            caption: 'One board per journey, with the UX recommendation written on the diagram rather than in a separate document.',
+            slots: [
+              {
+                slot: 'jobseeker-flow-annotated',
+                alt: 'CultureLancer job seeker user flow with UX annotations',
+              },
+            ],
           },
           {
-            slot: 'jobseeker-flow-annotated',
-            alt: 'CultureLancer job seeker user flow with UX annotations',
-            wide: true,
+            after: 4,
+            slots: [
+              {
+                slot: 'employer-flow-annotated',
+                alt: 'CultureLancer employer user flow with UX annotations',
+              },
+            ],
           },
           {
-            slot: 'employer-flow-annotated',
-            alt: 'CultureLancer employer user flow with UX annotations',
-            wide: true,
+            after: 5,
+            slots: [
+              {
+                slot: 'project-timeline',
+                alt: 'CultureLancer project timeline in FigJam',
+              },
+            ],
           },
           {
-            slot: 'lowfi-jobseeker',
-            alt: 'CultureLancer job seeker low-fidelity wireframes',
+            after: 6,
+            caption: 'Structure signed off in grey before a single colour decision was made.',
+            slots: [
+              {
+                slot: 'lowfi-jobseeker',
+                alt: 'CultureLancer job seeker low-fidelity wireframes',
+              },
+              {
+                slot: 'lowfi-employer',
+                alt: 'CultureLancer employer low-fidelity wireframes',
+              },
+            ],
           },
           {
-            slot: 'lowfi-employer',
-            alt: 'CultureLancer employer low-fidelity wireframes',
-          },
-          {
-            slot: 'component-library',
-            alt: 'CultureLancer component library and design system overview',
+            after: 7,
             caption: 'Defined once, reused everywhere — the reason a dozen page types read as one product.',
-            wide: true,
+            slots: [
+              {
+                slot: 'component-library',
+                alt: 'CultureLancer component library and design system overview',
+              },
+            ],
           },
           {
-            slot: 'navbar-states',
-            alt: 'CultureLancer navigation bar states across user roles',
+            after: 7,
+            caption: 'One component, every state and every role it has to cover.',
+            slots: [
+              {
+                slot: 'navbar-states',
+                alt: 'CultureLancer navigation bar states across user roles',
+              },
+            ],
           },
         ],
       },
       deliverable: {
         copy: 'The entry point had to work for two audiences without feeling like two products. Job seekers and employers each get their own path from the very first screen, with the choice presented clearly upfront rather than buried in a settings toggle later.',
         more: [
-          'For job seekers the platform front-loads profile information deliberately: personal details, experience, education, portfolio projects, awards and certifications, specialisations and social links, all collected in a structured multi-step flow. That is not friction for its own sake — richer profile data upfront is what makes the matching sharper later. Once the profile exists, the seeker gets a dashboard with a skills assessment, a match-based job feed, and messaging with the employers who responded to their application, rather than the other way round.',
-          'The employer dashboard is built around candidate discovery rather than job browsing: best-matched candidates, applied candidates per job, and analytics on job performance and applications over time. Posting a job includes an AI-assisted description tool, so an employer with a rough idea still ends up with a complete, well-matched listing. Candidates apply to specific postings rather than messaging cold, which keeps the employer inbox to people who actually fit.',
+          'For job seekers the platform front-loads profile information deliberately: personal details, experience, education, portfolio projects, awards and certifications, specialisations and social links, all collected in a structured multi-step flow. That is not friction for its own sake — richer profile data upfront is what makes the matching sharper later.',
+          'Once the profile exists, the seeker gets a dashboard with a skills assessment, a match-based job feed, and messaging with the employers who responded to their application, rather than the other way round. A listing opens into the full role detail from the same feed, so applying never means leaving the page they were scanning.',
+          'The employer dashboard is built around candidate discovery rather than job browsing: best-matched candidates, applied candidates per job, and analytics on job performance and applications over time.',
+          'Posting a job includes an AI-assisted description tool, so an employer with a rough idea still ends up with a complete, well-matched listing. Candidates apply to specific postings rather than messaging cold, which keeps the employer inbox to people who actually fit.',
           'Three shared systems tie the two sides together: direct messaging between matched employers and candidates, a courses and certifications section that lets job seekers build verifiable skills on-platform, and a tiered membership structure for employers who need more postings or advanced search.',
         ],
         figures: [
           {
-            slot: 'signup-flow',
-            alt: 'CultureLancer signup flow for job seekers and employers',
+            after: 0,
             caption: 'The fork comes first, on screen one — not as a setting found later.',
+            slots: [
+              {
+                slot: 'signup-flow',
+                alt: 'CultureLancer signup flow for job seekers and employers',
+              },
+            ],
           },
           {
-            slot: 'profile-builder',
-            alt: 'CultureLancer job seeker profile builder flow',
+            after: 1,
+            slots: [
+              {
+                slot: 'profile-builder',
+                alt: 'CultureLancer job seeker profile builder flow',
+              },
+            ],
           },
           {
-            slot: 'jobseeker-dashboard',
-            alt: 'CultureLancer job seeker dashboard',
-            wide: true,
+            after: 2,
+            caption: 'The feed and the role it opens into, on the same surface.',
+            slots: [
+              {
+                slot: 'jobseeker-dashboard',
+                alt: 'CultureLancer job seeker dashboard',
+              },
+              {
+                slot: 'job-listing-detail',
+                alt: 'CultureLancer job listing detail page',
+              },
+            ],
           },
           {
-            slot: 'job-listing-detail',
-            alt: 'CultureLancer job listing detail page',
+            after: 3,
+            slots: [
+              {
+                slot: 'employer-dashboard',
+                alt: 'CultureLancer employer dashboard',
+              },
+            ],
           },
           {
-            slot: 'employer-dashboard',
-            alt: 'CultureLancer employer dashboard',
-            wide: true,
+            after: 4,
+            caption: 'Posting a role, and the candidate view it produces.',
+            slots: [
+              {
+                slot: 'post-job-flow',
+                alt: 'CultureLancer job posting flow with AI assistance',
+              },
+              {
+                slot: 'candidate-profile',
+                alt: 'CultureLancer candidate profile view for employers',
+              },
+            ],
           },
+          /* Three systems named in one sentence, so they are shown on one
+             line. Stacked, they would read as three unrelated features. */
           {
-            slot: 'post-job-flow',
-            alt: 'CultureLancer job posting flow with AI assistance',
-          },
-          {
-            slot: 'candidate-profile',
-            alt: 'CultureLancer candidate profile view for employers',
-          },
-          {
-            slot: 'messaging',
-            alt: 'CultureLancer messaging interface',
-          },
-          {
-            slot: 'courses',
-            alt: 'CultureLancer courses and certifications section',
-          },
-          {
-            slot: 'membership-plans',
-            alt: 'CultureLancer employer membership plans',
+            after: 5,
+            caption: 'The three systems both sides share: messaging, courses, and employer membership tiers.',
+            slots: [
+              {
+                slot: 'messaging',
+                alt: 'CultureLancer messaging interface',
+              },
+              {
+                slot: 'courses',
+                alt: 'CultureLancer courses and certifications section',
+              },
+              {
+                slot: 'membership-plans',
+                alt: 'CultureLancer employer membership plans',
+              },
+            ],
           },
         ],
       },
       result: {
-        copy: 'The project delivered more than a UI layer. It delivered the product\u2019s actual interaction logic — planned in FigJam, validated through low-fidelity wireframes, and translated into a design system the client could understand and build from with confidence. CultureLancer is live and operating today.',
+        copy: 'The project delivered more than a UI layer. It delivered the product’s actual interaction logic — planned in FigJam, validated through low-fidelity wireframes, and translated into a design system the client could understand and build from with confidence. CultureLancer is live and operating today.',
       },
     },
     deliverables: [
@@ -421,29 +572,41 @@ export const caseStudies: CaseStudy[] = [
       problem: {
         copy: 'The project began small. A police-affiliated cricket body connected to WACA needed a member catalogue for their police cricket club — a quick, low-stakes job.',
         more: [
-          'They liked it, and that changed the scope entirely. What came back was a request for something far bigger: a large interactive guide for the Australia & New Zealand Police Cricket Championships in Perth, scoped at roughly 150 pages, covering match schedules, venue profiles, official merchandise, team rosters and championship rules. WACA had a brand to start from — a yellow and black colour system built around a custom typeface — but no precedent for a document this size that still had to feel fast in someone\u2019s hand on the sidelines of a match.',
+          'They liked it, and that changed the scope entirely. What came back was a request for something far bigger: a large interactive guide for the Australia & New Zealand Police Cricket Championships in Perth, scoped at roughly 150 pages, covering match schedules, venue profiles, official merchandise, team rosters and championship rules. WACA had a brand to start from — a yellow and black colour system built around a custom typeface — but no precedent for a document this size that still had to feel fast in someone’s hand on the sidelines of a match.',
           'The real constraint was time. The client needed it complete within three to four days. I brought in Sheraz Nawaz to execute under my direction and led the build as art director rather than as the sole hand on every page. The interactive version landed inside that window. Roughly 48 hours later came a second request: an A5 printable version of the same design, in another 48 hours.',
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'The ask: a tournament guide that had to carry a championship and still open fast on a phone.',
+            slots: [
+              {
+                slot: 'hero',
+                alt: 'WACA ANZPCC 2024 tournament guide cover',
+              },
+            ],
+          },
         ],
       },
       systemBuilt: {
         copy: 'A document this size cannot be designed page by page, not on this timeline. Every section — match schedules, team rosters, merchandise — had to share the same visual grammar, or the guide would read as dozens of pages stitched together rather than one product.',
         more: [
-          'So the work went into a repeatable system first: a consistent header treatment, a colour and type language pulled directly from WACA\u2019s brand guideline, and a page architecture that could absorb any number of teams, venues or match days without being reinvented each time. That system is the only reason a second, A5 edition of the whole thing was possible inside 48 hours.',
+          'So the work went into a repeatable system first: a consistent header treatment, a colour and type language pulled directly from WACA’s brand guideline, and a page architecture that could absorb any number of teams, venues or match days without being reinvented each time. That system is the only reason a second, A5 edition of the whole thing was possible inside 48 hours.',
           'A guide this size is also easy to get lost in, especially when someone needs one fact quickly in the middle of a live tournament. It is built around a central navigation hub: a full interactive index linking straight to 13 major sections, each reachable in a single tap rather than a long scroll.',
         ],
         figures: [
           {
-            slot: 'hero',
-            alt: 'WACA ANZPCC 2024 tournament guide cover',
-            wide: true,
-          },
-          {
-            slot: 'index',
-            alt: 'The tournament guide\u2019s interactive index, linking to all 13 sections',
+            after: 2,
             caption: 'One tap to any of 13 sections — the alternative was scrolling a 64-page document mid-match.',
-            /* 1.15 and dense with type. Full width would only add empty page
-               either side; the extra height is what makes it readable. */
+            /* 1.15 and dense with type. The extra height is what makes it
+               readable; width would only add empty page either side. */
             tall: true,
+            slots: [
+              {
+                slot: 'index',
+                alt: 'The tournament guide’s interactive index, linking to all 13 sections',
+              },
+            ],
           },
         ],
       },
@@ -451,40 +614,69 @@ export const caseStudies: CaseStudy[] = [
         copy: 'Every good guide earns trust before it turns functional. The opening pages carry a welcome letter from the WA Cricket CEO, giving the document a sense of occasion before the reader reaches schedules and logistics.',
         more: [
           'Match schedules are the pages people return to most, usually in a hurry. They are laid out to read instantly: clear match-ups, ground assignments and start times at high contrast, so nothing is missed at a glance.',
-          'Beyond logistics the guide carries real editorial weight. Venue pages tell the story of each participating club, some with a century behind them, paired with photography of the grounds. Team pages introduce every squad with player photography and short personal bios, giving the tournament a human face beyond the fixtures.',
-          'It doubles as a retail touchpoint: official merchandise is presented in the same visual system as everything else, product photography against bold typography and pricing, so buying reads as part of the guide rather than a catalogue bolted to the back. The final third holds the full championship rules — a dense reference section that still had to stay legible and on-brand across dozens of pages of regulation text.',
+          'Venue pages tell the story of each participating club, some with a century behind them, paired with photography of the grounds.',
+          'Team pages introduce every squad with player photography and short personal bios, giving the tournament a human face beyond the fixtures.',
+          'It doubles as a retail touchpoint: official merchandise is presented in the same visual system as everything else, product photography against bold typography and pricing, so buying reads as part of the guide rather than a catalogue bolted to the back.',
+          'The final third holds the full championship rules — a dense reference section that still had to stay legible and on-brand across dozens of pages of regulation text.',
         ],
         figures: [
+          /* Every spread here is 2.15 or wider. Two of them side by side would
+             be two 240px strips of unreadable body text, so each takes its own
+             line and the copy is split so each has a paragraph to sit under. */
           {
-            slot: 'welcome',
-            alt: 'Welcome letter page from the WA Cricket CEO',
-            wide: true,
+            after: 0,
+            slots: [
+              {
+                slot: 'welcome',
+                alt: 'Welcome letter page from the WA Cricket CEO',
+              },
+            ],
           },
           {
-            slot: 'schedule',
-            alt: 'ANZPCC match schedule page',
+            after: 1,
             caption: 'The page people open under pressure, built to be read at a glance.',
-            wide: true,
+            slots: [
+              {
+                slot: 'schedule',
+                alt: 'ANZPCC match schedule page',
+              },
+            ],
           },
           {
-            slot: 'venue',
-            alt: 'Venue profile page for a participating cricket club',
-            wide: true,
+            after: 2,
+            slots: [
+              {
+                slot: 'venue',
+                alt: 'Venue profile page for a participating cricket club',
+              },
+            ],
           },
           {
-            slot: 'team',
-            alt: 'Team and player profile page with photography and bios',
-            wide: true,
+            after: 3,
+            slots: [
+              {
+                slot: 'team',
+                alt: 'Team and player profile page with photography and bios',
+              },
+            ],
           },
           {
-            slot: 'merch',
-            alt: 'Official ANZPCC tournament merchandise page',
-            wide: true,
+            after: 4,
+            slots: [
+              {
+                slot: 'merch',
+                alt: 'Official ANZPCC tournament merchandise page',
+              },
+            ],
           },
           {
-            slot: 'rules',
-            alt: 'ANZPCC championship rules reference page',
-            wide: true,
+            after: 5,
+            slots: [
+              {
+                slot: 'rules',
+                alt: 'ANZPCC championship rules reference page',
+              },
+            ],
           },
         ],
       },

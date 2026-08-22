@@ -112,8 +112,17 @@
      three values together are the invisible container every asset is fitted
      into: whichever bound it reaches first decides its size, and it keeps its
      own ratio getting there. */
-  --figure-cap: clamp(20rem, 52vh, 34rem);
+  /* Named separately from `--figure-cap` so a variant that raised the
+     ceiling can put it back. `--figure-cap: var(--figure-cap)` looks like it
+     would do that and does not: a custom property cannot reference itself,
+     the declaration is dropped as invalid, and the override silently never
+     happens. */
+  --figure-cap-solo: clamp(20rem, 52vh, 34rem);
+  --figure-cap: var(--figure-cap-solo);
   --figure-cap-tall: clamp(26rem, 78vh, 52rem);
-  --figure-cap-grid: clamp(14rem, 34vh, 22rem);
+  --figure-cap-grid: clamp(16rem, 42vh, 26rem);
+  /* Floor width for a band of imagery — see `.case__figure`. Held below the
+     container so the widest assets still read as wider than the rest. */
+  --figure-min: min(100%, 52rem);
 
 }

@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
-import type { CaseFigureSlot, CaseStudy as CaseStudyType } from '../content'
+import { useEffect, useMemo, useState } from 'react'
+import type { CaseFigureRow, CaseStudy as CaseStudyType, CaseSection } from '../content'
 import { CrtImage } from './CrtImage'
+import { Lightbox, type LightboxItem } from './Lightbox'
 import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from '../content'
 import { navigateHome, navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
@@ -11,104 +12,251 @@ import { Reveal } from './Reveal'
 const pillarLabel = (value: string) =>
   pillarFilters.find((option) => option.value === value)?.label ?? value
 
-/**
- * Renders whatever images exist for one slot, or nothing at all.
- *
- * A slot names a file that may not have been supplied yet, so the empty case
- * is the normal case, not an error — the section simply reads as text until the
- * photograph arrives. Several files sharing a slot stack in variant order under
- * the paragraph they illustrate, which is where they explain something; a
- * gallery bolted to the end of the page explains nothing.
- */
-function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot }) {
-  const sources = figuresFor(study, figure.slot)
-  if (sources.length === 0) return null
+/** Fallback shape for an asset whose dimensions were never measured. */
+const FALLBACK_RATIO = 1.5
 
-  /* Content decides the layout, not a global rule. One asset gets the full
-     frame; two or three of the same thing — the two storefronts, a set of
-     document spreads — read better side by side than stacked, because the
-     point of supplying more than one is the comparison between them. */
-  const columns = figure.columns ?? (sources.length >= 2 ? Math.min(sources.length, 2) : 1)
-  const grid = columns > 1
+/**
+ * Beyond this the row is too wide to be worth keeping on one line. Two 2.5
+ * document spreads side by side inside a 1240px container are two 240px
+ * strips of body text — technically a comparison, practically unreadable —
+ * so they stack instead.
+ */
+const MAX_ROW_RATIO = 3.4
+
+type BandItem = {
+  src: string
+  kind: 'image' | 'video'
+  alt: string
+  caption?: string
+  width?: number
+  height?: number
+  ratio: number
+}
+
+/** Every file a row resolves to, in slot order, with its measured shape. */
+function bandItems(study: string, row: CaseFigureRow): BandItem[] {
+  return row.slots.flatMap((slot) => {
+    const files = figuresFor(study, slot.slot)
+    return files.map((file, index) => ({
+      src: file.src,
+      kind: file.kind,
+      alt: files.length > 1 ? `${slot.alt} (${index + 1} of ${files.length})` : slot.alt,
+      caption: file.caption ?? slot.caption,
+      width: file.width,
+      height: file.height,
+      ratio: file.width && file.height ? file.width / file.height : FALLBACK_RATIO,
+    }))
+  })
+}
+
+/**
+ * One band of imagery, sized to its own contents.
+ *
+ * The band is exactly as wide as the work inside it needs to be: the height
+ * ceiling multiplied by the combined shape of its contents, never past the
+ * container. Everything is centred on the same axis as a result, so a square
+ * mark and a full-width strip share a centre line instead of one sitting in
+ * the text column with a hole beside it and the next running edge to edge.
+ *
+ * Items share a height rather than a width. Flex grow is set to each asset's
+ * own ratio against a zero basis, which distributes width in proportion to
+ * shape — the arithmetic that makes a 1:1 mark and a 4:3 lockup line up along
+ * the top and the bottom without either being cropped to get there.
+ */
+function CaseFigureBand({
+  study,
+  row,
+  onZoom,
+}: {
+  study: string
+  row: CaseFigureRow
+  onZoom: (src: string) => void
+}) {
+  const items = bandItems(study, row)
+  if (items.length === 0) return null
+
+  const sumRatio = items.reduce((total, item) => total + item.ratio, 0)
+  const stacked = items.length > 1 && sumRatio > MAX_ROW_RATIO
+  const rowRatio = stacked ? Math.max(...items.map((item) => item.ratio)) : sumRatio
+  const gaps = stacked ? 0 : items.length - 1
+  const caption = row.caption ?? items.find((item) => item.caption)?.caption
 
   return (
     <figure
       className={[
         'case__figure',
-        figure.wide ? 'case__figure--wide' : '',
-        grid ? 'case__figure--grid' : '',
-        figure.tall ? 'case__figure--tall' : '',
+        row.tall ? 'case__figure--tall' : '',
+        stacked ? 'case__figure--stack' : '',
+        items.length > 1 ? 'case__figure--set' : '',
       ]
         .filter(Boolean)
         .join(' ')}
-      style={grid ? ({ '--figure-columns': columns } as React.CSSProperties) : undefined}
+      style={
+        {
+          '--row-ar': rowRatio.toFixed(4),
+          '--row-gaps': gaps,
+        } as React.CSSProperties
+      }
+      /* Deters the two casual routes to the file — right-click on a desktop,
+         long-press on a phone. It is a speed bump, not protection: anything
+         the browser renders is in the network tab. */
+      onContextMenu={(event) => event.preventDefault()}
     >
       <div className="case__figure-items">
-        {sources.map((item, index) => {
-          const alt =
-            sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt
-
-          /* The measured ratio, handed to CSS so the box exists before the
-             bitmap does. Without it a lazy image is 0x0 until it decodes, the
-             figure below it slides up the page as you scroll past, and the
-             reading position moves under the reader — the jerk you feel
-             scrolling a case study. `width`/`height` attributes alone do not
-             fix it here, because the bounded-container rule sizes on `auto`
-             and an undecoded image has no intrinsic size to be auto about. */
-          const sized = item.width && item.height
-          const style = sized
-            ? ({ '--media-ar': (item.width! / item.height!).toFixed(4) } as React.CSSProperties)
-            : undefined
-          const className = sized ? 'case__media case__media--sized' : 'case__media'
-
-          return item.kind === 'video' ? (
-            <video
-              key={item.src}
-              className={className}
-              style={style}
-              src={item.src}
-              aria-label={alt}
-              width={item.width}
-              height={item.height}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-            />
-          ) : (
-            <img
-              key={item.src}
-              className={className}
-              style={style}
-              src={item.src}
-              alt={alt}
-              width={item.width}
-              height={item.height}
-              loading="lazy"
-              decoding="async"
-            />
-          )
-        })}
+        {items.map((item) => (
+          <div
+            className="case__slot"
+            key={item.src}
+            style={{ '--media-ar': item.ratio.toFixed(4) } as React.CSSProperties}
+          >
+            {item.kind === 'video' ? (
+              <span className="case__frame">
+                <video
+                  className="case__media"
+                  src={item.src}
+                  aria-label={item.alt}
+                  width={item.width}
+                  height={item.height}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  disablePictureInPicture
+                  controlsList="nodownload"
+                />
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="case__frame case__frame--zoom"
+                onClick={() => onZoom(item.src)}
+                aria-label={`Open full size: ${item.alt}`}
+              >
+                <img
+                  className="case__media"
+                  src={item.src}
+                  alt={item.alt}
+                  width={item.width}
+                  height={item.height}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+              </button>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* One caption for the set. Repeating it under each half of a pair says
-          the same thing twice about two different things. */}
-      {(figure.caption ?? sources.find((s) => s.caption)?.caption) && (
-        <figcaption className="case__figure-caption">
-          {figure.caption ?? sources.find((s) => s.caption)?.caption}
-        </figcaption>
-      )}
+      {/* One caption for the band. A row is one idea; repeating a line under
+          each half says the same thing twice about two different things. */}
+      {caption && <figcaption className="case__figure-caption">{caption}</figcaption>}
     </figure>
   )
 }
 
+/**
+ * A section's paragraphs, with each band of imagery cut in directly beneath
+ * the paragraph that argues for it.
+ *
+ * Figures used to be collected and dumped at the foot of the section, which
+ * is how a packaging photograph ended up four paragraphs below the sentence
+ * about packaging, sitting under copy about social media. Nothing about that
+ * was visible in the source — the list looked fine. Interleaving by index
+ * makes the pairing the thing you author.
+ */
+function CaseSectionBody({
+  study,
+  section,
+  onZoom,
+}: {
+  study: string
+  section: CaseSection
+  onZoom: (src: string) => void
+}) {
+  const paragraphs = [section.copy, ...(section.more ?? [])]
+  const rows = section.figures ?? []
+  const blocks: React.ReactNode[] = []
+  let run: string[] = []
+
+  const flushCopy = () => {
+    if (run.length === 0) return
+    const paragraphsInRun = run
+    run = []
+    blocks.push(
+      <div className="case__section-copy" key={`copy-${paragraphsInRun[0].slice(0, 24)}`}>
+        {paragraphsInRun.map((paragraph) => (
+          <p className="body" key={paragraph.slice(0, 40)}>
+            {paragraph}
+          </p>
+        ))}
+      </div>,
+    )
+  }
+
+  paragraphs.forEach((paragraph, index) => {
+    run.push(paragraph)
+    /* An index past the last paragraph anchors to the last one rather than
+       vanishing, so a trimmed paragraph never silently drops its figure. */
+    const here = rows.filter(
+      (figureRow) => Math.min(figureRow.after, paragraphs.length - 1) === index,
+    )
+    if (here.length === 0) return
+    flushCopy()
+    here.forEach((figureRow) =>
+      blocks.push(
+        <CaseFigureBand
+          key={figureRow.slots.map((slot) => slot.slot).join('+')}
+          study={study}
+          row={figureRow}
+          onZoom={onZoom}
+        />,
+      ),
+    )
+  })
+
+  flushCopy()
+  return <>{blocks}</>
+}
+
 export function CaseStudy({ study }: { study: CaseStudyType }) {
   const { hot, handlers } = useSpotlight()
+  const [zoomed, setZoomed] = useState<number | null>(null)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
+    setZoomed(null)
   }, [study.slug])
+
+  /* Every still on the page, in reading order, so the viewer's arrows walk
+     the case study rather than the one band the reader happened to open.
+     Video is left out: it is already playing, and a paused frame blown up to
+     full screen is not the thing anyone clicked for. */
+  const zoomable = useMemo<LightboxItem[]>(
+    () =>
+      caseStudySections.flatMap((section) =>
+        (study.body[section.key].figures ?? []).flatMap((row) =>
+          row.slots.flatMap((slot) =>
+            figuresFor(study.slug, slot.slot)
+              .filter((file) => file.kind === 'image')
+              .map((file) => ({
+                src: file.src,
+                alt: slot.alt,
+                caption: row.caption ?? file.caption ?? slot.caption,
+                width: file.width,
+                height: file.height,
+              })),
+          ),
+        ),
+      ),
+    [study],
+  )
+
+  const openZoom = (src: string) => {
+    const index = zoomable.findIndex((item) => item.src === src)
+    if (index >= 0) setZoomed(index)
+  }
 
   /* The cover is resolved through the same index as the figures, so it carries
      intrinsic dimensions too. */
@@ -211,29 +359,12 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
               <Eyebrow>{section.eyebrow}</Eyebrow>
               <h2 className="case__section-title">{section.label}</h2>
             </div>
-            <div className="case__section-copy">
-              <p className="body">{study.body[section.key].copy}</p>
-              {study.body[section.key].more?.map((paragraph) => (
-                <p className="body" key={paragraph.slice(0, 40)}>
-                  {paragraph}
-                </p>
-              ))}
-              {study.body[section.key].figures
-                ?.filter((figure) => !figure.wide)
-                .map((figure) => (
-                  <CaseFigures key={figure.slot} study={study.slug} figure={figure} />
-                ))}
-            </div>
 
-            {/* Wide figures are grid children of the section, not of the
-                measured column, so they span the heading rail as well. Doing
-                this with a viewport-width breakout instead pushed the page
-                296px wider than the screen. */}
-            {study.body[section.key].figures
-              ?.filter((figure) => figure.wide)
-              .map((figure) => (
-                <CaseFigures key={figure.slot} study={study.slug} figure={figure} />
-              ))}
+            <CaseSectionBody
+              study={study.slug}
+              section={study.body[section.key]}
+              onZoom={openZoom}
+            />
           </Reveal>
         ))}
 
@@ -290,6 +421,15 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
           </button>
         </div>
       </div>
+
+      {zoomed !== null && (
+        <Lightbox
+          items={zoomable}
+          index={zoomed}
+          onIndex={setZoomed}
+          onClose={() => setZoomed(null)}
+        />
+      )}
     </article>
   )
 }
