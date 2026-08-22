@@ -3739,25 +3739,24 @@
 
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  justify-content: center;
 
-  /* Square at rest so the glyph sits dead centre; the label expands it. */
-  min-width: 64px;
-  min-height: 64px;
-  padding: 0 1.15rem;
+  /* A circle everywhere. The word "WHATSAPP" set beside the mark made one
+     control a 140px pill and the other a 64px disc — two different shapes in
+     one rail, and the spelled-out platform name is the thing that makes a
+     floating button look bolted on. The glyph is the most recognisable mark
+     on the internet; it does not need labelling. */
+  width: 64px;
+  height: 64px;
 
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--gunmetal);
   border-radius: 999px;
-  background: rgba(13, 21, 38, 0.92);
-  backdrop-filter: blur(10px);
+  background: var(--surface-raised);
   color: var(--text-secondary);
 
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.45);
   transition:
     color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
@@ -3793,18 +3792,9 @@
   transform: translateY(0);
 }
 
-/* No cursor, no hover: the label can never be revealed, so it would only be
-   dead weight and a wider tap target than the glyph needs. */
-@media (hover: none), (pointer: coarse) {
-  .wa-fab__label {
-    display: none;
-  }
-
-  .wa-fab {
-    padding: 0;
-    justify-content: center;
-    width: 64px;
-  }
+/* The label is gone on every viewport now, not just touch. */
+.wa-fab__label {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3834,10 +3824,9 @@
   width: 64px;
   height: 64px;
 
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--gunmetal);
   border-radius: 999px;
-  background: rgba(13, 21, 38, 0.92);
-  backdrop-filter: blur(10px);
+  background: var(--surface-raised);
   color: var(--text-secondary);
   cursor: pointer;
 
@@ -3845,7 +3834,9 @@
   font-size: 1.5rem;
   line-height: 1;
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.45);
   transition:
     color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
@@ -3897,11 +3888,17 @@
   width: min(380px, calc(100vw - 2 * var(--space-sm)));
   max-height: min(560px, calc(100vh - 200px));
 
-  border: 1px solid var(--hairline-strong);
+  /* Opaque, not glass. Translucency plus an 18px backdrop blur over the hero
+     photograph is what made this read as floating in mid-air rather than as a
+     panel belonging to the page — you could see the portrait through it, so it
+     never acquired a surface of its own. Solid ground, a defined edge and a
+     shadow that sits it on the page instead. */
+  border: 1px solid var(--gunmetal);
   border-radius: var(--radius-md);
-  background: rgba(13, 21, 38, 0.97);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  background: var(--surface-raised);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 28px 70px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
 
@@ -3978,9 +3975,12 @@
   white-space: pre-wrap;
 }
 
+/* The panel ground moved up to --surface-raised, so a 4% white bubble on it
+   disappeared the same way the controls did. Down onto the obsidian instead:
+   the reply sits *in* the panel rather than floating on it. */
 .assistant__msg--bot {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--obsidian);
   border: 1px solid var(--hairline);
   color: var(--text-secondary);
 }
@@ -4084,7 +4084,7 @@
   flex: 1;
   resize: none;
   max-height: 120px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--obsidian);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
   min-height: 44px;
@@ -4176,4 +4176,17 @@
   .assistant-launch:hover {
     transform: none;
   }
+}
+
+/* Looping clips sit in the same frame as the stills beside them. No CRT
+   treatment: the scanline and RGB layers are built around a static plate, and
+   running them over 30fps of video is cost with nothing to show for it. */
+.case__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--obsidian);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
 }

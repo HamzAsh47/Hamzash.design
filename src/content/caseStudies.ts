@@ -1,5 +1,5 @@
 import cover01 from '../assets/images/cover-01.svg'
-import { figuresFor } from './caseFigures'
+import { coverFor } from './caseFigures'
 import cover02 from '../assets/images/cover-02.svg'
 import cover03 from '../assets/images/cover-03.svg'
 import cover04 from '../assets/images/cover-04.svg'
@@ -107,7 +107,7 @@ export const caseStudies: CaseStudy[] = [
     year: 'Sep 2023—Mar 2026',
     /* The supplied hero, the moment it is dropped in; the placeholder plate
        until then, so a real case study never sits behind a broken image. */
-    cover: figuresFor('josefs', 'hero')[0] ?? cover01,
+    cover: coverFor('josefs') ?? cover01,
     coverAlt: "Josef's Buffalo Wings brand hero image",
     resultStat: '0 to ~5,000 followers and one location to two, over two years and seven months',
     plannedClient: "Josef's Buffalo Wings",
@@ -123,6 +123,11 @@ export const caseStudies: CaseStudy[] = [
           'It was also never scoped down to a logo and a style guide. I came on as the sole creative behind everything the brand would ever put in front of a customer, from the mark on the packaging to the walls of the restaurant.',
         ],
         figures: [
+          {
+            slot: 'hero',
+            alt: "Josef's Buffalo Wings brand identity in motion",
+            wide: true,
+          },
           {
             slot: 'moodboard',
             alt: "Early moodboard and inspiration references for Josef's brand development",
@@ -225,7 +230,7 @@ export const caseStudies: CaseStudy[] = [
     projectType: 'UI/UX & Product Design System',
     pillars: ['uiux'],
     year: '2024',
-    cover: figuresFor('culturelancer', 'hero')[0] ?? cover02,
+    cover: coverFor('culturelancer') ?? cover02,
     coverAlt: 'CultureLancer job-matching platform interface',
     resultStat: 'Live and operating — a two-sided platform built from a design system, not screen by screen',
     plannedClient: 'CultureLancer',
@@ -343,7 +348,7 @@ export const caseStudies: CaseStudy[] = [
     projectType: 'Interactive Tournament Guide & Design System',
     pillars: ['brand', 'uiux'],
     year: '2024',
-    cover: figuresFor('waca', 'hero')[0] ?? cover01,
+    cover: coverFor('waca') ?? cover01,
     coverAlt: 'WACA ANZPCC 2024 tournament guide cover',
     resultStat: 'A 64-page interactive guide in three to four days, then a matching A5 print edition in another 48 hours',
     plannedClient: 'WACA',
@@ -363,6 +368,11 @@ export const caseStudies: CaseStudy[] = [
           'A guide this size is also easy to get lost in, especially when someone needs one fact quickly in the middle of a live tournament. It is built around a central navigation hub: a full interactive index linking straight to 13 major sections, each reachable in a single tap rather than a long scroll.',
         ],
         figures: [
+          {
+            slot: 'hero',
+            alt: 'WACA ANZPCC 2024 tournament guide cover',
+            wide: true,
+          },
           {
             slot: 'index',
             alt: 'The tournament guide\u2019s interactive index, linking to all 13 sections',

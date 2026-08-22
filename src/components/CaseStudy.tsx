@@ -26,21 +26,42 @@ function CaseFigures({ study, figure }: { study: string; figure: CaseFigureSlot 
 
   return (
     <>
-      {sources.map((src, index) => (
-        <figure
-          className={`case__figure${figure.wide ? ' case__figure--wide' : ''}`}
-          key={src}
-        >
-          <CrtImage
-            src={src}
-            /* One alt string across a stacked set would have a screen reader
-               read the same sentence three times. */
-            alt={sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt}
-            aspectRatio="16 / 10"
-          />
-          {figure.caption && <figcaption className="case__figure-caption">{figure.caption}</figcaption>}
-        </figure>
-      ))}
+      {sources.map((item, index) => {
+        /* One alt string across a stacked set would have a screen reader read
+           the same sentence three times. */
+        const alt =
+          sources.length > 1 ? `${figure.alt} (${index + 1} of ${sources.length})` : figure.alt
+        /* A caption parsed out of the filename beats the authored one — it is
+           the thing that distinguishes this shot from its siblings. */
+        const caption = item.caption ?? figure.caption
+
+        return (
+          <figure
+            className={`case__figure${figure.wide ? ' case__figure--wide' : ''}`}
+            key={item.src}
+          >
+            {item.kind === 'video' ? (
+              /* Muted, looping and inline so it behaves like the animated
+                 stills beside it rather than like a video player. No controls:
+                 there is nothing to scrub, and a control bar over a five-second
+                 loop is chrome for its own sake. */
+              <video
+                className="case__video"
+                src={item.src}
+                aria-label={alt}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <CrtImage src={item.src} alt={alt} aspectRatio="16 / 10" />
+            )}
+            {caption && <figcaption className="case__figure-caption">{caption}</figcaption>}
+          </figure>
+        )
+      })}
     </>
   )
 }

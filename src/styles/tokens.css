@@ -15,6 +15,13 @@
      or lighter. */
   --gunmetal: #4a4e58;
 
+  /* Raised surface for anything that floats over the page — the two persistent
+     controls and the assistant panel. The page ground is obsidian, and the
+     floating pieces used to be obsidian at 92% over it: 1.01:1, a surface that
+     measured as no surface at all, which is why they read as smudges rather
+     than as controls. This sits at 1.20:1 with a solid gunmetal edge over it. */
+  --surface-raised: #1e2635;
+
   /* The border of anything you can click. WCAG puts the floor for a UI
      component boundary at 3:1 and gunmetal sits at 2.19 — which is why the
      hero's outlined "Start a project" read as bare text rather than a button.
@@ -69,7 +76,14 @@
   --space-md: 2rem;
   --space-lg: 3.25rem;
   --space-xl: 5rem;
-  --space-2xl: clamp(5rem, 3rem + 8vw, 9rem);
+  /* Section padding. Was clamped to 9rem, which put 144px above and below
+     every section — 288px of empty page between any two of them, against a
+     pillars section whose entire content is 295px tall. Padding almost equal
+     to the thing it surrounds is what makes a page read as generated rather
+     than composed: the rhythm never responds to how much is actually there.
+     7rem keeps the sections clearly separate at 224px apart without the page
+     becoming mostly gaps. */
+  --space-2xl: clamp(4rem, 2.5rem + 5vw, 7rem);
 
   --container: 1240px;
   --container-narrow: 860px;

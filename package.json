@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "seo": "node scripts/generate-seo.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:check": "npm run build && wrangler deploy --dry-run"
+    "deploy:check": "npm run build && wrangler deploy --dry-run",
+    "images": "node scripts/optimise-case-images.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
