@@ -4579,3 +4579,137 @@ body:has(.assistant.is-open) .assistant-launch {
     display: none;
   }
 }
+
+/* --- Case-study proof points ---------------------------------------------
+   Sits between the cover and the argument. Most readers scan one screen
+   before deciding whether to read a case study at all, so this is what they
+   should leave with if they read nothing else: the numbers, the scope, and
+   the one fact that is hard to claim without having done the work. */
+.case__glance-wrap {
+  margin-bottom: var(--space-lg);
+}
+
+.case__glance {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  list-style: none;
+  border-left: 2px solid var(--crimson);
+  background: var(--surface-raised);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.case__glance li {
+  position: relative;
+  padding-left: var(--space-sm);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 88ch;
+}
+
+/* A rule rather than a bullet: the list is four claims, not four items of a
+   shopping list, and a disc in front of each one makes them read as smaller
+   than they are. */
+.case__glance li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 8px;
+  height: 1px;
+  background: var(--crimson);
+}
+
+/* --- Subheadings inside a section ----------------------------------------
+   A deliverable that covers six separate systems is six arguments. Run
+   together they read as a list of everything that happened; under headings
+   each one is findable, and its figure has something to sit beneath. */
+.case__sub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+/* White, not crimson. Crimson on obsidian measures 3.2:1, which is fine for
+   the decorative index numbers it is used for elsewhere and not fine for a
+   heading someone has to read. The colour moves to a rule above it, which
+   also matches the eyebrow language used across the rest of the site. */
+.case__sub-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.case__sub-title::before {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 2px;
+  background: var(--crimson);
+}
+
+/* --- Client quote ---------------------------------------------------------
+   Only ever real, attributed words. Where none are on record the narrative
+   says what happened in its own voice instead — an invented sentence in
+   quotation marks is the one claim on a portfolio a client can deny. */
+.case__quote {
+  grid-column: 1 / -1;
+  margin: var(--space-sm) 0 0;
+  padding: var(--space-md);
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--crimson);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-raised);
+}
+
+.case__quote blockquote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--white);
+  max-width: 46ch;
+}
+
+.case__quote blockquote::before {
+  content: '\201C';
+}
+
+.case__quote blockquote::after {
+  content: '\201D';
+}
+
+.case__quote figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-xs);
+  margin-top: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.case__quote-author {
+  color: var(--white);
+}
+
+/* Muted grey measures 4.19:1 against the raised surface — under AA at this
+   size. The secondary tone still reads as secondary and passes at 5.79. */
+.case__quote-role {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 860px) {
+  .case__quote {
+    grid-column: 1;
+  }
+}

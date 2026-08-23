@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { CaseFigureRow, CaseStudy as CaseStudyType, CaseSection } from '../content'
+import type {
+  CaseFigureRow,
+  CaseParagraph,
+  CaseStudy as CaseStudyType,
+  CaseSection,
+} from '../content'
 import { CrtImage } from './CrtImage'
 import { Lightbox, type LightboxItem } from './Lightbox'
 import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from '../content'
@@ -175,22 +180,31 @@ function CaseSectionBody({
   section: CaseSection
   onZoom: (src: string) => void
 }) {
-  const paragraphs = [section.copy, ...(section.more ?? [])]
+  const paragraphs: CaseParagraph[] = [section.copy, ...(section.more ?? [])]
   const rows = section.figures ?? []
   const blocks: React.ReactNode[] = []
-  let run: string[] = []
+  let run: CaseParagraph[] = []
+  const textOf = (paragraph: CaseParagraph) =>
+    typeof paragraph === 'string' ? paragraph : paragraph.copy
 
   const flushCopy = () => {
     if (run.length === 0) return
     const paragraphsInRun = run
     run = []
     blocks.push(
-      <div className="case__section-copy" key={`copy-${paragraphsInRun[0].slice(0, 24)}`}>
-        {paragraphsInRun.map((paragraph) => (
-          <p className="body" key={paragraph.slice(0, 40)}>
-            {paragraph}
-          </p>
-        ))}
+      <div className="case__section-copy" key={`copy-${textOf(paragraphsInRun[0]).slice(0, 24)}`}>
+        {paragraphsInRun.map((paragraph) =>
+          typeof paragraph === 'string' ? (
+            <p className="body" key={paragraph.slice(0, 40)}>
+              {paragraph}
+            </p>
+          ) : (
+            <div className="case__sub" key={paragraph.heading}>
+              <h3 className="case__sub-title">{paragraph.heading}</h3>
+              <p className="body">{paragraph.copy}</p>
+            </div>
+          ),
+        )}
       </div>,
     )
   }
@@ -217,6 +231,19 @@ function CaseSectionBody({
   })
 
   flushCopy()
+
+  if (section.quote) {
+    blocks.push(
+      <figure className="case__quote" key="quote">
+        <blockquote>{section.quote.text}</blockquote>
+        <figcaption>
+          <span className="case__quote-author">{section.quote.author}</span>
+          <span className="case__quote-role">{section.quote.role}</span>
+        </figcaption>
+      </figure>,
+    )
+  }
+
   return <>{blocks}</>
 }
 
@@ -349,6 +376,16 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
           priority
         />
       </div>
+
+      {study.atAGlance && (
+        <div className="container case__glance-wrap">
+          <ul className="case__glance">
+            {study.atAGlance.map((point) => (
+              <li key={point.slice(0, 40)}>{point}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="container case__body">
         {caseStudySections.map((section, index) => (
