@@ -4856,3 +4856,127 @@ body:has(.assistant.is-open) .assistant-launch {
   color: var(--white);
   border-color: var(--gunmetal);
 }
+
+/* Inline handoff: attached to the message that offered it, so the offer and
+   the way to take it are the same moment rather than a sentence pointing at
+   a footer. */
+.assistant__turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  align-items: flex-start;
+}
+
+.assistant__handoff--inline {
+  padding: 0;
+  border-top: 0;
+  width: 100%;
+}
+
+/* The email gate. One field, at the moment it is actually needed — a handoff
+   with no reply-to is a lead that cannot be answered. */
+.assistant__gate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--crimson);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-raised);
+}
+
+.assistant__gate-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.assistant__gate-row {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.assistant__gate-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--obsidian);
+  color: var(--white);
+  /* 16px, or iOS zooms the whole page in on focus. */
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.assistant__gate-input:focus-visible {
+  outline: 2px solid var(--crimson);
+  outline-offset: 1px;
+}
+
+/* Dictation. Only rendered where the browser has speech recognition, so this
+   never styles a button that cannot work. */
+.assistant__mic {
+  display: grid;
+  place-items: center;
+  flex: none;
+  /* 44px: the smallest target a thumb hits reliably. */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.assistant__mic svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.assistant__mic:hover,
+.assistant__mic:focus-visible {
+  color: var(--white);
+  border-color: var(--gunmetal);
+}
+
+/* Live: cyan, because this is the AI surface and that is what cyan is for
+   here. Pulsing, because a microphone that looks identical whether or not it
+   is recording is the one state a person must never be unsure about. */
+.assistant__mic.is-live {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  animation: mic-live 1.6s ease-in-out infinite;
+}
+
+@keyframes mic-live {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant__mic.is-live {
+    animation: none;
+  }
+}
+
+.assistant__listening {
+  padding: 0 var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--cyan);
+}

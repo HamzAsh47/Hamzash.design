@@ -60,12 +60,122 @@ const DISCLOSURE =
    nothing on its own. */
 const MIN_HANDOFF_TURNS = 2
 
+/**
+ * The marker the assistant ends a handoff offer with. Stripped before the
+ * message is shown; what it does is make the WhatsApp and call buttons appear
+ * attached to that turn, so the offer and the way to take it are the same
+ * moment rather than a sentence pointing at a footer.
+ */
+const HANDOFF_MARKER = '[[handoff]]'
+
+/**
+ * Last line of defence against the assistant writing out contact details.
+ *
+ * The prompt tells it not to, and a model does it anyway sometimes. A raw
+ * phone number and a calendar URL pasted above two buttons that do the same
+ * thing reads as amateurish, so the known ones are removed at render rather
+ * than trusted not to appear. Only these three exact things — nothing else is
+ * touched, because guessing at a model's sentence is worse than the problem.
+ */
+const CONTACT_NOISE: [RegExp, string][] = [
+  [/https?:\/\/(?:wa\.me|api\.whatsapp\.com)\/\S+/gi, 'WhatsApp'],
+  [/https?:\/\/calendar\.app\.google\/\S+/gi, 'the booking page'],
+  [/\+?92[\s-]?318[\s-]?\d{3}[\s-]?\d{4}/g, 'WhatsApp'],
+]
+
+/* Substituted rather than deleted. Cutting a URL out leaves "message him on
+   or book at, or call." — technically clean and unreadable. Swapping in the
+   words the link stood for keeps the sentence a sentence, which matters
+   because this fires exactly when the model has already gone off-script. */
+function scrubContacts(text: string) {
+  let out = text
+  for (const [pattern, replacement] of CONTACT_NOISE) out = out.replace(pattern, replacement)
+  return out
+    .replace(/\(\s*\)|\[\s*\]/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([.,;:!?])/g, '$1')
+    .trim()
+}
+
+/**
+ * Speech-to-text, where the browser has it.
+ *
+ * The Web Speech API, deliberately, over a transcription service: it costs
+ * nothing per use, adds no dependency and no key, and the audio never leaves
+ * the visitor's machine as a file we then have to be responsible for. The
+ * trade-off is coverage — Chrome, Edge and Safari have it, Firefox does not —
+ * so the button is only rendered where the API exists rather than sitting
+ * there dead. Anyone without it types, which is what they were doing anyway.
+ */
+type SpeechRecognitionLike = {
+  lang: string
+  interimResults: boolean
+  continuous: boolean
+  start: () => void
+  stop: () => void
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
+  onerror: (() => void) | null
+  onend: (() => void) | null
+}
+
+const SpeechRecognitionCtor: (new () => SpeechRecognitionLike) | undefined =
+  typeof window === 'undefined'
+    ? undefined
+    : ((window as unknown as Record<string, unknown>).SpeechRecognition as
+        | (new () => SpeechRecognitionLike)
+        | undefined) ??
+      ((window as unknown as Record<string, unknown>).webkitSpeechRecognition as
+        | (new () => SpeechRecognitionLike)
+        | undefined)
+
+/** Pulls a usable reply-to address out of whatever the visitor typed. */
+const EMAIL_IN_TEXT = /[^\s@<>()[\]",;]+@[^\s@<>()[\]",;]+\.[a-z]{2,}/i
+
+/**
+ * The two ways out of the chat.
+ *
+ * One component, rendered either attached to the message that offered the
+ * handoff or as a standing pair under the composer — never both at once. The
+ * assistant is told never to write a number or a link, so this is the only
+ * place either one exists in the interface.
+ */
+function HandoffActions({
+  onPick,
+  inline = false,
+}: {
+  onPick: (route: 'whatsapp' | 'call') => void
+  inline?: boolean
+}) {
+  return (
+    <div className={`assistant__handoff${inline ? ' assistant__handoff--inline' : ''}`}>
+      {!inline && <p className="assistant__handoff-label">Talk to Hamza directly</p>}
+      <div className="assistant__handoff-actions">
+        <button className="assistant__handoff-btn" onClick={() => onPick('whatsapp')}>
+          <Icon name="whatsapp" />
+          WhatsApp
+        </button>
+        <button className="assistant__handoff-btn" onClick={() => onPick('call')}>
+          <Icon name="calendar" />
+          Book a call
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function Assistant() {
   const [open, setOpen] = useState(false)
   const [turns, setTurns] = useState<Turn[]>([])
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  /* Set when the visitor has actually been handed over, so the buttons stop
+     re-sending Hamza the same conversation every time one is pressed. */
+  const [handedOff, setHandedOff] = useState<'whatsapp' | 'call' | null>(null)
+  /* Non-null while the email gate is open, holding the route it will resume. */
+  const [pendingRoute, setPendingRoute] = useState<'whatsapp' | 'call' | null>(null)
+  const [emailDraft, setEmailDraft] = useState('')
+  const [listening, setListening] = useState(false)
 
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -137,6 +247,45 @@ export function Assistant() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  /* Dictation drops into the same box the visitor types in, rather than
+     sending straight off. What comes back from speech recognition is often
+     nearly right and needs one word fixed, and sending it unseen would make
+     the visitor argue with a transcript instead of with the assistant. */
+  const recognition = useRef<SpeechRecognitionLike | null>(null)
+
+  const toggleVoice = () => {
+    if (listening) {
+      recognition.current?.stop()
+      return
+    }
+    if (!SpeechRecognitionCtor) return
+
+    const engine = new SpeechRecognitionCtor()
+    /* Follows the page, so a visitor reading this site in another language
+       is not dictated at in English. */
+    engine.lang = document.documentElement.lang || 'en-US'
+    engine.interimResults = false
+    engine.continuous = false
+    engine.onresult = (event) => {
+      const said = Array.from({ length: event.results.length }, (_, i) => event.results[i][0].transcript)
+        .join(' ')
+        .trim()
+      if (!said) return
+      setDraft((current) => (current ? `${current} ${said}` : said))
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          autoGrow(inputRef.current)
+          inputRef.current.focus()
+        }
+      })
+    }
+    engine.onerror = () => setListening(false)
+    engine.onend = () => setListening(false)
+    recognition.current = engine
+    setListening(true)
+    engine.start()
+  }
+
   /* Grow with the message rather than making the visitor scroll a one-line
      box to re-read what they typed. Capped in CSS. */
   const autoGrow = (el: HTMLTextAreaElement) => {
@@ -144,12 +293,22 @@ export function Assistant() {
     el.style.height = `${el.scrollHeight}px`
   }
 
+  /* Whatever address the visitor already gave in conversation. The assistant
+     is told to ask for one before offering the handoff, so most of the time
+     it is here and the gate below never appears. */
+  const emailInChat =
+    turns
+      .filter((turn) => turn.role === 'user')
+      .map((turn) => turn.content.match(EMAIL_IN_TEXT)?.[0])
+      .filter(Boolean)
+      .pop() ?? ''
+
   /* Hands the conversation to a person, and tells Hamza it happened.
-     The email is deliberately not awaited before opening the destination: the
-     visitor asked to talk to somebody, and making them watch a spinner while
-     two emails go out is the wrong order. `keepalive` is what lets the
-     request survive the tab losing focus to WhatsApp. */
-  const handoff = (route: 'whatsapp' | 'call') => {
+     Not awaited before opening the destination: they asked to talk to
+     somebody, and making them watch a spinner while two emails go out is the
+     wrong order. `keepalive` is what lets the request survive the tab losing
+     focus to WhatsApp. */
+  const forward = (route: 'whatsapp' | 'call', email: string) => {
     const target =
       route === 'whatsapp'
         ? `https://wa.me/${site.whatsapp.number}?text=${encodeURIComponent(site.whatsapp.prefill)}`
@@ -159,15 +318,26 @@ export function Assistant() {
       void fetch('/api/handoff', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: turns, route }),
+        body: JSON.stringify({ messages: turns, route, email }),
         keepalive: true,
       }).catch(() => {
-        /* Silent. The visitor is on their way to Hamza either way, and an
-           error toast about an email they never asked for helps nobody. */
+        /* Silent. They are on their way to Hamza either way, and an error
+           about an email they never asked for helps nobody. */
       })
     }
 
+    setHandedOff(route)
+    setPendingRoute(null)
     window.open(target, '_blank', 'noopener,noreferrer')
+  }
+
+  /* An address is required, because a handoff with no reply-to is a lead
+     Hamza cannot answer. If the conversation already contains one, this is
+     invisible; if not, one field appears rather than the whole thing being
+     refused. */
+  const handoff = (route: 'whatsapp' | 'call') => {
+    if (emailInChat) return forward(route, emailInChat)
+    setPendingRoute(route)
   }
 
   const send = async (text: string) => {
@@ -192,6 +362,7 @@ export function Assistant() {
       const data = (await response.json()) as { reply?: string; error?: string }
       if (!response.ok || !data.reply) throw new Error(data.error ?? 'No reply')
       setTurns([...next, { role: 'assistant', content: data.reply }])
+      setHandedOff(null)
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Something went wrong.')
     } finally {
@@ -241,14 +412,75 @@ export function Assistant() {
           <p className="assistant__notice">{DISCLOSURE}</p>
           <p className="assistant__msg assistant__msg--bot">{GREETING}</p>
 
-          {turns.map((turn, index) => (
-            <p
-              key={index}
-              className={`assistant__msg assistant__msg--${turn.role === 'user' ? 'user' : 'bot'}`}
+          {turns.map((turn, index) => {
+            if (turn.role === 'user') {
+              return (
+                <p key={index} className="assistant__msg assistant__msg--user">
+                  {turn.content}
+                </p>
+              )
+            }
+
+            const offersHandoff = turn.content.includes(HANDOFF_MARKER)
+            const body = scrubContacts(turn.content.split(HANDOFF_MARKER).join(''))
+            /* Only on the newest message. An offer three turns back is
+               history, and leaving its buttons live means several sets of the
+               same two controls stacked down the log. */
+            const isLast = index === turns.length - 1
+
+            return (
+              <div key={index} className="assistant__turn">
+                <p className="assistant__msg assistant__msg--bot">{withLinks(body)}</p>
+                {offersHandoff && isLast && !handedOff && (
+                  <HandoffActions onPick={handoff} inline />
+                )}
+              </div>
+            )
+          })}
+
+          {/* The gate. One field, at the moment it is actually needed. */}
+          {pendingRoute && (
+            <form
+              className="assistant__gate"
+              onSubmit={(event) => {
+                event.preventDefault()
+                const value = emailDraft.trim()
+                if (!EMAIL_IN_TEXT.test(value)) return
+                forward(pendingRoute, value)
+              }}
             >
-              {turn.role === 'assistant' ? withLinks(turn.content) : turn.content}
+              <label className="assistant__gate-label" htmlFor="assistant-email">
+                What is the best email for Hamza to reply to?
+              </label>
+              <div className="assistant__gate-row">
+                <input
+                  id="assistant-email"
+                  className="assistant__gate-input"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  value={emailDraft}
+                  onChange={(event) => setEmailDraft(event.target.value)}
+                  autoFocus
+                />
+                <button
+                  className="assistant__send"
+                  type="submit"
+                  disabled={!EMAIL_IN_TEXT.test(emailDraft.trim())}
+                >
+                  Continue
+                </button>
+              </div>
+            </form>
+          )}
+
+          {handedOff && (
+            <p className="assistant__msg assistant__msg--bot">
+              Sent to Hamza — he will follow up shortly. If this was useful, tell him so when
+              you speak.
             </p>
-          ))}
+          )}
 
           {busy && (
             <p className="assistant__msg assistant__msg--bot assistant__msg--thinking">
@@ -305,30 +537,43 @@ export function Assistant() {
               }
             }}
           />
+          {/* Only where the browser actually has speech recognition. A dead
+              microphone is worse than no microphone. */}
+          {SpeechRecognitionCtor && (
+            <button
+              type="button"
+              className={`assistant__mic${listening ? ' is-live' : ''}`}
+              onClick={toggleVoice}
+              aria-pressed={listening}
+              aria-label={listening ? 'Stop dictating' : 'Dictate a message'}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <rect x="7.4" y="2.6" width="5.2" height="9.4" rx="2.6" />
+                <path d="M4.6 9.4a5.4 5.4 0 0 0 10.8 0M10 14.8v2.6" />
+              </svg>
+            </button>
+          )}
+
           <button className="assistant__send" type="submit" disabled={busy || !draft.trim()}>
             Send
           </button>
         </form>
 
-        {/* Appear once there is a conversation worth handing over, which is
-            also the point at which the assistant is told to offer this. Real
-            buttons rather than links the model has to remember to produce:
-            the route out of a chat should not depend on what a model wrote. */}
-        {turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS && (
-          <div className="assistant__handoff">
-            <p className="assistant__handoff-label">Talk to Hamza directly</p>
-            <div className="assistant__handoff-actions">
-              <button className="assistant__handoff-btn" onClick={() => handoff('whatsapp')}>
-                <Icon name="whatsapp" />
-                WhatsApp
-              </button>
-              <button className="assistant__handoff-btn" onClick={() => handoff('call')}>
-                <Icon name="calendar" />
-                Book a call
-              </button>
-            </div>
-          </div>
+        {listening && (
+          <p className="assistant__listening" role="status">
+            Listening — speak, then press the microphone again.
+          </p>
         )}
+
+        {/* The standing pair, under the composer. Real buttons rather than
+            links the model has to remember to write: the route out of a chat
+            should not depend on what a model produced that turn. Hidden while
+            an inline set is showing, so only one pair is ever on screen. */}
+        {turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS &&
+          !pendingRoute &&
+          !turns.at(-1)?.content.includes(HANDOFF_MARKER) && (
+            <HandoffActions onPick={handoff} />
+          )}
 
         <p className="assistant__foot">
           Answers come from this site. For a quote or a start date,{' '}
