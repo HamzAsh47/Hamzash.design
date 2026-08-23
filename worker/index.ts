@@ -15,11 +15,22 @@
  */
 
 import { botKnowledge } from '../src/content/botContext'
-import { site } from '../src/content/brand'
+import { brand, site } from '../src/content/brand'
 
 interface Env {
   SEND_EMAIL: SendEmail
   AI: Ai
+  /**
+   * Resend, for the confirmation that goes back to the visitor.
+   *
+   * Optional on purpose. The Cloudflare binding above can only send to one
+   * verified destination — Hamza's inbox — so reaching the visitor needs a
+   * second sender. Until the secret is set the confirmation is skipped
+   * silently and the brief still arrives, which is the part that matters.
+   */
+  RESEND_API_KEY?: string
+  /** Overrides the confirmation's From, for a `send.` subdomain setup. */
+  RESEND_FROM?: string
 }
 
 /** Mirrors buildBrief() on the client. Everything here reaches the inbox. */
@@ -50,6 +61,106 @@ const json = (status: number, body: Record<string, unknown>) =>
     status,
     headers: { 'content-type': 'application/json' },
   })
+
+/* --- Visitor confirmation ------------------------------------------------- */
+
+const RESEND_ENDPOINT = 'https://api.resend.com/emails'
+const CONFIRM_FROM = `${brand.name} <${FROM}>`
+
+/**
+ * A first name, and nothing else.
+ *
+ * This is the only part of the confirmation a submitter controls, and it is
+ * deliberately the only part. Anyone can POST this endpoint with somebody
+ * else's address, so any free text echoed back would make the form a way to
+ * send chosen words to a chosen stranger over Hamza's domain. Their own brief
+ * is not repeated to them either — they typed it a moment ago, and including
+ * it would reopen exactly that hole.
+ *
+ * Letters, marks, apostrophes and hyphens survive; digits, punctuation, URLs
+ * and newlines do not.
+ */
+function greetingName(raw: string) {
+  const first = raw.trim().split(/\s+/)[0] ?? ''
+  const clean = first.replace(/[^\p{L}\p{M}'-]/gu, '').slice(0, 40)
+  return clean.length >= 2 ? clean : ''
+}
+
+/** The confirmation, as Resend wants it. Pure, so its shape can be tested. */
+export function confirmationPayload(brief: Brief, from: string) {
+  const name = greetingName(brief.name)
+  const hello = name ? `Hi ${name},` : 'Hi,'
+  const { label, url } = site.scheduling
+
+  const text = [
+    hello,
+    '',
+    "Thanks — your brief came through and it's with Hamza. He replies within 24 hours.",
+    '',
+    'If you would rather talk it through sooner, you can book a slot directly:',
+    '',
+    label,
+    url,
+    '',
+    brand.name,
+    'Brand Identity, UI/UX and Motion Branding, as one system',
+    site.url,
+  ].join('\n')
+
+  const html = [
+    '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a">',
+    `<p style="margin:0 0 16px">${escape(hello)}</p>`,
+    "<p style=\"margin:0 0 16px\">Thanks — your brief came through and it's with Hamza. He replies within 24 hours.</p>",
+    '<p style="margin:0 0 8px">If you would rather talk it through sooner, you can book a slot directly:</p>',
+    `<p style="margin:0 0 24px"><strong>${escape(label)}</strong><br>`,
+    `<a href="${url}" style="color:#C81E3A">${url}</a></p>`,
+    '<hr style="margin:24px 0;border:0;border-top:1px solid #e5e5e5">',
+    `<p style="margin:0;color:#808792;font-size:13px">${escape(brand.name)}<br>`,
+    'Brand Identity, UI/UX and Motion Branding, as one system<br>',
+    `<a href="${site.url}" style="color:#808792">${site.url.replace(/^https?:\/\//, '')}</a></p>`,
+    '</div>',
+  ].join('')
+
+  return {
+    from,
+    to: [brief.email],
+    /* A reply to the confirmation should reach a person, not bounce off a
+       send-only address. */
+    reply_to: FROM,
+    subject: `Your brief is with ${brand.name}`,
+    text,
+    html,
+  }
+}
+
+/**
+ * Best effort, always. Called after the brief has already reached the inbox,
+ * so a Resend outage, an expired key or an unverified domain costs the
+ * visitor a courtesy email and costs Hamza nothing — the enquiry is already
+ * delivered and the booking link is already on their screen.
+ */
+async function sendConfirmation(env: Env, brief: Brief): Promise<void> {
+  if (!env.RESEND_API_KEY) return
+
+  try {
+    const response = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(confirmationPayload(brief, env.RESEND_FROM ?? CONFIRM_FROM)),
+    })
+    if (!response.ok) {
+      /* Logged with the body: Resend's failures are nearly always a domain
+         that is not verified yet or a From that does not match it, and the
+         reason is in the response rather than the status. */
+      console.error('confirmation rejected', response.status, await response.text())
+    }
+  } catch (error) {
+    console.error('confirmation failed', error)
+  }
+}
 
 function asText(brief: Brief) {
   return [
@@ -200,7 +311,7 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url)
     if (pathname === '/api/chat') return handleChat(request, env)
     if (pathname !== '/api/brief') return new Response('Not found', { status: 404 })
@@ -241,6 +352,11 @@ export default {
       console.error('brief send failed', error)
       return json(502, { error: 'Could not send the brief' })
     }
+
+    /* Only once the brief is delivered, and outside the response: the visitor
+       has no reason to wait on a courtesy email, and if it fails they have
+       still been told their brief arrived — because it did. */
+    ctx.waitUntil(sendConfirmation(env, brief))
 
     return json(200, { ok: true })
   },

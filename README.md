@@ -120,6 +120,56 @@ to people and to screen readers, so anything that arrives with it filled came
 from a bot; the Worker answers those with a plain `200` rather than explaining
 which check they failed.
 
+### The visitor's confirmation email (Resend)
+
+The Cloudflare binding above can only reach that one verified address, so it
+cannot send anything to the person who filled the form. Resend does that half:
+a short confirmation with the discovery-call booking link.
+
+It is **optional**. With no `RESEND_API_KEY` set, the confirmation is skipped
+and the brief still arrives — which is why the site worked before the key
+existed and keeps working if the key is ever revoked. The send happens in
+`ctx.waitUntil` *after* the brief is delivered, so a Resend outage, an expired
+key or an unverified domain costs a courtesy email and nothing else. The
+visitor still sees the booking link on the confirmation screen either way.
+
+To switch it on:
+
+1. Create a Resend account (free tier: 3,000 emails/month, 100/day) and add
+   the domain `hamzash47.com` under **Domains**.
+2. Resend gives a DKIM `TXT` record and an SPF `TXT` record. Add the DKIM one
+   to Cloudflare DNS as-is.
+3. **Merge the SPF record — do not add a second one.** Email Routing already
+   publishes `v=spf1 include:_spf.mx.cloudflare.net ~all` on the root domain,
+   and two SPF records on one name is a misconfiguration that makes both
+   unreliable. Edit the existing record to:
+
+   ```
+   v=spf1 include:_spf.mx.cloudflare.net include:amazonses.com ~all
+   ```
+
+4. Once Resend shows the domain as Verified:
+
+   ```
+   npx wrangler secret put RESEND_API_KEY
+   ```
+
+   Then redeploy. Nothing else changes — `RESEND_FROM` is available if the
+   domain is ever verified on a `send.` subdomain instead, but the default
+   `Hamza Ashraf <contact@hamzash47.com>` is correct for the setup above.
+
+For local runs, put the key in `.dev.vars` (gitignored) rather than
+`wrangler.jsonc`.
+
+**What the confirmation contains, and why so little.** Anyone can POST
+`/api/brief` with somebody else's address, so any free text echoed back would
+turn the form into a way to send chosen words to a chosen stranger over this
+domain. The confirmation is therefore fixed copy plus the booking link, and
+the only variable in it is a first name — stripped to letters, marks,
+apostrophes and hyphens, capped at 40 characters, and dropped entirely if
+what is left is shorter than two. The submitted brief is never repeated back;
+they typed it a moment ago, and including it would reopen exactly that hole.
+
 ## Deploying
 
 Hosted on **Cloudflare Workers** (not Pages) and served at

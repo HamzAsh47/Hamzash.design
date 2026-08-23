@@ -26,3 +26,8 @@ dist-ssr
 
 # Wrangler local dev state (miniflare caches, trace store)
 .wrangler/
+
+# Local Worker secrets (Resend key). Never committed — the real one lives in
+# `wrangler secret put`, and this file only exists to run the Worker locally.
+.dev.vars
+.dev.vars.*
