@@ -59,6 +59,10 @@ export const contact = {
    * there would be a lie, and the visitor would close the window on an unsent
    * email. So that copy ends on the instruction, not the reassurance.
    */
+  /* Sits under the confirmation. A visitor who has just described a project
+     is the most engaged they will ever be — sending them away to wait is the
+     wrong moment to give them nothing to do. */
+  schedulingLead: 'Want to talk it through sooner? Book a slot in the next open window:',
   successHeading: 'Brief received',
   successMessage: "Got it — I'll get back to you within 24 hours.",
 

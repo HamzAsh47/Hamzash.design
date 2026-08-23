@@ -61,15 +61,21 @@ function pricingSection() {
 }
 
 /**
- * The three real client projects. Kept here by hand, unlike everything else on
- * this page, because caseStudies.ts imports image assets that cannot be
- * bundled into a Worker. Four short lines — if a case study is added to the
- * site, add it here too.
+ * The real client projects. Kept here by hand, unlike everything else on this
+ * page, because caseStudies.ts imports image assets that cannot be bundled
+ * into a Worker.
+ *
+ * That hand-copying is a liability, and it has already bitten once: the
+ * follower count and the WACA timeline here went on being quoted by the bot
+ * after both were corrected in the case studies. If a study is added or a
+ * figure changes, change it here in the same edit.
  */
 const portfolio = `
-Josef's Buffalo Wings (Sep 2023—Mar 2026) — full system: brand identity, mascot, packaging, interior and facade for two Hamburg locations, animated LED menus, and the social presence. Grew @josefs_hamburg from 0 to ~5,000 followers; the business went from one location to two.
+Josef's Buffalo Wings (Sep 2023—Mar 2026) — full system: brand identity, mascot, packaging, interior and facade for two Hamburg locations, animated LED menus, and the social presence. Grew @josefs_hamburg from 0 to ~4,800 followers over two years six months; the business went from one location to two, funded by the first.
 CultureLancer (2024) — UI/UX and product design for a two-sided job-matching platform. Brand already existed; built the design system, both dashboards, onboarding, messaging, courses and membership. Live and operating.
-WACA / WA Cricket (2024) — ANZPCC 2024 tournament guide. A 64-page interactive guide built on a repeatable design system in three to four days, then a matching A5 print edition in another 48 hours. Worked as art director with a collaborator.
+WACA / WA Cricket (2024) — ANZPCC 2024 tournament guide. A 64-page interactive guide built on a repeatable design system in about a week, then a matching A5 print edition in a further three to four days. Worked as art director with a collaborator.
+Uplift K12 (Oct 2023—Oct 2025) — a funded home-schooling math platform. Started at 2 sample games, grew to 270+ interactive math games across grades K-8, then full ownership of the platform's UI/UX: dashboard, lesson playlists and a shared interactive whiteboard. Also the K1-K4 curriculum structure and a 20-game physical board game adaptation.
+EZ Sports Apparel (Apr 2024—present) — standing seasonal design partner for a Texas custom-uniform business. Client-facing team uniform mockup decks and vendor-ready production files, across recurring league accounts (Bear Creek Little League, Prodigy, Outlaws, Texas Bombers, Power Soccer, LTYA).
 Full case studies are on the site under Work. More work: ${brand.portfolioLinks.map((l) => `${l.label} on ${l.platform}`).join(', ')}.
 `.trim()
 
@@ -106,4 +112,5 @@ export const botKnowledge = [
   '',
   `HOW TO GET IN TOUCH`,
   `Brief form on the site (four short steps, best for real enquiries — it reaches ${site.contactEmail}). WhatsApp ${site.whatsapp.display} for quick questions. LinkedIn: ${brand.handles.linkedin.href}.`,
+  `Discovery call — ${site.scheduling.label}: ${site.scheduling.url}. Offer this whenever someone asks to book a call or speak to Hamza, and alongside the brief form when a question needs him rather than you.`,
 ].join('\n')

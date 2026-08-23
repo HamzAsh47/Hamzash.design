@@ -188,6 +188,27 @@ export function Contact() {
               <p className="lede">
                 {site.formEndpoint ? contact.successMessage : contact.mailtoMessage}
               </p>
+
+              {/* The booking window, offered here rather than emailed. The
+                  Worker's send_email binding is locked to one verified
+                  destination — it can reach Hamza's inbox and nobody else's —
+                  so a visitor-facing confirmation email would need a whole
+                  new provider. This reaches them faster anyway: it is on
+                  screen the moment they submit, with nothing to open. */}
+              <div className="contact__book">
+                <p className="contact__book-label">{contact.schedulingLead}</p>
+                <a
+                  className="btn btn--ghost contact__book-link"
+                  href={site.scheduling.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {site.scheduling.label}
+                  <span className="btn__arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+              </div>
             </div>
           ) : (
             <form className="form" onSubmit={submit} noValidate>

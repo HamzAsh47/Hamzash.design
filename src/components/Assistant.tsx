@@ -13,6 +13,37 @@ const STARTERS = [
   'How does a project actually run?',
 ]
 
+/**
+ * Turns bare URLs in a reply into links.
+ *
+ * The assistant is told to offer the booking window as a full URL on its own,
+ * and a model writes exactly that — a URL, as text. Rendered into a plain
+ * `<p>` it stays text, so the one message whose whole purpose is to get
+ * somebody onto a call ended in a link they would have to select and copy.
+ *
+ * Deliberately not markdown parsing or `dangerouslySetInnerHTML`: this is
+ * model output, and the only thing in it that needs to be interactive is an
+ * http(s) URL. Everything else stays inert text, which is the right default
+ * for a string this component did not write.
+ */
+const URL_PATTERN = /(https?:\/\/[^\s<>"')\]]+)/g
+
+function withLinks(text: string) {
+  /* Split on a capturing group, so the URLs come back in the array between
+     the text around them. Tested with `startsWith` rather than the regex,
+     because a /g regex carries lastIndex between calls and `test` would then
+     skip every other match. */
+  return text.split(URL_PATTERN).map((part, index) =>
+    part.startsWith('http://') || part.startsWith('https://') ? (
+      <a key={index} href={part} target="_blank" rel="noreferrer noopener">
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  )
+}
+
 const GREETING =
   "Ask me about Hamza's services, pricing, process or past work. I answer from what is on this site — for anything that needs a decision, I will point you to him."
 
@@ -175,7 +206,7 @@ export function Assistant() {
               key={index}
               className={`assistant__msg assistant__msg--${turn.role === 'user' ? 'user' : 'bot'}`}
             >
-              {turn.content}
+              {turn.role === 'assistant' ? withLinks(turn.content) : turn.content}
             </p>
           ))}
 

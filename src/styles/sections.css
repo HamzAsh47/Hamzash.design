@@ -4731,3 +4731,56 @@ body:has(.assistant.is-open) .assistant-launch {
   color: var(--white);
   border-bottom-color: var(--crimson);
 }
+
+/* The booking window, under the brief confirmation. Separated by a rule
+   rather than dropped straight under the copy: it is a second, optional
+   action, not the end of the sentence above it. */
+.contact__book {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--hairline);
+}
+
+.contact__book-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+/* Wraps rather than overflows: the label is six words long and the panel is
+   narrow on a phone. */
+.contact__book-link {
+  height: auto;
+  min-height: 44px;
+  padding-block: 0.7rem;
+  text-align: left;
+  white-space: normal;
+}
+
+/* Follows the last line of a wrapped label instead of floating level with the
+   middle of the block, which is where centre alignment puts it once the label
+   runs to three lines on a phone. */
+.contact__book-link .btn__arrow {
+  align-self: flex-end;
+}
+
+/* Links the assistant found in its own reply — the booking window, mostly.
+   Underlined, because a bare URL in a chat bubble reads as text until
+   something says otherwise. */
+.assistant__msg--bot a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.assistant__msg--bot a:hover,
+.assistant__msg--bot a:focus-visible {
+  color: var(--white);
+}

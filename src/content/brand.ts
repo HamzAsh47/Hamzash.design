@@ -65,6 +65,19 @@ export const site = {
   contactEmail: import.meta.env?.VITE_CONTACT_EMAIL ?? 'contact@hamzash47.com',
 
   /**
+   * The discovery-call booking window.
+   *
+   * Declared once and read everywhere it appears — the form's confirmation
+   * screen, the notification email, and the assistant's knowledge — so a
+   * changed calendar link is one edit rather than a hunt through three files
+   * with a dead link left behind in whichever one got missed.
+   */
+  scheduling: {
+    label: 'Client Discovery & Alignment Calls (Available Window)',
+    url: 'https://calendar.app.google/vhZUFTQjm9SzMMAk7',
+  },
+
+  /**
    * Direct WhatsApp route, offered alongside the brief form rather than
    * instead of it — some enquiries are a two-line question, and a four-step
    * form is the wrong shape for those.
