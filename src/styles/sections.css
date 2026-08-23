@@ -4784,3 +4784,75 @@ body:has(.assistant.is-open) .assistant-launch {
 .assistant__msg--bot a:focus-visible {
   color: var(--white);
 }
+
+/* --- Assistant: disclosure and handoff -----------------------------------
+   The notice sits above the greeting, before anything has been typed, which
+   is the only moment at which saying it is worth anything. Quiet, but not
+   hidden — the conversation really is forwarded. */
+.assistant__notice {
+  margin: 0 0 var(--space-xs);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  max-width: none;
+}
+
+/* Appears once the conversation is real. Above the composer, so it reads as
+   where this goes next rather than as another thing to type into. */
+.assistant__handoff {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-sm) 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.assistant__handoff-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.assistant__handoff-actions {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.assistant__handoff-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  /* 44px: the smallest target a thumb hits reliably. */
+  min-height: 44px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.assistant__handoff-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.assistant__handoff-btn:hover,
+.assistant__handoff-btn:focus-visible {
+  color: var(--white);
+  border-color: var(--gunmetal);
+}

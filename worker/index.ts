@@ -134,12 +134,16 @@ export function confirmationPayload(brief: Brief, from: string) {
 }
 
 /**
- * Best effort, always. Called after the brief has already reached the inbox,
- * so a Resend outage, an expired key or an unverified domain costs the
- * visitor a courtesy email and costs Hamza nothing — the enquiry is already
- * delivered and the booking link is already on their screen.
+ * Hands one message to Resend. Best effort, always — every caller is on a
+ * path where the important thing has already happened, so a Resend outage,
+ * an expired key or a domain that is not verified yet costs an email and
+ * nothing else.
  */
-async function sendConfirmation(env: Env, brief: Brief): Promise<void> {
+async function resendSend(
+  env: Env,
+  message: { to: string; subject: string; text: string; html: string; replyTo?: string },
+  label: string,
+): Promise<void> {
   if (!env.RESEND_API_KEY) return
 
   try {
@@ -149,17 +153,39 @@ async function sendConfirmation(env: Env, brief: Brief): Promise<void> {
         authorization: `Bearer ${env.RESEND_API_KEY}`,
         'content-type': 'application/json',
       },
-      body: JSON.stringify(confirmationPayload(brief, env.RESEND_FROM ?? CONFIRM_FROM)),
+      body: JSON.stringify({
+        from: env.RESEND_FROM ?? CONFIRM_FROM,
+        to: [message.to],
+        reply_to: message.replyTo ?? FROM,
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+      }),
     })
     if (!response.ok) {
       /* Logged with the body: Resend's failures are nearly always a domain
          that is not verified yet or a From that does not match it, and the
          reason is in the response rather than the status. */
-      console.error('confirmation rejected', response.status, await response.text())
+      console.error(`${label} rejected`, response.status, await response.text())
     }
   } catch (error) {
-    console.error('confirmation failed', error)
+    console.error(`${label} failed`, error)
   }
+}
+
+/** The visitor's confirmation, after the brief has already reached the inbox. */
+async function sendConfirmation(env: Env, brief: Brief): Promise<void> {
+  const payload = confirmationPayload(brief, env.RESEND_FROM ?? CONFIRM_FROM)
+  await resendSend(
+    env,
+    {
+      to: brief.email,
+      subject: payload.subject,
+      text: payload.text,
+      html: payload.html,
+    },
+    'confirmation',
+  )
 }
 
 function asText(brief: Brief) {
@@ -228,39 +254,56 @@ const CHAT_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 const MAX_CHARS = 900
 const MAX_TURNS = 12
 
-const SYSTEM_PROMPT = `You are the assistant on Hamza Ashraf's portfolio site, hamzash47.com. You talk to prospective clients about his work, his services, his pricing, and how to start a project.
+const SYSTEM_PROMPT = `You are the assistant on Hamza Ashraf's portfolio site, hamzash47.com.
 
-Talk like a person taking a brief. Not like a menu.
+You do two jobs, and knowing which one you are doing is the first thing to get right.
 
-HOW TO ANSWER
+WHICH JOB AM I DOING
 
-Answer what was actually asked. If someone asks about a logo, talk about the logo. Do not answer a narrower question with a wider package: matching every request to the closest tier and quoting its price is the single worst thing you can do here, and it is what makes an assistant feel like a phone tree. The rate card is there for when someone asks what something costs, not as the shape of every reply.
+If the message is a question about the site, the work, the process, the pricing page, or Hamza himself — answer it. Directly, from the reference below, in a sentence or three. "What are your tiers", "tell me about the portfolio", "what makes his work different", "how does a project run" are all direct questions and they deserve direct answers. Do not turn a question into a pitch. Nobody asked to be sold to.
 
-When you need more to be useful, ask for it — one specific question at a time, the one a person taking a brief would actually ask next. "What's the brand called, and is there a direction you're drawn to?" is a question. A list of five qualifying fields is a form, and they can already fill in the form.
+If the message is a project enquiry — someone describing something they want made, or saying they need help with something — run the conversation below instead.
 
-Small or informal projects are worth a real answer. Someone asking about a logo for a friend's home-cooking business is not a bad fit to be deflected — they are a person asking a question. Engage with it. Hamza's focus is funded startups needing brand, product and motion as one system, and that is worth saying if it is relevant, but say it as context, not as a rejection.
+RUNNING A PROJECT ENQUIRY
 
-WHEN YOU CANNOT ANSWER WELL
+This is the conversation Hamza would have. It is not a script; move through it the way the person in front of you actually talks, and skip anything they have already covered.
 
-Some asks need Hamza: a custom quote, a discount, a start date, anything outside the reference below, or a project too loosely described to say anything useful about. When you hit one, do this instead of guessing or dead-ending:
+1. Understand it before answering it. Say yes, this is something Hamza does. Then ask about what is genuinely missing — who it is for, whether they have references, anything they specifically do not want. One question at a time. Then reflect the brief back in your own words, including where you would take it: "for a bold, premium fragrance brand, that likely leans darker and more minimal — a confident layout rather than a decorative one." That sentence is the whole point of this step. It shows you understood, and it is the only thing that separates you from a form.
 
-1. Ask them to write out the whole thing in their own words, here in the chat — what they need, how they need it, any constraints, budget or deadline they already have in mind.
-2. Once they have written it, tell them it is with Hamza and he replies within 24 hours. Say the brief form on this page is the more reliable route if they would rather send it that way, since it reaches his inbox directly.
-3. Offer the call as the faster parallel route, so they are not just waiting: ${site.scheduling.label} — ${site.scheduling.url}
+2. Start at the foundation, once. If what they are asking for sits on top of something that does not exist yet — posts before there is a brand, a reel before there is a type system — say so plainly: before individual posts it is usually worth setting the brand identity first, logo, colour, type, so everything after it is built on one system instead of one-off pieces. That is true and it is why it is worth saying. Say it ONCE. If they are not interested, drop it completely and help with what they actually asked for. Repeating it is the fastest way to sound like a machine.
 
-Offer that same link whenever someone asks about booking a call, a meeting, or talking to Hamza directly. Give the URL in full, on its own, so it is clickable.
+3. If they take it, build on it — still no prices. Once a system exists, post and reel design gets faster and cheaper, and it fits an estimated budget. Consistent visuals also perform better, with people and with the feed. Offer that as context if it helps them decide. Never as pressure.
 
-HARD RULES — these override everything above
+4. Prices only when they ask. "How much" is the trigger, and then give real figures from the reference — tiers if tiers fit, a narrower estimate if they only want posts or reels. Add, honestly: they can also talk to Hamza directly, and once he understands the full scope there is often room to work out a better rate together. He does negotiate on calls. Never name a discount, a percentage or a reduced figure — only that the conversation is possible.
+
+5. Offer the handoff when they are clearly interested. Asking about cost, timing or next steps is the signal. Ask directly: would you like me to pass this conversation to Hamza — WhatsApp, or a call? Do not wait to be asked. There are buttons for both under this chat, so tell them they are there.
+
+NEVER:
+- Quote a package price as your first or second reply to a creative-services request. That is the single thing that makes this feel like a vending machine.
+- Repeat the brand-first pitch after someone has passed on it.
+- Claim work outside what the reference lists.
+- Promise a discount, a percentage or a specific reduced price. Only that direct negotiation with Hamza is possible.
+
+WHEN YOU CANNOT HELP
+
+If the ask is outside the reference, needs a custom quote, or is too vague to say anything useful about: ask them to write the whole thing out in their own words here — what they need, how, any budget or deadline they have in mind. Then tell them it is with Hamza and he replies within 24 hours, and that the brief form on this page reaches him directly if they would rather send it that way. Offer the call as the faster route: ${site.scheduling.label} — ${site.scheduling.url}
+
+HANDOFF ROUTES
+- WhatsApp: ${site.whatsapp.display}
+- Book a call: ${site.scheduling.url} — this is Hamza's live availability. It reads his real calendar and only offers slots he is actually free for, so it is always current. Describe it that way rather than as a generic booking page.
+Both are buttons under this chat. Point at them rather than only pasting a link.
+
+HARD RULES
 
 1. Every fact about Hamza comes from the reference below. Do not invent services, clients, results or capabilities.
-2. Never invent, estimate, round, discount or negotiate a price. Quote the exact figures from the reference. Anything not in it — a custom quote, a discount, a bundled deal — needs Hamza.
-3. Never commit him to a deadline, a start date, or availability. Delivery times listed against a tier are what that tier includes, not a promise about when he can start.
+2. Never invent, estimate, round or negotiate a price. Quote the exact figures from the reference.
+3. Never commit him to a deadline, a start date, or availability beyond what the booking page shows. Delivery times listed against a tier are what that tier includes, not a promise about when he can start.
 4. You are not Hamza. Refer to him in the third person.
-5. Reply in the language the visitor wrote in — Urdu, Roman Urdu, Spanish, German, Arabic, anything. Keep prices, tier names and package names exactly as written in the reference. This is about the language YOU reply in; it says nothing about which languages Hamza speaks. If asked what languages HE works in, answer only from the reference.
+5. Reply in the language the visitor wrote in — Urdu, Roman Urdu, Spanish, German, Arabic, anything. Keep prices, tier names and package names exactly as written in the reference. This is about the language YOU reply in; it says nothing about which languages Hamza speaks.
 
 STYLE
 
-Short. Two or three sentences for most things. No preamble, no "great question", no emoji. Plain sentences — no markdown headers, and no bullet lists unless you are actually listing tiers or prices. Be concrete: if a tier genuinely answers what they asked, name it and its price.
+Short. Two or three sentences for most things. No preamble, no "great question", no emoji. Plain sentences, no markdown headers, and no bullet lists unless you are actually listing tiers or prices.
 
 REFERENCE:
 ${botKnowledge}`
@@ -310,10 +353,143 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   }
 }
 
+/* --- Handoff -------------------------------------------------------------- */
+
+/* A handoff is the visitor choosing to continue with a person, and it costs
+   two emails. These caps are what stop that being a way to post arbitrary
+   text into Hamza's inbox on demand: a conversation has to actually have
+   happened, and it cannot be enormous. */
+const MIN_HANDOFF_TURNS = 2
+const MAX_TRANSCRIPT_CHARS = 20_000
+
+type HandoffRoute = 'whatsapp' | 'call'
+
+/**
+ * A readable brief, written by the model from the conversation it just had.
+ *
+ * Separate from the transcript on purpose. The point of this email is to be
+ * actionable in ten seconds — what they want, what was covered, how they
+ * chose to continue — without reading a chat log to find out.
+ */
+const SUMMARY_PROMPT = `You are summarising a chat between a prospective client and the assistant on a designer's website, for the designer to read.
+
+Write exactly these four lines and nothing else. No preamble, no markdown, no bullets.
+
+Name: the visitor's name if they gave one, otherwise "not given"
+Project: what they want, in one plain sentence
+Scope discussed: what the conversation actually covered
+Next step: how they chose to continue
+
+Report only what is in the conversation. Do not infer a budget, a deadline or a name that was never stated, and do not add advice or next actions of your own. If something was never discussed, write "not discussed".`
+
+const transcriptOf = (turns: ChatTurn[]) =>
+  turns
+    .map((turn) => `${turn.role === 'user' ? 'Visitor' : 'Assistant'}: ${turn.content}`)
+    .join('\n\n')
+    .slice(0, MAX_TRANSCRIPT_CHARS)
+
+const pre = (body: string) =>
+  `<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;` +
+  `line-height:1.55;white-space:pre-wrap;word-break:break-word;margin:0">${escape(body)}</pre>`
+
+async function handleHandoff(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  if (request.method !== 'POST') return json(405, { error: 'Method not allowed' })
+
+  let body: { messages?: ChatTurn[]; route?: HandoffRoute }
+  try {
+    body = (await request.json()) as { messages?: ChatTurn[]; route?: HandoffRoute }
+  } catch {
+    return json(400, { error: 'Malformed request' })
+  }
+
+  const turns = (Array.isArray(body.messages) ? body.messages : [])
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-MAX_TURNS)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }))
+
+  /* Not an error the visitor should see. They are being sent to WhatsApp or
+     the booking page either way; there is simply nothing worth emailing yet. */
+  if (turns.filter((t) => t.role === 'user').length < MIN_HANDOFF_TURNS) {
+    return json(200, { ok: true, notified: false })
+  }
+
+  const route: HandoffRoute = body.route === 'whatsapp' ? 'whatsapp' : 'call'
+  ctx.waitUntil(notifyHandoff(env, turns, route))
+  return json(200, { ok: true, notified: true })
+}
+
+async function notifyHandoff(env: Env, turns: ChatTurn[], route: HandoffRoute): Promise<void> {
+  const transcript = transcriptOf(turns)
+  const chose = route === 'whatsapp' ? 'WhatsApp' : 'a call'
+
+  let summary = ''
+  try {
+    const result = (await env.AI.run(CHAT_MODEL, {
+      messages: [
+        { role: 'system' as const, content: SUMMARY_PROMPT },
+        { role: 'user' as const, content: `${transcript}\n\nThey chose to continue by ${chose}.` },
+      ],
+      max_tokens: 300,
+      temperature: 0.2,
+    })) as { response?: string }
+    summary = result.response?.trim() ?? ''
+  } catch (error) {
+    console.error('handoff summary failed', error)
+  }
+
+  /* A failed summary must not cost the lead. The transcript still goes out,
+     and this email still says who is waiting and where. */
+  if (!summary) summary = 'Summary unavailable — see the full transcript sent to the review inbox.'
+
+  const [lead, review] = handoffEmails(turns, route, summary)
+
+  /* Two emails to two addresses, never one to both. The lead inbox should
+     only ever hold the readable brief; the review inbox only ever the raw
+     log. Awaited separately so one being rejected cannot stop the other. */
+  await resendSend(env, lead, 'handoff summary')
+  await resendSend(env, review, 'handoff transcript')
+}
+
+/**
+ * The two handoff emails. Pure, so their separation can be tested — the whole
+ * point of this pair is that the summary and the transcript never end up in
+ * the same inbox.
+ */
+export function handoffEmails(turns: ChatTurn[], route: HandoffRoute, summary: string) {
+  const chose = route === 'whatsapp' ? 'WhatsApp' : 'a call'
+  const transcript = transcriptOf(turns)
+  const firstAsk = turns.find((t) => t.role === 'user')?.content.slice(0, 60) ?? 'new enquiry'
+
+  return [
+    {
+      to: site.inboxes.lead,
+      subject: `New enquiry from the site assistant — continuing by ${chose}`,
+      text: `${summary}\n\nFull transcript sent to ${site.inboxes.review}.`,
+      html:
+        '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.6">' +
+        `${pre(summary)}` +
+        `<p style="margin:20px 0 0;color:#808792;font-size:13px">Full transcript sent to ${escape(site.inboxes.review)}.</p>` +
+        '</div>',
+    },
+    {
+      to: site.inboxes.review,
+      subject: `Full transcript — ${firstAsk} — chose ${chose}`,
+      text: `Full transcript. Visitor chose ${chose}.\n\n${transcript}`,
+      html:
+        '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.6">' +
+        `<p style="margin:0 0 16px;color:#808792">Unedited. Visitor chose ${escape(chose)}.</p>` +
+        `${pre(transcript)}` +
+        '</div>',
+    },
+  ] as const
+}
+
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url)
     if (pathname === '/api/chat') return handleChat(request, env)
+    if (pathname === '/api/handoff') return handleHandoff(request, env, ctx)
     if (pathname !== '/api/brief') return new Response('Not found', { status: 404 })
     if (request.method !== 'POST') {
       return json(405, { error: 'Method not allowed' })

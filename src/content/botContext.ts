@@ -76,6 +76,7 @@ CultureLancer (2024) — UI/UX and product design for a two-sided job-matching p
 WACA / WA Cricket (2024) — ANZPCC 2024 tournament guide. A 64-page interactive guide built on a repeatable design system in about a week, then a matching A5 print edition in a further three to four days. Worked as art director with a collaborator.
 Uplift K12 (Oct 2023—Oct 2025) — a funded home-schooling math platform. Started at 2 sample games, grew to 270+ interactive math games across grades K-8, then full ownership of the platform's UI/UX: dashboard, lesson playlists and a shared interactive whiteboard. Also the K1-K4 curriculum structure and a 20-game physical board game adaptation.
 EZ Sports Apparel (Apr 2024—present) — standing seasonal design partner for a Texas custom-uniform business. Client-facing team uniform mockup decks and vendor-ready production files, across recurring league accounts (Bear Creek Little League, Prodigy, Outlaws, Texas Bombers, Power Soccer, LTYA).
+GoTeach.ai (2025) — AI-driven EdTech platform for teachers, for the same client as Uplift K12. Brand identity from zero: mascot-led logo, colour and type system, a nine-pose mascot cast. Extended into a full UI/UX design system and the core product screens — landing page, auth flows, and a TEKS-aligned worksheet dashboard. Designed, not built: no development work is claimed on this one.
 Full case studies are on the site under Work. More work: ${brand.portfolioLinks.map((l) => `${l.label} on ${l.platform}`).join(', ')}.
 `.trim()
 
@@ -109,6 +110,13 @@ export const botKnowledge = [
   '',
   `LANGUAGES`,
   `Hamza works in English and Urdu. Client-facing work — writing, presentations, calls — is in English.`,
+  '',
+  /* So "tell me about the site" or "what's on your portfolio" gets an answer
+     rather than a deflection into a pitch. The bot is a guide to this page
+     first and an intake conversation second. */
+  `THE SITE ITSELF (answer questions about it directly, from this)`,
+  `hamzash47.com is Hamza's portfolio. Top to bottom it runs: a hero; The System (why brand, product and motion are one system rather than three vendors); Work (the case studies, filterable by Brand Identity, UI/UX and Motion Branding); Pricing (packages and tiers, plus monthly retainers); Reviews (real LinkedIn reviews from named clients, each linking to the public post it appears in); Process (how a project runs); FAQ; and the brief form at the bottom. Each case study opens as its own page with the same four-part structure — business problem, the system built, the deliverable, result — and images that can be clicked to open full size.`,
+  `The reviews on the site are real and verifiable, each linked to the public LinkedIn post it came from. Named reviewers: Dr. Marc Anthony Santamaria (Santamaria Law Firm), Brian Schoellkopf (EZ Sports Apparel), Mehul Shah (Uplift K12 / GoTeach.ai).`,
   '',
   `HOW TO GET IN TOUCH`,
   `Brief form on the site (four short steps, best for real enquiries — it reaches ${site.contactEmail}). WhatsApp ${site.whatsapp.display} for quick questions. LinkedIn: ${brand.handles.linkedin.href}.`,

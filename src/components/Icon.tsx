@@ -18,6 +18,7 @@ export type IconName =
   | 'behance'
   | 'whatsapp'
   | 'assistant'
+  | 'calendar'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   linkedin: (
@@ -80,6 +81,16 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M3 8.4A3.4 3.4 0 0 1 6.4 5h7.2A3.4 3.4 0 0 1 17 8.4v3.9a3.4 3.4 0 0 1-3.4 3.4H8.2L4.6 18.3a.4.4 0 0 1-.6-.35v-2.5A3.4 3.4 0 0 1 3 12.3Z" />
       <path d="M10 7.8l.85 2.1 2.1.85-2.1.85L10 13.7l-.85-2.1-2.1-.85 2.1-.85Z" />
+    </>
+  ),
+  /* Drawn rather than set as a glyph, for the same reason the rating stars
+     are: a character renders at whatever weight the fallback font happens to
+     have, and a clock at 16px came out as a smudge. */
+  calendar: (
+    <>
+      <path d="M3.6 5.4h12.8v11H3.6zM3.6 8.6h12.8" />
+      <path d="M6.8 3.6v2.4M13.2 3.6v2.4" />
+      <path d="M6.6 11.4h2M11.4 11.4h2M6.6 13.8h2M11.4 13.8h2" />
     </>
   ),
   whatsapp: (

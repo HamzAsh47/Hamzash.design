@@ -47,6 +47,19 @@ function withLinks(text: string) {
 const GREETING =
   "Ask me about Hamza's services, pricing, process or past work. I answer from what is on this site — for anything that needs a decision, I will point you to him."
 
+/* Shown before the visitor has typed anything, because that is the only point
+   at which telling them is worth anything. Handing this conversation on is
+   the whole purpose of the two buttons below it, so it is stated plainly and
+   up front rather than buried in a footnote nobody reads. */
+const DISCLOSURE =
+  'This conversation is recorded and shared with Hamza Ashraf so he can follow up personally.'
+
+/* A handoff emails Hamza a summary and the transcript, so it should only fire
+   on a conversation that has actually happened. Matches the Worker's own
+   floor — it enforces this again server-side, since a client check protects
+   nothing on its own. */
+const MIN_HANDOFF_TURNS = 2
+
 export function Assistant() {
   const [open, setOpen] = useState(false)
   const [turns, setTurns] = useState<Turn[]>([])
@@ -131,6 +144,32 @@ export function Assistant() {
     el.style.height = `${el.scrollHeight}px`
   }
 
+  /* Hands the conversation to a person, and tells Hamza it happened.
+     The email is deliberately not awaited before opening the destination: the
+     visitor asked to talk to somebody, and making them watch a spinner while
+     two emails go out is the wrong order. `keepalive` is what lets the
+     request survive the tab losing focus to WhatsApp. */
+  const handoff = (route: 'whatsapp' | 'call') => {
+    const target =
+      route === 'whatsapp'
+        ? `https://wa.me/${site.whatsapp.number}?text=${encodeURIComponent(site.whatsapp.prefill)}`
+        : site.scheduling.url
+
+    if (turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS) {
+      void fetch('/api/handoff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: turns, route }),
+        keepalive: true,
+      }).catch(() => {
+        /* Silent. The visitor is on their way to Hamza either way, and an
+           error toast about an email they never asked for helps nobody. */
+      })
+    }
+
+    window.open(target, '_blank', 'noopener,noreferrer')
+  }
+
   const send = async (text: string) => {
     const message = text.trim()
     if (!message || busy) return
@@ -199,6 +238,7 @@ export function Assistant() {
         </header>
 
         <div className="assistant__log" ref={logRef} role="log" aria-live="polite" aria-atomic="false">
+          <p className="assistant__notice">{DISCLOSURE}</p>
           <p className="assistant__msg assistant__msg--bot">{GREETING}</p>
 
           {turns.map((turn, index) => (
@@ -269,6 +309,26 @@ export function Assistant() {
             Send
           </button>
         </form>
+
+        {/* Appear once there is a conversation worth handing over, which is
+            also the point at which the assistant is told to offer this. Real
+            buttons rather than links the model has to remember to produce:
+            the route out of a chat should not depend on what a model wrote. */}
+        {turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS && (
+          <div className="assistant__handoff">
+            <p className="assistant__handoff-label">Talk to Hamza directly</p>
+            <div className="assistant__handoff-actions">
+              <button className="assistant__handoff-btn" onClick={() => handoff('whatsapp')}>
+                <Icon name="whatsapp" />
+                WhatsApp
+              </button>
+              <button className="assistant__handoff-btn" onClick={() => handoff('call')}>
+                <Icon name="calendar" />
+                Book a call
+              </button>
+            </div>
+          </div>
+        )}
 
         <p className="assistant__foot">
           Answers come from this site. For a quote or a start date,{' '}

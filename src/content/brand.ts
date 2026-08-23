@@ -78,6 +78,20 @@ export const site = {
   },
 
   /**
+   * Where a lead ends up, split by what the mail is for.
+   *
+   * `lead` gets the readable brief — a summary you can act on without
+   * reading a conversation. `review` gets the raw transcript, which is a
+   * different job: checking the assistant did not invent a capability or
+   * misquote a price. One address doing both means the useful mail arrives
+   * buried under the audit copy.
+   */
+  inboxes: {
+    lead: 'contact@hamzash47.com',
+    review: 'updates@hamzash47.com',
+  },
+
+  /**
    * Direct WhatsApp route, offered alongside the brief form rather than
    * instead of it — some enquiries are a two-line question, and a four-step
    * form is the wrong shape for those.
