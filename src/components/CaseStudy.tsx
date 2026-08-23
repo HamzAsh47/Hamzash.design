@@ -7,7 +7,14 @@ import type {
 } from '../content'
 import { CrtImage } from './CrtImage'
 import { Lightbox, type LightboxItem } from './Lightbox'
-import { caseStudies, caseStudySections, figuresFor, pillarFilters, site } from '../content'
+import {
+  caseStudies,
+  caseStudySections,
+  figuresFor,
+  pillarFilters,
+  site,
+  testimonialById,
+} from '../content'
 import { navigateHome, navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
@@ -232,13 +239,27 @@ function CaseSectionBody({
 
   flushCopy()
 
-  if (section.quote) {
+  /* Read from the reviews record, verbatim — including the reviewer's own
+     grammar. Tidying a client's wording is rewriting their testimonial. */
+  const quote = section.quoteFrom ? testimonialById(section.quoteFrom) : undefined
+  if (quote) {
     blocks.push(
       <figure className="case__quote" key="quote">
-        <blockquote>{section.quote.text}</blockquote>
+        <blockquote>{quote.quote}</blockquote>
         <figcaption>
-          <span className="case__quote-author">{section.quote.author}</span>
-          <span className="case__quote-role">{section.quote.role}</span>
+          <span className="case__quote-author">{quote.name}</span>
+          <span className="case__quote-role">{quote.company}</span>
+          {quote.sourceUrl && (
+            <a
+              className="case__quote-source"
+              href={quote.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on LinkedIn
+              <span aria-hidden="true">↗</span>
+            </a>
+          )}
         </figcaption>
       </figure>,
     )

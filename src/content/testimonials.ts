@@ -87,6 +87,18 @@ export const testimonials: Testimonial[] = [
 ]
 
 /**
+ * One record per review, looked up by id.
+ *
+ * Case studies quote the same people this section does, and the two had
+ * already drifted: the copy handed over for the EZ Sports study tidied
+ * Brian's grammar into "a reliable resource that can help you with a variety
+ * of graphics", which is not what he wrote. Reading the quote from here means
+ * a case study cannot carry a version of a testimonial that the reviews
+ * section would contradict.
+ */
+export const testimonialById = (id: string) => testimonials.find((item) => item.id === id)
+
+/**
  * Optional scrolling client logo strip. Left empty on purpose — a logo wall is
  * a trust claim, so it only gets populated with companies that are cleared to
  * appear. Add `{ name, logo }` entries to switch the strip on.

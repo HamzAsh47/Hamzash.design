@@ -62,12 +62,13 @@ export type CaseSection = {
   more?: CaseParagraph[]
   figures?: CaseFigureRow[]
   /**
-   * A real, attributed client quote. Never a paraphrase dressed as one: an
-   * invented sentence in quotation marks is the one thing on a portfolio the
-   * client can read and deny. Where the words are not on record, the
-   * narrative says what happened in its own voice instead.
+   * The id of a review in `testimonials.ts`, quoted at the end of this
+   * section. A reference rather than the words themselves, so a case study
+   * cannot carry a tidied-up version of a testimonial the reviews section
+   * publishes verbatim — and so nothing can appear here that is not already
+   * in the record as real and attributable.
    */
-  quote?: { text: string; author: string; role: string }
+  quoteFrom?: string
 }
 
 /**
@@ -938,11 +939,7 @@ export const caseStudies: CaseStudy[] = [
         more: [
           'Over that time the scope grew from a two-sample game request into full ownership of a funded platform’s UI/UX, its game library, its K1–K4 curriculum structure, and a physical product line — with Mehul as the client throughout.',
         ],
-        quote: {
-          text: 'Hamza has incredible talent with design. I highly recommend his work!',
-          author: 'Mehul Shah',
-          role: 'Product Manager, Uplift K12',
-        },
+        quoteFrom: 'review-shah',
       },
     },
     deliverables: [
@@ -953,6 +950,164 @@ export const caseStudies: CaseStudy[] = [
       'K1–K4 math syllabus structure and chapter planning',
       'Promotional videos, graphic assets and pitch deck',
       'Physical board game — 20 two-player games, box dieline, cover, cards, manipulatives and booklet',
+    ],
+  },
+  {
+    slug: 'ez-sports',
+    client: 'EZ Sports Apparel',
+    projectType: 'Team Uniform Mockups & Vendor Production Graphics',
+    /* Brand only. Apparel design and production graphics are neither product
+       UI nor motion, and stretching either tag to cover them would misdescribe
+       the work to anyone filtering for it. */
+    pillars: ['brand'],
+    year: 'Apr 2024—Present',
+    cover: coverFor('ez-sports') ?? cover04,
+    coverAlt: 'EZ Sports Apparel team uniform mockup and production graphics',
+    resultStat:
+      'A standing seasonal partner since 2024 — BCLL, LTYA, Outlaws and others returning each season rather than one-off jobs',
+    plannedClient: 'EZ Sports Apparel',
+    isPlaceholder: false,
+    atAGlance: [
+      'Running continuously since April 2024 as the seasonal design partner, not a job-by-job supplier',
+      'One repeatable deck structure means a ten-team league moves through approval without inventing a process per team',
+      'Client-facing mockups and vendor production files are separate deliverables, so what was approved and what gets printed can never be confused',
+      'Recurring accounts across baseball, softball, football, basketball, soccer and volleyball — BCLL, Prodigy, Outlaws, Texas Bombers, Power Soccer, LTYA',
+    ],
+    body: {
+      problem: {
+        copy: 'Brian runs EZ Sports Apparel, a custom-uniform and team-store business based in Cypress, Texas, serving clubs, schools and leagues across baseball, softball, football, basketball, soccer and volleyball. He found me through Freelancer.com; the working relationship then moved into ongoing, direct work outside the platform, running continuously since April 2024.',
+        more: [
+          'The problem EZ Sports Apparel needed solved sits before manufacturing ever starts: a school or league signs up for a new season, and someone has to show every team — often several teams inside the same league — exactly what their jersey, pants and other gear will look like, in their own colours and branding, before anything gets approved and sent to a vendor to print. Get that step wrong and the league is ordering blind on colours, logo placement, and name-and-number layout.',
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'The step before manufacturing: what a team sees before it signs off.',
+            slots: [
+              {
+                slot: 'approval-mockup',
+                alt: 'EZ Sports Apparel client-facing uniform approval mockup',
+              },
+            ],
+          },
+        ],
+      },
+      systemBuilt: {
+        copy: 'Every team’s apparel got the same repeatable structure, so a league with ten different team names could move through it fast without each one needing its own process invented from scratch: a brand identity and vision intro, a colour palette and font/logo asset sheet with exact CMYK, RGB and HEX values specified for the printer, a spring jersey design spread, and a pant design spread — closing with the full team lockup.',
+        more: [
+          'Once a client signed off on the look, the same design got rebuilt as a production-ready file — sized, labelled, and in some cases explicitly marked “FOR VENDOR” — separate from the client-facing presentation, so there was never ambiguity between what the client approved and what gets sent to print.',
+        ],
+        figures: [
+          {
+            after: 0,
+            caption: 'The deck structure, unchanged from team to team: identity, palette and specs, jersey, pants, lockup.',
+            slots: [
+              {
+                slot: 'deck-structure',
+                alt: 'EZ Sports Apparel repeatable mockup deck structure',
+              },
+            ],
+          },
+          {
+            after: 0,
+            caption: 'Exact CMYK, RGB and HEX on the sheet, because the printer cannot guess a club colour.',
+            slots: [
+              {
+                slot: 'colour-specs',
+                alt: 'Colour palette and logo asset sheet with CMYK, RGB and HEX values',
+              },
+            ],
+          },
+          {
+            after: 1,
+            caption: 'Two files, deliberately: the one that gets approved, and the one that gets printed.',
+            slots: [
+              {
+                slot: 'vendor-file',
+                alt: 'Vendor-ready production file, sized and labelled for print',
+              },
+            ],
+          },
+        ],
+      },
+      deliverable: {
+        copy: 'The accounts differ in sport, cut and colourway; the route from mockup to vendor file does not.',
+        more: [
+          {
+            heading: 'Recurring league work',
+            copy: 'Bear Creek Little League (BCLL) is a standing client — a full season meant producing individual mockup decks for each team in the league: Hooks, Blue Rocks, TinCaps, Storm, Bulls, Rattlers, Rail Riders, Marauders and Red Wings, each with its own colour story and jersey/pant design built off the same repeatable deck structure.',
+          },
+          {
+            heading: 'Prodigy',
+            copy: 'A recurring baseball and softball client with the widest range of any single account — button-downs, crewnecks and softball-specific cuts across multiple colourways (Armed Forces green, Awareness pink, Black Ops, American white, and more), plus fabric-specific variants like a 160 GSM interlock option.',
+          },
+          {
+            heading: 'Outlaws',
+            copy: 'Full team identity work including a red colourway with a combined mockup-and-die-cut sublimation layout, and a separate black colourway. Die-cut sheets are their own deliverable, since sublimated jerseys print differently than a standard screen-printed design.',
+          },
+          {
+            heading: 'Additional recurring accounts',
+            copy: 'Texas Bombers, Power Soccer and LTYA Softball League are among the longer-standing relationships — teams that return season after season rather than one-off requests, plus other one-off school and club jobs as they come in.',
+          },
+          'Across every account the work isn’t limited to baseball — soccer, softball and other school sports get the same mockup-to-vendor treatment. Alongside the core apparel work, smaller packaging pieces — bags and branded soft goods for EZ Sports Apparel itself — have come up as one-off add-ons within the same working relationship.',
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'Nine teams, one league, one deck structure — only the colour story changes.',
+            slots: [
+              {
+                slot: 'bcll-teams',
+                alt: 'Bear Creek Little League team uniform mockups across the league',
+              },
+            ],
+          },
+          {
+            after: 2,
+            caption: 'One account, every cut and colourway it orders.',
+            slots: [
+              {
+                slot: 'prodigy-colourways',
+                alt: 'Prodigy button-down, crewneck and softball cuts across colourways',
+              },
+            ],
+          },
+          {
+            after: 3,
+            caption: 'Sublimation prints differently, so the die-cut sheet is its own deliverable.',
+            slots: [
+              {
+                slot: 'outlaws-diecut',
+                alt: 'Outlaws die-cut sublimation layout alongside the uniform mockup',
+              },
+            ],
+          },
+          {
+            after: 5,
+            slots: [
+              {
+                slot: 'packaging',
+                alt: 'Branded bags and soft goods for EZ Sports Apparel',
+              },
+            ],
+          },
+        ],
+      },
+      result: {
+        copy: 'Several of these accounts — BCLL, LTYA and Outlaws among them — are recurring, multi-season relationships rather than single projects, with new team decks produced each time a league’s roster changes or a new season starts.',
+        more: [
+          'The repeatable deck structure is what makes that turnaround possible: a new team’s colours and logo drop into an existing system rather than requiring a new design process each time. That is the difference between a supplier who is called when there is work and a partner a season is planned around.',
+        ],
+        quoteFrom: 'review-schoellkopf',
+      },
+    },
+    deliverables: [
+      'Team-by-team apparel mockup decks — brand identity, colour palette (CMYK/RGB/HEX), font and logo assets, jersey and pant designs',
+      'Vendor-ready production files, sized and labelled for print',
+      'Die-cut sublimation layouts for sublimated jerseys',
+      'Multiple fabric and cut variants per client — button-down, crewneck, softball-specific',
+      'Ongoing seasonal design support across recurring league and club accounts',
+      'Occasional packaging and soft-goods design for EZ Sports Apparel’s own branded materials',
     ],
   },
   {

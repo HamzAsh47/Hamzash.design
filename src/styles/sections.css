@@ -4713,3 +4713,21 @@ body:has(.assistant.is-open) .assistant-launch {
     grid-column: 1;
   }
 }
+
+/* The public post the review appears in. A testimonial the reader can go and
+   check is worth more than one they have to take on trust. */
+.case__quote-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-left: auto;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.case__quote-source:hover,
+.case__quote-source:focus-visible {
+  color: var(--white);
+  border-bottom-color: var(--crimson);
+}

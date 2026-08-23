@@ -58,14 +58,23 @@ function HeadingBase({
     .filter(Boolean)
     .join(' ')
 
+  /* The plain sentence, for anything that should not see the word split:
+     screen readers, and the clipboard. */
+  const plain = useMemo(() => text.replace(/[[\]]/g, ''), [text])
+
   return (
     <Tag
       className={classes}
       id={id}
+      /* Named on the element rather than duplicated into a visually-hidden
+         span beside it. The words are `display: inline-block`, which some
+         screen readers announce one fragment at a time, so the plain sentence
+         does need to exist somewhere — but as a second text node it was also
+         in the DOM twice, and copying any heading off the page pasted it
+         twice: "What clients actually said.What clients actually said." */
+      aria-label={plain}
       style={delayMs ? ({ '--headline-delay': `${delayMs}ms` } as React.CSSProperties) : undefined}
     >
-      {/* Screen readers get the plain sentence, not word-by-word fragments. */}
-      <span className="visually-hidden">{text.replace(/[[\]]/g, '')}</span>
       <span aria-hidden="true">
         {tokens.map((token, index) => (
           <span
