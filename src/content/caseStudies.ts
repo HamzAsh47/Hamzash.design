@@ -1111,22 +1111,231 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    slug: 'case-03',
-    client: 'Client Name',
-    projectType: 'Full System — Brand, Product & Motion',
-    pillars: ['brand', 'uiux', 'motion'],
-    year: '2026',
-    cover: cover03,
-    coverAlt: 'Placeholder cover for a full system case study',
-    resultStat: 'result coming soon',
+    slug: 'goteach',
+    client: 'GoTeach.ai',
+    projectType: 'AI-Driven EdTech Brand & Product Design System',
+    /* Brand and UI/UX. No motion: the deliverables are an identity, a design
+       system and product screens, and there is no motion work to claim. */
+    pillars: ['brand', 'uiux'],
+    /* The brand manual is dated March 2025 and the work ran inside the Uplift
+       K12 freelance window. The exact start month was never established, so
+       the year is as precise as this gets rather than a guessed month. */
+    year: '2025',
+    cover: coverFor('goteach') ?? cover03,
+    coverAlt: 'GoTeach.ai brand identity and product interface',
+    /* Careful wording. "Shipped" on a portfolio card reads as launched, and
+       what is established here is the design: brand, system and screens. No
+       build or launch is claimed anywhere in this entry. */
+    resultStat:
+      'A brand system, a UI/UX design system and the core product screens, all built from one visual language',
     plannedClient: 'GoTeach.ai',
-    isPlaceholder: true,
-    body: PLACEHOLDER_BODY,
+    isPlaceholder: false,
+    atAGlance: [
+      'A full brand system from zero: mascot-led logo, a three-tone primary palette plus accents, a dual-typeface system and clear-space rules for every lockup',
+      'A nine-pose mascot character set, so the identity has a cast to draw from rather than one illustration copy-pasted everywhere',
+      'The brand system extended directly into a UI/UX design system — components, a two-style icon font, shadows, an interface palette and a full type scale',
+      'Core product screens on that same system: landing page, auth flows, and a TEKS-aligned worksheet dashboard across four subjects and grades 3–8',
+      'Mehul again — the same client as Uplift K12, on a second project inside that freelance-era relationship',
+    ],
+    body: {
+      problem: {
+        copy: 'Mehul — the same contact as Uplift K12 — brought me onto a second, related project inside that freelance-era relationship: GoTeach.ai, an AI-driven EdTech platform aimed at teachers. The idea was to give teachers smart tools for lesson planning and classroom engagement, centred on a syllabus maker and an auto-generated, TEKS-aligned test-prep library — STAAR Math, STAAR Reading, STAAR Social Studies and Bluebonnet Math, across grades 3 through 8.',
+        more: [
+          'GoTeach.ai started with nothing built: no logo, no colour system, no visual language. And the brief had a specific tension in it. The platform had to stand out in an increasingly crowded, AI-saturated EdTech market without reading as cold or purely technological. Teachers are the primary user, and a tool that leans too hard on "AI" as a brand risks feeling impersonal to exactly the audience it is trying to win. The identity had to hold technology and humanity at the same time.',
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'The brief in one line: read as intelligent without reading as a machine.',
+            slots: [
+              {
+                slot: 'challenge',
+                alt: 'The GoTeach.ai brand challenge — balancing technology and humanity',
+              },
+            ],
+          },
+        ],
+      },
+      systemBuilt: {
+        copy: 'The answer was a mascot-led identity rather than a purely typographic or abstract mark — a symbol for connectivity and knowledge-sharing, built by turning the word "Go" into a friendly, glasses-wearing character that reads as approachable rather than robotic. A face is the shortest route to warmth in a category that mostly signals intelligence, and it settled the technology-versus-humanity tension in the mark itself rather than in the copy around it.',
+        more: [
+          'That mascot became the anchor everything else was built around. Colour, typography and clear-space rules were all defined so the mark stayed legible and consistent at every size, from a favicon to a letterhead.',
+          'Rather than stopping at a brand manual, the same colour and typography system was extended directly into a full UI/UX design system — components, icons, shadows and an interface-specific palette — so the product and the brand collateral around it could never read as two different companies.',
+        ],
+        figures: [
+          {
+            after: 0,
+            caption: 'The wordmark, given a face: "Go" as a character rather than a logotype.',
+            slots: [
+              {
+                slot: 'mascot-concept',
+                alt: 'The GoTeach.ai mascot built from the "Go" wordmark',
+              },
+            ],
+          },
+          {
+            after: 1,
+            caption: 'Full lockup and symbol-only mark, so the identity survives being shrunk to a favicon.',
+            slots: [
+              {
+                slot: 'logo-lockup',
+                alt: 'GoTeach.ai primary logo lockup with wordmark and tagline',
+              },
+              {
+                slot: 'logo-secondary',
+                alt: 'GoTeach.ai symbol-only secondary mark',
+              },
+            ],
+          },
+        ],
+      },
+      deliverable: {
+        copy: 'Seven things came out of it, and each one is built on the one before rather than beside it.',
+        more: [
+          {
+            heading: 'Brand identity & logo system',
+            copy: 'The mascot carries the brand’s core idea: a character built from the "Go" wordmark, given a face, glasses and a posture library rather than left as a static shape — the point being that a teaching tool should feel like a helpful presence in the room, not a piece of software. The primary logo pairs that symbol with the GoTeach.ai wordmark and the tagline "Teaching Meets Innovation"; a symbol-only mark handles the places the full lockup will not fit legibly — a favicon, an app icon, a watermark. Minimum clear-space rules were defined for every lockup variation, so the mark never gets crowded by whatever sits next to it.',
+          },
+          {
+            heading: 'Colour and typography',
+            copy: 'Colour is built on three primary tones — Deep Blue #2D10DD, Vibrant Purple #5A38F6 and Dark Gray #39393A — plus a set of accents (Pink #FF69B4, Teal #A1E3D8, Yellow #FEC601) reserved for energy and highlight moments rather than core brand surfaces. That reservation is the whole point: the accents keep the palette warm without tipping it into looking like a children’s toy brand. Typography splits logo from body use — Quadaptor-Regular carries the wordmark specifically, Oxanium handles everything else — so the logo keeps a distinct identity from the interface type without the two feeling unrelated.',
+          },
+          {
+            heading: 'The mascot cast',
+            copy: 'A nine-pose character set, with different expressions and gestures, gives the brand something to draw from across marketing and product moments. One static illustration pasted everywhere it appears stops being a character after the second time you see it; a cast can respond to what the screen is actually saying.',
+          },
+          {
+            heading: 'Brand collateral & stationery',
+            copy: 'The identity was applied across physical and digital touchpoints — laptop and smartphone splash screens, letterhead and envelope design — so the system had proof it worked somewhere other than a logo lockup on a white background.',
+          },
+          {
+            heading: 'Design system for the product',
+            copy: 'Underneath the product UI sits a full component library: input fields, radio buttons, checkboxes and toggles, primary and secondary buttons, all built to the same visual language rather than left as browser defaults with brand colours dropped on top. An icon font was built in two parallel styles — rounded and square line icons — covering navigation, media, communication and data, so a designer or developer always has a matching pair whichever style a screen calls for. A shadow system, both neutral and primary-colour, gives cards and modals depth without relying on borders alone, and a type scale running Display 10 down to Display 1 plus a separate paragraph scale covers everything from a hero headline to fine print.',
+          },
+          {
+            heading: 'An interface palette on top of the brand one',
+            copy: 'Brand colour and interface colour are not the same job, so the system carries both. On top of the core palette sits an extended digital set built for interface use — Purple Magic, Purple Blue, Cyan/Teal and Blue, each with its own tint and shade range, plus a full neutral grey scale for text, borders and backgrounds. That gives the product room to express state — hover, active, disabled, error — without ever reaching outside the brand’s own colour language for it.',
+          },
+          {
+            heading: 'Product UI/UX',
+            copy: 'The landing page leads with "Master Your Test Preparation" and lays out the platform’s core value props — PDF generation, progress tracking, TEKS-aligned content, custom assessments, smart search and subject coverage — followed by an available-subjects grid and an FAQ answering the questions a teacher or parent actually has before signing up. Sign-in and registration include a teacher/student account-type toggle at registration, since the platform serves the two roles differently and needed to route each into the right experience from the first screen rather than after the fact.',
+          },
+          'The core of the product is the Practice Tools dashboard: a subject- and grade-filtered library across STAAR Math, STAAR Reading, STAAR Social Studies and Bluebonnet Math, grades 3 through 8. Each worksheet card shows its TEKS learning objective, a live HTML preview so a teacher can check the content before committing to it, a downloadable PDF, and quantity controls for printing multiple copies. The filtering is what makes a large library usable rather than overwhelming — narrow by subject and grade first, then scan covers rather than titles alone.',
+        ],
+        figures: [
+          {
+            after: 2,
+            caption: 'Three primary tones, accents held back for highlights, and two typefaces doing separate jobs.',
+            slots: [
+              {
+                slot: 'colour-palette',
+                alt: 'GoTeach.ai primary colour palette and accent colours',
+              },
+              {
+                slot: 'typography',
+                alt: 'GoTeach.ai typography system: Quadaptor-Regular and Oxanium',
+              },
+            ],
+          },
+          {
+            after: 3,
+            caption: 'Nine poses, so the brand can answer what a screen is saying instead of just appearing on it.',
+            slots: [
+              {
+                slot: 'mascot-poses',
+                alt: 'The nine-pose GoTeach.ai mascot character set',
+              },
+            ],
+          },
+          {
+            after: 4,
+            slots: [
+              {
+                slot: 'stationery',
+                alt: 'GoTeach.ai letterhead and envelope design',
+              },
+              {
+                slot: 'splash-screens',
+                alt: 'GoTeach.ai laptop and smartphone splash screens',
+              },
+            ],
+          },
+          {
+            after: 5,
+            caption: 'Components, and an icon font in two styles so a screen never has to mix them.',
+            slots: [
+              {
+                slot: 'component-library',
+                alt: 'GoTeach.ai component library: fields, toggles, buttons',
+              },
+            ],
+          },
+          {
+            after: 5,
+            slots: [
+              {
+                slot: 'icon-font',
+                alt: 'GoTeach.ai icon font in rounded and square line styles',
+              },
+            ],
+          },
+          {
+            after: 6,
+            caption: 'Interface colour with tint and shade ranges, so state never needs a colour from outside the brand.',
+            slots: [
+              {
+                slot: 'interface-palette',
+                alt: 'GoTeach.ai extended interface colour palette with tints and shades',
+              },
+            ],
+          },
+          {
+            after: 7,
+            slots: [
+              {
+                slot: 'landing-page',
+                alt: 'GoTeach.ai landing page',
+              },
+            ],
+          },
+          {
+            after: 7,
+            caption: 'Teacher or student, chosen on the first screen rather than corrected later.',
+            slots: [
+              {
+                slot: 'auth-flows',
+                alt: 'GoTeach.ai sign-in and registration flows with account-type toggle',
+              },
+            ],
+          },
+          {
+            after: 8,
+            caption: 'Filter by subject and grade first — a large library only works if you never see all of it at once.',
+            slots: [
+              {
+                slot: 'practice-dashboard',
+                alt: 'GoTeach.ai Practice Tools worksheet dashboard',
+              },
+            ],
+          },
+        ],
+      },
+      result: {
+        copy: 'GoTeach.ai was designed as one system rather than a logo in isolation: brand identity, a full UI/UX design system, and the core product screens — landing page, auth flows and the Practice Tools worksheet library — all drawn from the same visual language, so nothing in the product reads as bolted onto a separate brand exercise.',
+        more: [
+          'The identity and the interface were never separate pieces of work handed to each other. The interface palette extends the brand palette, the component library uses the brand type scale, and the mascot appears in the product rather than only in the marketing around it — which is the difference between a brand a product carries and a brand a product happens to be painted in.',
+        ],
+        quoteFrom: 'review-shah',
+      },
+    },
     deliverables: [
-      'Brand identity system',
-      'Product UI and design system',
-      'Motion identity and launch film',
-      'Campaign asset templates',
+      'Brand identity and logo system — primary lockup, symbol-only mark, logo philosophy and clear-space guidelines',
+      'Colour palette and typography system — primary tones plus accents, Quadaptor-Regular for the logo, Oxanium throughout',
+      'Mascot character system — a nine-pose "Go" cast for marketing and product use',
+      'Brand stationery and digital collateral — letterhead, envelope, laptop and smartphone splash screens',
+      'Full UI/UX design system — component library, two-style icon font, shadow system, interface palette, complete type scale',
+      'Core product UI/UX — landing page, sign-in and register flows, Practice Tools worksheet dashboard',
+      'TEKS-aligned worksheet templates — STAAR Math, STAAR Reading, STAAR Social Studies and Bluebonnet Math, grades 3–8',
     ],
   },
   {
