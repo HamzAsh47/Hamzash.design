@@ -143,8 +143,11 @@ async function resendSend(
   env: Env,
   message: { to: string; subject: string; text: string; html: string; replyTo?: string },
   label: string,
-): Promise<void> {
-  if (!env.RESEND_API_KEY) return
+): Promise<boolean> {
+  if (!env.RESEND_API_KEY) {
+    console.error(`${label} skipped — RESEND_API_KEY is not set on this Worker`)
+    return false
+  }
 
   try {
     const response = await fetch(RESEND_ENDPOINT, {
@@ -167,9 +170,55 @@ async function resendSend(
          that is not verified yet or a From that does not match it, and the
          reason is in the response rather than the status. */
       console.error(`${label} rejected`, response.status, await response.text())
+      return false
     }
+    return true
   } catch (error) {
     console.error(`${label} failed`, error)
+    return false
+  }
+}
+
+type Delivery = 'sent' | 'fallback' | 'failed'
+
+/**
+ * Gets a message to Hamza, whatever state Resend is in.
+ *
+ * Resend is the nice path: it can address `contact@` and `updates@`
+ * separately, which is the whole point of splitting the brief from the
+ * transcript. But it is also the fragile path — an unset secret, an expired
+ * key, a domain still pending verification, and it silently sends nothing.
+ * That is exactly what happened: handoffs were reaching this function and
+ * leaving no trace, while the endpoint cheerfully answered `notified: true`.
+ *
+ * The Cloudflare binding cannot choose a recipient — it is pinned to the one
+ * verified mailbox — but that mailbox is where `contact@` and `updates@`
+ * forward to anyway, and it has been delivering the brief form reliably for
+ * as long as the form has existed. So when Resend does not deliver, the same
+ * message goes through the binding with the intended address in the subject.
+ * A lead landing in the right inbox under a slightly clumsy subject line
+ * beats a lead that silently does not exist.
+ */
+export async function deliver(
+  env: Env,
+  message: { to: string; subject: string; text: string; html: string; replyTo?: string },
+  label: string,
+): Promise<Delivery> {
+  if (await resendSend(env, message, label)) return 'sent'
+
+  try {
+    await env.SEND_EMAIL.send({
+      from: { name: brand.name, email: FROM },
+      to: TO,
+      replyTo: message.replyTo ? { name: message.replyTo, email: message.replyTo } : undefined,
+      subject: `[${message.to}] ${message.subject}`,
+      text: `Intended for ${message.to}\n\n${message.text}`,
+      html: `<p style="color:#808792;font:13px system-ui">Intended for ${escape(message.to)}</p>${message.html}`,
+    })
+    return 'fallback'
+  } catch (error) {
+    console.error(`${label} fallback failed`, error)
+    return 'failed'
   }
 }
 
@@ -432,7 +481,7 @@ const pre = (body: string) =>
   `<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;` +
   `line-height:1.55;white-space:pre-wrap;word-break:break-word;margin:0">${escape(body)}</pre>`
 
-async function handleHandoff(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+async function handleHandoff(request: Request, env: Env): Promise<Response> {
   if (request.method !== 'POST') return json(405, { error: 'Method not allowed' })
 
   let body: { messages?: ChatTurn[]; route?: HandoffRoute; email?: string }
@@ -460,8 +509,14 @@ async function handleHandoff(request: Request, env: Env, ctx: ExecutionContext):
      goes into an email body, and anything arriving here is a stranger's. */
   const raw = typeof body.email === 'string' ? body.email.trim().slice(0, 254) : ''
   const email = isEmail(raw) ? raw : ''
-  ctx.waitUntil(notifyHandoff(env, turns, route, email))
-  return json(200, { ok: true, notified: true })
+  /* Awaited rather than deferred. The client sends this and does not wait for
+     it, so nothing is held up — and `waitUntil` meant the endpoint answered
+     `notified: true` whether or not a single email had gone anywhere, which
+     is precisely how this failed silently for as long as it did. The status
+     is coarse on purpose: enough to tell working from broken from a network
+     tab, with the reason kept in the Worker log where it belongs. */
+  const delivery = await notifyHandoff(env, turns, route, email)
+  return json(200, { ok: true, notified: true, delivery })
 }
 
 async function notifyHandoff(
@@ -469,7 +524,7 @@ async function notifyHandoff(
   turns: ChatTurn[],
   route: HandoffRoute,
   email: string,
-): Promise<void> {
+): Promise<{ lead: Delivery; review: Delivery }> {
   const transcript = transcriptOf(turns)
   const chose = ROUTE_LABEL[route]
 
@@ -497,8 +552,10 @@ async function notifyHandoff(
   /* Two emails to two addresses, never one to both. The lead inbox should
      only ever hold the readable brief; the review inbox only ever the raw
      log. Awaited separately so one being rejected cannot stop the other. */
-  await resendSend(env, lead, 'handoff summary')
-  await resendSend(env, review, 'handoff transcript')
+  return {
+    lead: await deliver(env, lead, 'handoff summary'),
+    review: await deliver(env, review, 'handoff transcript'),
+  }
 }
 
 /**
@@ -549,7 +606,7 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url)
     if (pathname === '/api/chat') return handleChat(request, env)
-    if (pathname === '/api/handoff') return handleHandoff(request, env, ctx)
+    if (pathname === '/api/handoff') return handleHandoff(request, env)
     if (pathname !== '/api/brief') return new Response('Not found', { status: 404 })
     if (request.method !== 'POST') {
       return json(405, { error: 'Method not allowed' })
