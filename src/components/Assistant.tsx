@@ -4,6 +4,14 @@ import { Icon } from './Icon'
 
 type Turn = { role: 'user' | 'assistant'; content: string }
 
+/**
+ * How the visitor chose to carry on. `email` is not a button — it is what
+ * happens when they simply type an address into the chat because the
+ * assistant asked for one, which is the most common way this ends and the way
+ * that used to send Hamza nothing at all.
+ */
+type HandoffRoute = 'whatsapp' | 'call' | 'email'
+
 /* Openers, so the first screen is not an empty box asking the visitor to
    invent a question. These are the three things people actually arrive
    wanting to know. */
@@ -178,7 +186,7 @@ function HandoffActions({
   onPick,
   inline = false,
 }: {
-  onPick: (route: 'whatsapp' | 'call') => void
+  onPick: (route: Exclude<HandoffRoute, 'email'>) => void
   inline?: boolean
 }) {
   return (
@@ -206,9 +214,9 @@ export function Assistant() {
   const [error, setError] = useState('')
   /* Set when the visitor has actually been handed over, so the buttons stop
      re-sending Hamza the same conversation every time one is pressed. */
-  const [handedOff, setHandedOff] = useState<'whatsapp' | 'call' | null>(null)
+  const [handedOff, setHandedOff] = useState<HandoffRoute | null>(null)
   /* Non-null while the email gate is open, holding the route it will resume. */
-  const [pendingRoute, setPendingRoute] = useState<'whatsapp' | 'call' | null>(null)
+  const [pendingRoute, setPendingRoute] = useState<Exclude<HandoffRoute, 'email'> | null>(null)
   const [emailDraft, setEmailDraft] = useState('')
   const [listening, setListening] = useState(false)
   const [voiceLanguage, setVoiceLanguage] = useState(storedVoiceLanguage)
@@ -288,6 +296,9 @@ export function Assistant() {
      nearly right and needs one word fixed, and sending it unseen would make
      the visitor argue with a transcript instead of with the assistant. */
   const recognition = useRef<SpeechRecognitionLike | null>(null)
+  /* One notification per conversation. A ref rather than state because the
+     check has to be right the moment it runs, not after the next render. */
+  const forwarded = useRef(false)
 
   const toggleVoice = () => {
     if (listening) {
@@ -342,11 +353,16 @@ export function Assistant() {
      somebody, and making them watch a spinner while two emails go out is the
      wrong order. `keepalive` is what lets the request survive the tab losing
      focus to WhatsApp. */
-  const forward = (route: 'whatsapp' | 'call', email: string) => {
+  const forward = (route: HandoffRoute, email: string) => {
+    /* Only the two button routes go anywhere. An address typed into the chat
+       is a handoff without a destination — the visitor stays where they are
+       and Hamza comes to them. */
     const target =
       route === 'whatsapp'
         ? `https://wa.me/${site.whatsapp.number}?text=${encodeURIComponent(site.whatsapp.prefill)}`
-        : site.scheduling.url
+        : route === 'call'
+          ? site.scheduling.url
+          : ''
 
     if (turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS) {
       void fetch('/api/handoff', {
@@ -360,16 +376,17 @@ export function Assistant() {
       })
     }
 
+    forwarded.current = true
     setHandedOff(route)
     setPendingRoute(null)
-    window.open(target, '_blank', 'noopener,noreferrer')
+    if (target) window.open(target, '_blank', 'noopener,noreferrer')
   }
 
   /* An address is required, because a handoff with no reply-to is a lead
      Hamza cannot answer. If the conversation already contains one, this is
      invisible; if not, one field appears rather than the whole thing being
      refused. */
-  const handoff = (route: 'whatsapp' | 'call') => {
+  const handoff = (route: Exclude<HandoffRoute, 'email'>) => {
     if (emailInChat) return forward(route, emailInChat)
     setPendingRoute(route)
   }
@@ -395,8 +412,31 @@ export function Assistant() {
       })
       const data = (await response.json()) as { reply?: string; error?: string }
       if (!response.ok || !data.reply) throw new Error(data.error ?? 'No reply')
-      setTurns([...next, { role: 'assistant', content: data.reply }])
-      setHandedOff(null)
+      const settled: Turn[] = [...next, { role: 'assistant', content: data.reply }]
+      setTurns(settled)
+
+      /* The fix for the way this actually ends. The assistant is told to ask
+         for an email, the visitor types one into the chat — and nothing was
+         reaching Hamza, because the only thing wired to notify him was a
+         button neither of them had any reason to press. An address in the
+         conversation is the intent; treat it as the handoff it is.
+
+         Sent after the reply lands rather than on the message itself, so the
+         transcript Hamza receives ends where the conversation ended instead
+         of one turn short. */
+      const given = message.match(EMAIL_IN_TEXT)?.[0]
+      if (given && !forwarded.current) {
+        forwarded.current = true
+        setHandedOff('email')
+        void fetch('/api/handoff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: settled, route: 'email', email: given }),
+          keepalive: true,
+        }).catch(() => {
+          /* Silent, as everywhere else on this path. */
+        })
+      }
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Something went wrong.')
     } finally {
@@ -511,8 +551,9 @@ export function Assistant() {
 
           {handedOff && (
             <p className="assistant__msg assistant__msg--bot">
-              Sent to Hamza — he will follow up shortly. If this was useful, tell him so when
-              you speak.
+              {handedOff === 'email'
+                ? 'Sent to Hamza, along with everything above — he replies within 24 hours. If this chat was useful, do say so when he gets in touch.'
+                : 'Sent to Hamza — he will follow up shortly. If this was useful, tell him so when you speak.'}
             </p>
           )}
 
@@ -627,6 +668,7 @@ export function Assistant() {
             an inline set is showing, so only one pair is ever on screen. */}
         {turns.filter((turn) => turn.role === 'user').length >= MIN_HANDOFF_TURNS &&
           !pendingRoute &&
+          handedOff !== 'email' &&
           !turns.at(-1)?.content.includes(HANDOFF_MARKER) && (
             <HandoffActions onPick={handoff} />
           )}

@@ -266,9 +266,13 @@ A project enquiry — someone describing something they want made — runs the c
 
 HOW YOU WRITE
 
-Two to four sentences. A person texting back promptly, not a brochure read aloud. No preamble, no "great question", no emoji, no markdown headers, no bullet lists unless you are actually listing tiers.
+Three or four sentences. That is a ceiling, not a target — two is often better. The only thing that earns more is a direct request for detail, like a walk through a case study.
 
-Vary how you build a sentence. Do not open turn after turn with "Hamza does" or "Hamza will" — reusing one sentence shape across a conversation is the single thing that makes this read as a machine. Say it a different way, or drop his name and say "that's doable" or "yes, that's in scope".
+Do not restate what the visitor just told you. They know what they said, and reading it back to them in a paragraph before asking one short question is the exact shape that makes this tiring. A few words of acknowledgement at most, then spend the reply on the new thing: the question, the recommendation, the number.
+
+Vary how you build a sentence. Do not open turn after turn with "Hamza does" or "Hamza will" — reusing one sentence shape across a conversation is what makes this read as a machine. Say it another way, or drop his name: "that's doable", "yes, that's in scope".
+
+No preamble, no "great question", no emoji, no markdown headers, no bullet lists unless you are actually listing tiers.
 
 Never write out a phone number, a WhatsApp link or the booking URL. There are buttons under this chat for both, and pasting the raw details on top of them looks amateurish. Say "I can put you through to him on WhatsApp, or set up a call — the buttons are just below" and stop there.
 
@@ -276,7 +280,9 @@ RUNNING A PROJECT ENQUIRY
 
 Not a script. Move the way the person in front of you actually talks, and skip anything already covered.
 
-1. Understand it before answering it. Say yes, this is something he does. Ask what is genuinely missing — who it is for, references, anything they specifically do not want — one question at a time. Then reflect the brief back in your own words, including where you would take it: "for a bold, premium fragrance brand, that likely leans darker and more minimal." That sentence is the point of this step. It shows you understood, and it is what separates you from a form.
+1. Understand it before answering it. Say yes, this is something he does. Ask what is genuinely missing — who it is for, references, anything they specifically do not want — one question at a time. Then say, in one line, where you would take it visually, in their own words.
+
+   CONTEXT LOCK. Every noun you use for their business must have come from them. Their industry, their products, their audience, their brand name — quote them, do not characterise them. Never introduce a category they did not say, whatever it was suggested by: a guess, a pattern in the request, or anything anywhere in these instructions. There are no worked examples in this prompt for exactly that reason. Naming the wrong business back at somebody tells them nobody is reading, and it is the fastest way to lose them. Unsure what they do? Ask.
 
 2. Start at the foundation, once. If what they want sits on top of something that does not exist — posts before a brand, a reel before a type system — say so plainly, once: it is usually worth setting the identity first so everything after is built on one system instead of one-off pieces. Say it ONCE. If they pass, drop it entirely and help with what they actually asked for.
 
@@ -294,11 +300,13 @@ Not a script. Move the way the person in front of you actually talks, and skip a
 
 4. Match scope honestly. Every video tier is built around 30 to 90 seconds of produced motion. Somebody with their own five-to-eight-minute recording who wants it cut is not a Motion Branding or an AI Video job, and calling it one is worse than saying you have no tier for it. Check duration, format, and whether footage already exists before naming any package. If nothing fits, say nothing fits.
 
-5. Get an email before the handoff. Once they are engaged and you are about to offer WhatsApp or a call, ask for it — "what's the best email for Hamza to reply to?" — and their name if you do not have it. Ask it naturally at that point, never as a form field before a real conversation has happened. Without an email there is nothing to follow up.
+5. Ask about budget before you ask for anything else. One soft question — "do you have a rough budget in mind for this?" — asked once, near the point where the conversation turns practical. Not a test and not a gate: a full brand-and-social system and a single logo are different conversations, and the answer tells you which one this is, and which tier is even relevant. If they would rather not say, let it go and carry on.
 
-6. Check before you close. When it feels like the discussion has reached a natural stopping point, ask rather than assume: "does that cover everything? If so I'll write this up and pass it to Hamza." Only offer the handoff once they say yes.
+6. Get an email before the handoff. Once they are engaged and you are about to offer WhatsApp or a call, ask for it — "what's the best email for Hamza to reply to?" — and their name if you do not have it. Ask it naturally at that point, never as a form field before a real conversation has happened. Without an email there is nothing to follow up.
 
-7. Close once. One clear closing message when they confirm — that it is with Hamza, that he will follow up, and an invitation to say whether the chat was useful. One. Do not sign off again if they keep talking.
+7. Check before you close. When it feels like the discussion has reached a natural stopping point, ask rather than assume: "does that cover everything? If so I'll write this up and pass it to Hamza." Only offer the handoff once they say yes.
+
+8. Close once. One clear closing message when they confirm — that it is with Hamza, that he will follow up, and an invitation to say whether the chat was useful. One. Do not sign off again if they keep talking.
 
 When you offer the handoff, end that message with [[handoff]] on its own. It is a marker for the interface, never shown to anyone, and it is what makes the WhatsApp and call buttons appear right there in the conversation. Use it only on a message that actually offers to put them through.
 
@@ -309,6 +317,8 @@ NEVER:
 - Claim work, prices or capabilities that are not in the reference.
 - Promise a discount, a percentage or a reduced figure.
 - Write out a phone number, a WhatsApp link or the booking URL.
+- Substitute a different industry or product for the one the visitor described.
+- Summarise the visitor's own message back at them before answering it.
 
 WHEN YOU CANNOT HELP
 
@@ -383,7 +393,10 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
 const MIN_HANDOFF_TURNS = 2
 const MAX_TRANSCRIPT_CHARS = 20_000
 
-type HandoffRoute = 'whatsapp' | 'call'
+/* `email` is the route with no button: the assistant asked for an address,
+   the visitor typed one, and that is the whole handoff. It is also the most
+   common way a conversation ends. */
+type HandoffRoute = 'whatsapp' | 'call' | 'email'
 
 /**
  * A readable brief, written by the model from the conversation it just had.
@@ -402,6 +415,12 @@ Scope discussed: what the conversation actually covered
 Next step: how they chose to continue
 
 Report only what is in the conversation. Do not infer a budget, a deadline or a name that was never stated, and do not add advice or next actions of your own. If something was never discussed, write "not discussed".`
+
+const ROUTE_LABEL: Record<HandoffRoute, string> = {
+  whatsapp: 'WhatsApp',
+  call: 'a call',
+  email: 'email — reply to the address above',
+}
 
 const transcriptOf = (turns: ChatTurn[]) =>
   turns
@@ -434,7 +453,8 @@ async function handleHandoff(request: Request, env: Env, ctx: ExecutionContext):
     return json(200, { ok: true, notified: false })
   }
 
-  const route: HandoffRoute = body.route === 'whatsapp' ? 'whatsapp' : 'call'
+  const route: HandoffRoute =
+    body.route === 'whatsapp' || body.route === 'email' ? body.route : 'call'
   /* Captured in the chat, so the summary carries a reply-to rather than
      leaving Hamza to hunt for one in a transcript. Validated and capped: it
      goes into an email body, and anything arriving here is a stranger's. */
@@ -451,7 +471,7 @@ async function notifyHandoff(
   email: string,
 ): Promise<void> {
   const transcript = transcriptOf(turns)
-  const chose = route === 'whatsapp' ? 'WhatsApp' : 'a call'
+  const chose = ROUTE_LABEL[route]
 
   let summary = ''
   try {
@@ -492,7 +512,7 @@ export function handoffEmails(
   summary: string,
   email = '',
 ) {
-  const chose = route === 'whatsapp' ? 'WhatsApp' : 'a call'
+  const chose = ROUTE_LABEL[route]
   const transcript = transcriptOf(turns)
   const firstAsk = turns.find((t) => t.role === 'user')?.content.slice(0, 60) ?? 'new enquiry'
   /* First line of the brief, above the model's summary. It is the one field
