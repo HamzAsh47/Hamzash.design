@@ -4085,12 +4085,28 @@
   border-color: var(--crimson);
 }
 
+/* Two rows once the voice controls are in it. On one row the message box was
+   squeezed to 136px between a language picker, a microphone and Send — the
+   thing people came here to use, made the smallest thing in the row. The box
+   takes the first row alone; the controls sit under it. */
 .assistant__form {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 0.5rem;
   padding: 0.7rem;
   border-top: 1px solid var(--hairline);
+}
+
+.assistant__form:has(.assistant__mic) .assistant__input {
+  flex: 1 0 100%;
+}
+
+/* Send goes to the far end of the control row, away from the two small
+   controls, so the destructive-adjacent tap and the harmless ones are not
+   neighbours. */
+.assistant__form:has(.assistant__mic) .assistant__send {
+  margin-left: auto;
 }
 
 .assistant__input {
@@ -4979,4 +4995,35 @@ body:has(.assistant.is-open) .assistant-launch {
   font-size: 0.68rem;
   letter-spacing: 0.02em;
   color: var(--cyan);
+}
+
+/* Which language the next dictation is in. Speech recognition takes one
+   language per session and cannot detect it, so this has to be a choice —
+   and it sits beside the microphone because that is the only thing it
+   affects. */
+.assistant__voice-lang {
+  flex: none;
+  min-height: 44px;
+  max-width: 6.5rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--obsidian);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.assistant__voice-lang:hover,
+.assistant__voice-lang:focus-visible {
+  color: var(--white);
+  border-color: var(--gunmetal);
+}
+
+/* The native picker draws its own list, and on a dark page it needs telling
+   or the options come back as black on black in some browsers. */
+.assistant__voice-lang option {
+  background: var(--obsidian);
+  color: var(--white);
 }

@@ -107,6 +107,41 @@ function scrubContacts(text: string) {
  * so the button is only rendered where the API exists rather than sitting
  * there dead. Anyone without it types, which is what they were doing anyway.
  */
+/**
+ * What the visitor is about to speak.
+ *
+ * Speech recognition takes exactly one language per session — there is no
+ * auto-detect in the API — so mixed speech has to be told what it is rather
+ * than worked out. These four cover who actually talks to this site.
+ *
+ * `en-IN` is the Hinglish entry, and it is the right engine for it: it is
+ * trained on Indian and Pakistani English, tolerates Hindi and Urdu words
+ * dropped mid-sentence, and transcribes to Latin script — so what lands in
+ * the box is the Roman Urdu / Hinglish the person actually said. The two
+ * native-script options are there for anyone speaking mostly Hindi or Urdu,
+ * and they transcribe into Devanagari and Urdu script respectively, which the
+ * assistant reads and answers in the same language.
+ */
+const VOICE_LANGUAGES = [
+  { code: 'en-US', label: 'EN' },
+  { code: 'en-IN', label: 'Hinglish' },
+  { code: 'hi-IN', label: 'हिंदी' },
+  { code: 'ur-PK', label: 'اردو' },
+] as const
+
+const VOICE_PREF_KEY = 'ha-voice-lang'
+
+/** Remembered per visitor. Storage throws in some private modes. */
+function storedVoiceLanguage() {
+  try {
+    const saved = localStorage.getItem(VOICE_PREF_KEY)
+    if (saved && VOICE_LANGUAGES.some((entry) => entry.code === saved)) return saved
+  } catch {
+    /* No storage, no preference. The default is still correct. */
+  }
+  return VOICE_LANGUAGES[0].code as string
+}
+
 type SpeechRecognitionLike = {
   lang: string
   interimResults: boolean
@@ -176,6 +211,7 @@ export function Assistant() {
   const [pendingRoute, setPendingRoute] = useState<'whatsapp' | 'call' | null>(null)
   const [emailDraft, setEmailDraft] = useState('')
   const [listening, setListening] = useState(false)
+  const [voiceLanguage, setVoiceLanguage] = useState(storedVoiceLanguage)
 
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -261,9 +297,7 @@ export function Assistant() {
     if (!SpeechRecognitionCtor) return
 
     const engine = new SpeechRecognitionCtor()
-    /* Follows the page, so a visitor reading this site in another language
-       is not dictated at in English. */
-    engine.lang = document.documentElement.lang || 'en-US'
+    engine.lang = voiceLanguage
     engine.interimResults = false
     engine.continuous = false
     engine.onresult = (event) => {
@@ -539,6 +573,28 @@ export function Assistant() {
           />
           {/* Only where the browser actually has speech recognition. A dead
               microphone is worse than no microphone. */}
+          {SpeechRecognitionCtor && (
+            <select
+              className="assistant__voice-lang"
+              value={voiceLanguage}
+              aria-label="Language you will speak in"
+              onChange={(event) => {
+                setVoiceLanguage(event.target.value)
+                try {
+                  localStorage.setItem(VOICE_PREF_KEY, event.target.value)
+                } catch {
+                  /* Fine. It just will not be remembered next visit. */
+                }
+              }}
+            >
+              {VOICE_LANGUAGES.map((entry) => (
+                <option key={entry.code} value={entry.code}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+          )}
+
           {SpeechRecognitionCtor && (
             <button
               type="button"
