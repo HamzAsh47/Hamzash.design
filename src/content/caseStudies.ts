@@ -144,21 +144,6 @@ export const pillarFilters: { value: 'all' | Pillar; label: string }[] = [
   { value: 'motion', label: 'Motion Branding' },
 ]
 
-const PLACEHOLDER_BODY = {
-  problem: {
-    copy: '[Business problem placeholder] — what the company was actually losing before the work started, in their terms: the audience they were failing to reach, the conversion that was leaking, or the inconsistency that was costing them credibility.',
-  },
-  systemBuilt: {
-    copy: '[System built placeholder] — the rules, architecture and components created to solve it: naming and brand architecture, the design system underneath the product UI, and the motion language that carries both into video.',
-  },
-  deliverable: {
-    copy: '[Deliverable placeholder] — the concrete assets handed over, in editable production-ready form, plus the guidelines that let the team keep applying the system without me.',
-  },
-  result: {
-    copy: '[Result / value placeholder] — the measurable outcome, with the real figure and the timeframe it was measured over.',
-  },
-}
-
 export const caseStudies: CaseStudy[] = [
   {
     slug: 'josefs',
@@ -1362,22 +1347,156 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    slug: 'case-04',
-    client: 'Client Name',
-    projectType: 'Motion Branding',
+    slug: 'santamaria',
+    client: 'Santamaria Law Firm',
+    projectType: 'Video-First Legal Education System',
+    /* Motion alone. This is a video production system — no identity work, no
+       product interface — and stretching either tag over it would misdescribe
+       the work to anyone filtering for one. */
     pillars: ['motion'],
-    year: '2026',
-    cover: cover04,
-    coverAlt: 'Placeholder cover for a motion branding case study',
-    resultStat: 'result coming soon',
+    year: 'Jan 2021 – Jun 2022',
+    cover: coverFor('santamaria') ?? cover04,
+    coverAlt: 'Santamaria Law Firm legal education video with animated icon overlays',
+    resultStat:
+      'A channel from 1,000 to 30–40K subscribers over 18 months, on 10+ videos a month with no gaps',
     plannedClient: 'Santamaria Law Firm',
-    isPlaceholder: true,
-    body: PLACEHOLDER_BODY,
+    isPlaceholder: false,
+    atAGlance: [
+      { lead: '1,000 → 30–40K subscribers', note: 'across the 18-month engagement' },
+      { lead: '10+ videos every month', note: 'for eighteen months, with no gaps' },
+      { lead: '2 university partnerships', note: 'UC Berkeley and the University of San Francisco followed from the channel’s visibility' },
+      { lead: 'Two content lines, one pipeline', note: 'legal updates and a kids’ English series, without breaking visual consistency' },
+      { lead: 'Where “lock it once” came from', note: 'the layout churn on this project is why branding-first became the default on every one after' },
+    ],
+    body: {
+      problem: {
+        copy: 'Santamaria Law Firm needed to explain U.S. immigration law to people who are not lawyers — clearly, consistently, and at volume. Static content was not doing that job.',
+        more: [
+          'What they had was raw green-screen footage of the attorney and no visual system to put it in. What they needed was not a video style but a video engine: something that could turn dense legal procedure into content people would actually watch, understand, and act on, at ten or more episodes a month for as long as the channel ran.',
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'The raw material: an attorney, a green screen, and nothing else agreed.',
+            slots: [
+              {
+                slot: 'raw-footage',
+                alt: 'Raw green-screen footage before any visual system was applied',
+              },
+            ],
+          },
+        ],
+      },
+      systemBuilt: {
+        copy: 'The engine had to come out of the firm’s own brand rather than be invented alongside it, or every episode would drift a little further from the practice it represented.',
+        more: [
+          {
+            heading: 'Branding first, then everything else',
+            copy: 'The layout system was pulled directly from the firm’s existing logo, colour palette and typography, and built on top of them — so every icon, popup and callout that followed stayed inside one visual language instead of being decided per episode.',
+          },
+          {
+            heading: 'Green-screen compositing',
+            copy: 'The raw background was keyed out and replaced with a custom backdrop colour-graded to the firm’s palette. Every single episode, not a template applied once and left to drift.',
+          },
+          {
+            heading: 'A motion and icon system',
+            copy: 'Animated, keyframed icon sets were built per legal topic — a birth-certificate mock-up for identity documents, a numbered checklist for disclosures, an arrest icon for deportation risk. Synced to the script, they work almost as a visual subtitle track: someone who loses the thread of a sentence about procedure still has something on screen telling them what is being discussed.',
+          },
+          {
+            heading: 'The audio layer',
+            copy: 'Voiceover enhancement and sound design on every episode, for pacing and for clarity. Legal explanation is dense by nature, and audio is what gives a viewer somewhere to breathe in it.',
+          },
+          {
+            heading: 'A second content line on the same pipeline',
+            copy: 'Alongside the legal updates ran a parallel series: Dora-the-Explorer-style English tutorials for children, hosted around a cat character called Lenin, who put questions directly to the viewer before the host answered. Same production pipeline, an entirely different audience, and no loss of visual consistency between them.',
+          },
+          {
+            heading: 'One lesson, kept',
+            copy: 'Three or four layout and animation variations were tested early, while the colour system stayed locked throughout. That layout churn is exactly why branding-first, locked once, became the default on every project after this one — including the ones on this site.',
+          },
+        ],
+        figures: [
+          {
+            after: 1,
+            caption: 'The firm’s own logo, palette and type, turned into a layout system rather than applied over one.',
+            slots: [
+              {
+                slot: 'brand-extraction',
+                alt: 'The Santamaria video layout system derived from the firm’s brand',
+              },
+            ],
+          },
+          {
+            after: 2,
+            caption: 'Keyed, then graded to the firm’s palette — every episode, not a template left to drift.',
+            slots: [
+              {
+                slot: 'compositing',
+                alt: 'Green-screen key and branded backdrop, before and after',
+              },
+            ],
+          },
+          {
+            after: 3,
+            caption: 'A visual subtitle track: identity documents, disclosure checklists, deportation risk.',
+            slots: [
+              {
+                slot: 'icon-system',
+                alt: 'Animated icon library built per legal topic',
+              },
+            ],
+          },
+          {
+            after: 5,
+            caption: 'Lenin the cat: the same pipeline, pointed at an audience of children.',
+            slots: [
+              {
+                slot: 'kids-series',
+                alt: 'Frames from the children’s English tutorial series with the Lenin character',
+              },
+            ],
+          },
+        ],
+      },
+      deliverable: {
+        copy: 'Every episode left as a finished package rather than a cut of footage: keyed and colour-graded to the firm’s branding, topic-specific animated overlays, a full voiceover and sound pass, and the same branded intro and outro carrying across the whole run.',
+        more: [
+          'The children’s line shipped on the same terms — a distinct, character-led format, produced through the identical pipeline, so running two audiences never meant running two productions.',
+          'Two university collaborations came out of the channel as well, with UC Berkeley and the University of San Francisco. That work is under NDA and is not shown here.',
+          'The scope also widened past video during the contract: the firm’s presentation and document assets were rebranded on top of the video work, so what an attorney handed a client in a meeting matched what a viewer saw on the channel.',
+        ],
+        figures: [
+          {
+            after: 0,
+            caption: 'The same system across topics — the icons change, the language does not.',
+            slots: [
+              {
+                slot: 'episode-frames',
+                alt: 'Frame grabs from delivered episodes across different legal topics',
+              },
+            ],
+          },
+        ],
+      },
+      result: {
+        copy: 'The channel went from roughly 1,000 subscribers to 30–40K across the eighteen-month engagement, on a delivery rate of ten or more videos a month with no gaps. Two university partnerships — UC Berkeley and the University of San Francisco — followed from that visibility.',
+        more: [
+          'What made the volume possible was that it was one production system rather than a style reapplied each time. It carried two content lines with different audiences and did not break visual consistency between them, and it absorbed a scope expansion into presentation and document design without a rebuild.',
+          /* Same honesty as the Josef's numbers: this describes the channel
+             over the period, not a causal claim about what a single hand
+             produced. */
+          'These figures describe the channel’s growth over the period I ran its video production. They speak to the consistency and reach of the work rather than a claim of sole causation.',
+        ],
+        quoteFrom: 'review-santamaria',
+      },
+    },
     deliverables: [
-      'Animated logo and identity system',
-      'Social motion templates',
-      'Campaign film',
-      'Editable project files',
+      'Green-screen keying and branded colour-grading pipeline',
+      'Animated icon and callout system — an immigration-law visual library',
+      'Voiceover enhancement and sound design on every episode',
+      'Branded intro and outro carried across the full run',
+      'Parallel English-tutorial line for children — character-led format',
+      'Presentation and document asset rebrand, added to the video contract',
     ],
   },
 ]
