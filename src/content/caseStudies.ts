@@ -37,8 +37,14 @@ export type CaseStudy = {
    * Three to five proof points, read before the body. A case study is a long
    * argument and most readers scan the first screen before deciding to read
    * it — this is what they should leave with if they read nothing else.
+   *
+   * Split rather than a plain sentence, because a busy reader scans this box
+   * the same way they scan the page: `lead` is the claim, two to five words,
+   * set to be read on its own; `note` is what qualifies it, for whoever
+   * carries on reading. A full sentence per bullet gets skimmed and lands
+   * nothing.
    */
-  atAGlance?: string[]
+  atAGlance?: { lead: string; note: string }[]
   /** Locked case-study structure. Never a flat "what was designed" list. */
   body: {
     problem: CaseSection
@@ -163,7 +169,7 @@ export const caseStudies: CaseStudy[] = [
        was a brand, a building and a feed. Claiming it invited a question the
        work could not answer. */
     pillars: ['brand', 'motion'],
-    year: 'Sep 2023—Mar 2026',
+    year: 'Sep 2023 – Mar 2026',
     /* The supplied hero, the moment it is dropped in; the placeholder plate
        until then, so a real case study never sits behind a broken image. */
     cover: coverFor('josefs') ?? cover01,
@@ -172,10 +178,13 @@ export const caseStudies: CaseStudy[] = [
     plannedClient: "Josef's Buffalo Wings",
     isPlaceholder: false,
     atAGlance: [
-      '0 → ~4,800 Instagram followers over 2 years 6 months, built entirely on original content',
-      '1 → 2 physical locations — the second funded by the success of the first, not outside investment',
-      'Sole creative across identity, packaging, interior, motion and social — no team, no outsourcing, start to finish',
-      "Word of mouth became its own channel: people repeatedly asked Josef's staff who was behind their branding, and that visibility brought in new clients directly",
+      { lead: '0 → ~4,800 followers', note: 'over 2 years 6 months, built entirely on original content' },
+      { lead: 'One location to two', note: 'the second funded by the success of the first, not outside investment' },
+      { lead: 'Sole creative throughout', note: 'identity, packaging, interior, motion and social — no team, no outsourcing' },
+      {
+        lead: 'Word of mouth became a channel',
+        note: 'people repeatedly asked staff who was behind the branding, and that brought in new clients directly',
+      },
     ],
     externalUrl:
       'https://www.behance.net/gallery/204631775/Josefs-360-Visual-Identity-Social-Motion',
@@ -365,6 +374,13 @@ export const caseStudies: CaseStudy[] = [
     resultStat: 'Live and operating — a two-sided platform built from a design system, not screen by screen',
     plannedClient: 'CultureLancer',
     isPlaceholder: false,
+    atAGlance: [
+      { lead: 'Live and operating', note: 'a two-sided hiring platform in use today' },
+      { lead: 'A brand, and no product', note: 'logo and palette existed; no UX direction, no system, no rules for how anything behaved' },
+      { lead: 'Structure before pixels', note: 'mindmap, sitemap, annotated flows and low-fi wireframes signed off before high fidelity' },
+      { lead: 'One component system', note: 'a dozen distinct page types read as one product instead of a patchwork of screens' },
+      { lead: 'Two sides, one platform', note: 'separate dashboards, onboarding and data for job seekers and employers' },
+    ],
     body: {
       problem: {
         copy: 'CultureLancer set out to solve a real problem: Black professionals were consistently facing barriers to job access, and existing platforms were not built with that audience or that problem in mind. The concept was a freelancer and hiring platform connecting Black job seekers with employers through a fairer, more direct matching system.',
@@ -610,6 +626,13 @@ export const caseStudies: CaseStudy[] = [
     resultStat: 'A 64-page interactive guide built in about a week, then a matching A5 print edition in a further three to four days',
     plannedClient: 'WACA',
     isPlaceholder: false,
+    atAGlance: [
+      { lead: '64-page interactive guide', note: 'built in about a week, on a page system rather than page by page' },
+      { lead: 'A5 print edition in 3–4 days', note: 'the same system re-flowed — the only reason a second edition was possible at all' },
+      { lead: '13 sections, one tap each', note: 'an interactive index instead of scrolling a 64-page document mid-match' },
+      { lead: '100+ pages across both editions', note: 'refined down from a ~150-page brief to a leaner interactive core' },
+      { lead: 'Art director, not sole hand', note: 'brought in a collaborator and led the build on a timeline with no room for a second draft' },
+    ],
     body: {
       problem: {
         copy: 'The project began small. A police-affiliated cricket body connected to WACA needed a member catalogue for their police cricket club — a quick, low-stakes job.',
@@ -752,7 +775,7 @@ export const caseStudies: CaseStudy[] = [
     client: 'Uplift K12',
     projectType: 'Game Design, UI/UX & Curriculum Platform System',
     pillars: ['brand', 'uiux', 'motion'],
-    year: 'Oct 2023—Oct 2025',
+    year: 'Oct 2023 – Oct 2025',
     cover: coverFor('upliftk12') ?? cover02,
     coverAlt: 'Uplift K12 interactive math games and teaching platform',
     resultStat:
@@ -760,11 +783,11 @@ export const caseStudies: CaseStudy[] = [
     plannedClient: 'Uplift K12',
     isPlaceholder: false,
     atAGlance: [
-      '2 sample games → 50 games brought into brand identity first, with the platform’s game library eventually growing to 270+ interactive math games',
-      'Took over full platform UI/UX from a bootcamp-hired team, rebuilding the dashboard, login and shared interactive whiteboard from scratch — including auto-checking, read-aloud and auto-grading',
-      'Built and coded the games in Adobe Captivate, with Java (and occasionally C++) handling the interactive logic and CSS carrying the visual layer',
-      'Later designed a 20-game physical board game adaptation — box dieline, cover, cards, manipulatives and instruction booklet',
-      'Two years total: an 11-month contract role, then an ongoing freelance creative-director partnership until the engagement closed',
+      { lead: '2 samples → 270+ games', note: 'brand-matched first at 50, then a full interactive math library across grades K–8' },
+      { lead: 'Took over platform UI/UX', note: 'from a bootcamp-hired team — dashboard, login and shared whiteboard rebuilt from scratch' },
+      { lead: 'Built in Adobe Captivate', note: 'Java and occasional C++ for the interactive logic, CSS carrying the visual layer' },
+      { lead: '20-game physical edition', note: 'box dieline, cover, cards, manipulatives and an instruction booklet' },
+      { lead: 'Two years, two roles', note: 'an 11-month contract, then a freelance creative-director partnership until it closed' },
     ],
     body: {
       problem: {
@@ -960,7 +983,7 @@ export const caseStudies: CaseStudy[] = [
        UI nor motion, and stretching either tag to cover them would misdescribe
        the work to anyone filtering for it. */
     pillars: ['brand'],
-    year: 'Apr 2024—Present',
+    year: 'Apr 2024 – Present',
     cover: coverFor('ez-sports') ?? cover04,
     coverAlt: 'EZ Sports Apparel team uniform mockup and production graphics',
     resultStat:
@@ -968,10 +991,10 @@ export const caseStudies: CaseStudy[] = [
     plannedClient: 'EZ Sports Apparel',
     isPlaceholder: false,
     atAGlance: [
-      'Running continuously since April 2024 as the seasonal design partner, not a job-by-job supplier',
-      'One repeatable deck structure means a ten-team league moves through approval without inventing a process per team',
-      'Client-facing mockups and vendor production files are separate deliverables, so what was approved and what gets printed can never be confused',
-      'Recurring accounts across baseball, softball, football, basketball, soccer and volleyball — BCLL, Prodigy, Outlaws, Texas Bombers, Power Soccer, LTYA',
+      { lead: 'Running since April 2024', note: 'the seasonal design partner, not a job-by-job supplier' },
+      { lead: 'One repeatable deck structure', note: 'a ten-team league clears approval without a new process per team' },
+      { lead: 'Mockups and vendor files, always separate', note: 'what was approved and what gets printed can never be confused' },
+      { lead: '6 sports, 6 recurring accounts', note: 'BCLL, Prodigy, Outlaws, Texas Bombers, Power Soccer, LTYA' },
     ],
     body: {
       problem: {
@@ -1131,11 +1154,11 @@ export const caseStudies: CaseStudy[] = [
     plannedClient: 'GoTeach.ai',
     isPlaceholder: false,
     atAGlance: [
-      'A full brand system from zero: mascot-led logo, a three-tone primary palette plus accents, a dual-typeface system and clear-space rules for every lockup',
-      'A nine-pose mascot character set, so the identity has a cast to draw from rather than one illustration copy-pasted everywhere',
-      'The brand system extended directly into a UI/UX design system — components, a two-style icon font, shadows, an interface palette and a full type scale',
-      'Core product screens on that same system: landing page, auth flows, and a TEKS-aligned worksheet dashboard across four subjects and grades 3–8',
-      'Mehul again — the same client as Uplift K12, on a second project inside that freelance-era relationship',
+      { lead: 'A brand system from zero', note: 'mascot-led logo, three primary tones plus accents, dual typefaces, clear-space rules' },
+      { lead: 'A nine-pose mascot cast', note: 'so the identity can answer what a screen is saying, not just appear on it' },
+      { lead: 'Brand extended into a UI system', note: 'components, a two-style icon font, shadows, an interface palette, a full type scale' },
+      { lead: 'Core product screens on it', note: 'landing page, auth flows, and a TEKS-aligned worksheet dashboard, grades 3–8' },
+      { lead: 'Designed, not built', note: 'no development work is claimed on this one' },
     ],
     body: {
       problem: {

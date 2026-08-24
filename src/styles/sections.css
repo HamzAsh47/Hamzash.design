@@ -721,14 +721,15 @@
 .services-slide {
   position: relative;
   z-index: 30;
-  /* Clamped so the overlap can never exceed the padding that absorbs it.
-     -12vh alone scales with window height while the padding does not: on a
-     1200px-tall window it pulled the section up 144px into a 112px cushion,
-     which put "SYS.02 | PILLARS" directly on top of the hero's
-     "VIEWPORT :: 01" readout. max() keeps the shorter of the two, so the
-     overlap stays a design flourish instead of eating the section above it. */
-  margin-top: max(-12vh, calc(-1 * var(--space-2xl)));
-  padding-block: var(--space-2xl);
+  /* Rides up over the hero by exactly the shared overlap. */
+  margin-top: calc(-1 * var(--slide-overlap));
+  padding-top: var(--space-2xl);
+  /* The System rides up into this, so the cushion carries the overlap on top
+     of the normal spacing. What is left visible under the cards is therefore
+     the same --space-2xl that sits above them, at every window size: the
+     cards keep their own room and read centred in the band, instead of being
+     squeezed against a section arriving from below. */
+  padding-bottom: calc(var(--space-2xl) + var(--slide-overlap));
 }
 
 .services-slide__inner {
@@ -859,7 +860,11 @@
 .system {
   position: relative;
   z-index: 40;
-  margin-top: -10vh;
+  /* The same token the pillars reserve for it below their cards. This was
+     -10vh, which is 144px on a 1440-tall window against a cushion that never
+     exceeded 112px — and since this section sits above the pillars in the
+     stack, the 32px difference was painted straight over them. */
+  margin-top: calc(-1 * var(--slide-overlap));
 }
 
 .system__compare {
@@ -1746,13 +1751,32 @@
   min-width: 0;
 }
 
+/* This is the last thing a reader sees, and it is the one control on the page
+   whose whole job is to keep them browsing. It was reading as footer
+   furniture: a crimson edge and a lit arrow make it a button. */
+.case__next {
+  border-left: 2px solid var(--crimson);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.case__next:hover,
+.case__next.is-hot,
+.case__next:focus-visible {
+  background: var(--surface-raised);
+}
+
 .case__next-label {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  /* Not crimson: 3.21:1 on obsidian, which is fine for a decorative index
+     number and not for a label. The crimson lives on the edge instead, where
+     it carries the same emphasis and has no contrast requirement to meet. */
+  color: var(--white);
 }
 
 .case__next-title {
@@ -1776,8 +1800,8 @@
 
 .case__next-arrow {
   padding-right: var(--space-md);
-  font-size: var(--step-2);
-  color: var(--text-muted);
+  font-size: var(--step-3, var(--step-2));
+  color: var(--white);
   transition:
     color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
@@ -4625,6 +4649,21 @@ body:has(.assistant.is-open) .assistant-launch {
   max-width: 88ch;
 }
 
+/* The claim, sized to be read on its own. A busy reader scans this box the
+   same way they scan the page, and a full sentence per bullet gets skimmed
+   and lands nothing — so the number or the fact goes first, in white, and
+   what qualifies it follows for whoever carries on reading. */
+.case__glance-lead {
+  color: var(--white);
+  font-weight: 500;
+}
+
+.case__glance-lead::after {
+  content: ' — ';
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
 /* A rule rather than a bullet: the list is four claims, not four items of a
    shopping list, and a disc in front of each one makes them read as smaller
    than they are. */
@@ -4678,8 +4717,11 @@ body:has(.assistant.is-open) .assistant-launch {
    quotation marks is the one claim on a portfolio a client can deny. */
 .case__quote {
   grid-column: 1 / -1;
-  margin: var(--space-sm) 0 0;
-  padding: var(--space-md);
+  /* Room of its own. Sitting on the same rhythm as the paragraphs around it,
+     a quote reads as one more paragraph that happens to be indented — the
+     reading flow does not register that somebody else is speaking. */
+  margin: var(--space-lg) 0 var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
   border: 1px solid var(--hairline);
   border-left: 2px solid var(--crimson);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;

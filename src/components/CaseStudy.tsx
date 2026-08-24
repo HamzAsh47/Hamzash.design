@@ -402,7 +402,10 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
         <div className="container case__glance-wrap">
           <ul className="case__glance">
             {study.atAGlance.map((point) => (
-              <li key={point.slice(0, 40)}>{point}</li>
+              <li key={point.lead}>
+                <b className="case__glance-lead">{point.lead}</b>
+                <span className="case__glance-note">{point.note}</span>
+              </li>
             ))}
           </ul>
         </div>
