@@ -1,0 +1,14 @@
+# Cloudflare Workers static-asset headers.
+
+# The email signature. It has to be publicly fetchable — Gmail loads those
+# images anonymously as it renders a message — but it is not part of the
+# website and should never surface in a search result. robots.txt asks
+# crawlers not to fetch it; this tells the ones that fetch it anyway not to
+# index what they found, which is the only instruction that also covers the
+# images, since an image cannot carry a meta tag.
+/assets/signature/*
+  X-Robots-Tag: noindex, nofollow, noimageindex
+  # A week. Long enough that a mail client is not re-fetching a portrait on
+  # every message, short enough that replacing one does not mean living with
+  # the old one for a year.
+  Cache-Control: public, max-age=604800

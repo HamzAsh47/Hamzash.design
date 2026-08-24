@@ -1,4 +1,12 @@
 User-agent: *
 Allow: /
 
+# The email signature. Publicly reachable because it has to be — Gmail
+# fetches those images anonymously when it renders a message, so anything
+# behind a login or a token shows a visitor a row of broken boxes. What it
+# is not is part of the website: nothing links to it, it is absent from the
+# sitemap, and this keeps it out of search results. See public/_headers,
+# which sends the same instruction as a header for the images themselves.
+Disallow: /assets/signature/
+
 Sitemap: https://hamzash47.com/sitemap.xml
