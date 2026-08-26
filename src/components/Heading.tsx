@@ -1,5 +1,6 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import type { ElementType } from 'react'
+import { useScrollLinkedProgress } from '../hooks/useScrollLinkedProgress'
 
 type HeadingProps = {
   /** Highlighted words are wrapped in square brackets: "as [one system]." */
@@ -8,6 +9,18 @@ type HeadingProps = {
   className?: string
   /** Runs the kinetic word-by-word entrance. Reserved for the hero. */
   animate?: boolean
+  /**
+   * Ties the words to scroll position: they drift a few pixels as the heading
+   * crosses the viewport, further along the line the later the word, and back
+   * again on the way up.
+   *
+   * Opt-in per heading rather than a separate wrapper component. A wrapper
+   * would have to either re-split the text — a second tokenizer to keep in
+   * step with this one — or reach into this component's DOM for its word
+   * spans. The words, and the `--word-index` the effect is built on, already
+   * exist here.
+   */
+  scrollLinked?: boolean
   delayMs?: number
   id?: string
 }
@@ -46,15 +59,23 @@ function HeadingBase({
   as: Tag = 'h2',
   className = '',
   animate = false,
+  scrollLinked = false,
   delayMs = 0,
   id,
 }: HeadingProps) {
+  const ref = useRef<HTMLElement>(null)
+  useScrollLinkedProgress(scrollLinked ? ref : { current: null })
   /* Every heading on the page re-tokenises on each render of its parent.
      Harmless in isolation, but the contact form re-renders its whole
      subtree on every keystroke, and this was doing the split-and-rebuild
      work per character typed. */
   const tokens = useMemo(() => tokenize(text), [text])
-  const classes = ['headline', animate ? 'headline--animate' : '', className]
+  const classes = [
+    'headline',
+    animate ? 'headline--animate' : '',
+    scrollLinked ? 'headline--linked' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 
@@ -64,6 +85,7 @@ function HeadingBase({
 
   return (
     <Tag
+      ref={ref}
       className={classes}
       id={id}
       /* Named on the element rather than duplicated into a visually-hidden

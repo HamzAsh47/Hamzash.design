@@ -73,7 +73,9 @@ export function Portfolio() {
       <div className="container">
         <Reveal className="section__head">
           <Eyebrow>{portfolioIntro.eyebrow}</Eyebrow>
-          <Heading text={portfolioIntro.headline} className="headline--lg" />
+          {/* The one place this is switched on for now. Adding it elsewhere is
+              a single prop — worth looking at live before it spreads. */}
+          <Heading text={portfolioIntro.headline} className="headline--lg" scrollLinked />
           <p className="section__lede">{portfolioIntro.lede}</p>
 
           {hasPlaceholders && site.showPlaceholderTags && (
@@ -105,7 +107,14 @@ export function Portfolio() {
 
         <ul className="portfolio__grid">
           {visible.map((item, index) => (
-            <Reveal as="li" key={item.slug} delayMs={index * 80} className="portfolio__cell">
+            <Reveal
+              as="li"
+              key={item.slug}
+              delayMs={index * 80}
+              variant="settle"
+              index={index}
+              className="portfolio__cell"
+            >
               <article className="work-card">
                 <WorkCard item={item} index={index} />
               </article>

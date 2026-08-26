@@ -51,7 +51,7 @@ export function Services() {
 
           <ul className="services__grid">
             {services.map((service, index) => (
-              <Reveal as="li" key={service.id} delayMs={index * 90}>
+              <Reveal as="li" key={service.id} delayMs={index * 90} variant="settle" index={index}>
                 <ServiceCard service={service} />
               </Reveal>
             ))}

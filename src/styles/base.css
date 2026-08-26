@@ -289,13 +289,44 @@ html {
   letter-spacing: -0.035em;
 }
 
+/* Section headings and case-study titles. Moved from --step-4 to the top of
+   the scale: at 56px against a 70px hero these read as labels for the
+   sections rather than as statements in their own right, and scale is the
+   whole move — no new animation, no new token.
+
+   That does make a section heading the same size as the hero's. The hero
+   keeps its distinction by other means, which it always had: the kinetic
+   entrance, the portrait beside it, and being the first thing on the page.
+   Nothing else on a case study competes — its own section titles are
+   --step-2 and stay there. */
 .headline--lg {
-  font-size: var(--step-4);
+  font-size: var(--step-5);
 }
 
 .headline__word {
   display: inline-block;
   white-space: pre;
+}
+
+/* Scroll-linked drift. `--sl-progress` runs -1 to 1 as the heading crosses
+   the window and back the other way on the way up; `--word-index` is already
+   on every word, so multiplying the two gives a shallow lag across the line
+   — the last word trails the first by a few pixels and catches up.
+
+   The numbers are small deliberately. Four or five pixels of drift is the
+   difference between a page that responds to you and a page that swims; the
+   effect stops reading as craft the moment you can see how much it is
+   moving. Unset, `--sl-progress` falls back to 0 and this is inert, which is
+   what a reduced-motion visitor gets — the hook attaches nothing at all. */
+/* Scoped to no-preference rather than zeroed under reduce. Falling back to
+   `--sl-progress: 0` leaves every word carrying `translateY(0px)` — visually
+   identical to nothing, but it is still a transform on the element, and a
+   reduced-motion visitor should be given the plain document rather than a
+   motion effect that happens to be parked. */
+@media (prefers-reduced-motion: no-preference) {
+  .headline--linked .headline__word {
+    transform: translateY(calc(var(--sl-progress, 0) * (1.5px + var(--word-index) * 0.55px)));
+  }
 }
 
 /* `position: relative` is the anchor for the glitch copies defined below. */
@@ -545,15 +576,26 @@ html {
     transform var(--dur-fast) var(--ease-out);
 }
 
+/* A lift and the faintest scale. 1.5% is deliberately near the threshold of
+   noticing — enough that the card feels picked up, small enough that a grid
+   of them does not read as a template with a hover effect bolted on. */
 .panel:hover,
 .panel.is-hot {
-  transform: translateY(-5px);
+  transform: translateY(-5px) scale(1.015);
   border-color: var(--panel-accent);
 }
 
 .panel:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   transition-duration: 60ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel:hover,
+  .panel.is-hot,
+  .panel:active {
+    transform: none;
+  }
 }
 
 .panel::before,
@@ -631,6 +673,40 @@ html {
 .reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* The settle variant: arrives slightly off-square and comes into line.
+   That un-aligned to aligned move is what separates a composed grid from a
+   placed one — a fade alone reads as a template because every element in it
+   is already perfect before you see it.
+
+   Faster than the base reveal on purpose. A rise can afford to be slow; a
+   rotation that lingers stops being an arrival and starts being an effect. */
+.reveal.reveal--settle {
+  transform: translate(var(--settle-x, 0), 14px) rotate(var(--settle-rot, 0deg));
+  transition:
+    opacity var(--dur-mid) var(--ease-out),
+    transform var(--dur-mid) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.reveal--settle.is-visible {
+  transform: none;
+}
+
+/* Reduced motion: the end state from the start, for both variants.
+   The global rule further down already collapses every transition to
+   0.001ms, so this is not about speed. It is that a reveal is hidden until
+   its observer fires, and content that appears as you scroll is still a
+   motion effect to somebody who asked for none. Declared for both variants
+   together so a third one cannot be added and forget to opt in. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.reveal--settle {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* --- Tags / chips -------------------------------------------------------- */
