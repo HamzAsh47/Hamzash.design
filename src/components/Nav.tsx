@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import logoLockup from '../assets/logo/Header logo.svg'
 import { navCta, navLinks } from '../content'
+import { navigateToAbout } from '../hooks/useHashRoute'
 import { goToSection } from '../lib/scroll'
 
 export function Nav() {
@@ -47,6 +48,17 @@ export function Nav() {
         </button>
 
         <nav className="nav__links" aria-label="Primary">
+          {/* First, because it is the only link that leaves the page rather
+              than moving down it. */}
+          <button
+            className="nav__link"
+            onClick={() => {
+              setOpen(false)
+              navigateToAbout()
+            }}
+          >
+            About
+          </button>
           {navLinks.map((link) => (
             <button key={link.id} className="nav__link" onClick={() => navigate(link.id)}>
               {link.label}
@@ -80,14 +92,27 @@ export function Nav() {
           height: the toggle flipped to an X and no menu ever appeared. */}
       <div id="mobile-nav" className={`nav__drawer${open ? ' is-open' : ''}`} hidden={!open}>
         <nav className="container nav__drawer-inner" aria-label="Mobile">
+          <button
+            className="nav__drawer-link"
+            onClick={() => {
+              setOpen(false)
+              navigateToAbout()
+            }}
+            style={{ '--word-index': 0 } as React.CSSProperties}
+          >
+            <span className="nav__drawer-index">01</span>
+            About
+          </button>
+          {/* Offset by one so the drawer still counts 01, 02, 03 down the
+              list rather than starting again at 01 under About. */}
           {navLinks.map((link, index) => (
             <button
               key={link.id}
               className="nav__drawer-link"
               onClick={() => navigate(link.id)}
-              style={{ '--word-index': index } as React.CSSProperties}
+              style={{ '--word-index': index + 1 } as React.CSSProperties}
             >
-              <span className="nav__drawer-index">{String(index + 1).padStart(2, '0')}</span>
+              <span className="nav__drawer-index">{String(index + 2).padStart(2, '0')}</span>
               {link.label}
             </button>
           ))}

@@ -1,8 +1,9 @@
 import { navigateHome } from '../hooks/useHashRoute'
 
 /**
- * Scrolls to a page section. If a case study is open, returns to the main page
- * first and waits a frame so the target section exists before scrolling.
+ * Scrolls to a page section. If a case study or the about page is open,
+ * returns to the main page first and waits a frame so the target section
+ * exists before scrolling.
  */
 export function goToSection(id: string) {
   const scroll = () => {
@@ -12,7 +13,8 @@ export function goToSection(id: string) {
     target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
   }
 
-  if (window.location.hash.startsWith('#/case/')) {
+  const hash = window.location.hash
+  if (hash.startsWith('#/case/') || hash === '#/about') {
     navigateHome()
     requestAnimationFrame(() => requestAnimationFrame(scroll))
     return

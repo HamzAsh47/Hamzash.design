@@ -27,6 +27,9 @@ const CaseStudy = lazy(() =>
 const CaseStudyNotFound = lazy(() =>
   import('./components/CaseStudy').then((m) => ({ default: m.CaseStudyNotFound })),
 )
+/* Same reasoning as the case studies: nobody lands on the about page first,
+   so its markup has no business in the bundle the home page waits on. */
+const About = lazy(() => import('./components/About').then((m) => ({ default: m.About })))
 
 function HomePage() {
   return (
@@ -64,7 +67,13 @@ export default function App() {
             description: site.description,
             url: `${site.url}/`,
           }
-        : { title: site.title, description: site.description, url: `${site.url}/` },
+        : route.name === 'about'
+          ? {
+              title: `About | ${brand.name}`,
+              description: site.description,
+              url: `${site.url}/#/about`,
+            }
+          : { title: site.title, description: site.description, url: `${site.url}/` },
   )
 
   return (
@@ -79,6 +88,10 @@ export default function App() {
       <main id="main">
         {route.name === 'home' ? (
           <HomePage />
+        ) : route.name === 'about' ? (
+          <Suspense fallback={<div className="route-hold" aria-hidden="true" />}>
+            <About />
+          </Suspense>
         ) : (
           /* Nothing to look at, but it has to take up room. A null fallback
              is zero-height, so the footer paints near the top of the window

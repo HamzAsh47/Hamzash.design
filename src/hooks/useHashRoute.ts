@@ -5,11 +5,14 @@ import { useEffect, useState } from 'react'
  * is the single scrolling page. Hash routing means the site deploys to any
  * subpath on GitHub Pages with no 404 rewrite rules and no router dependency.
  */
-export type Route = { name: 'home' } | { name: 'case'; slug: string }
+export type Route = { name: 'home' } | { name: 'case'; slug: string } | { name: 'about' }
 
 function parse(hash: string): Route {
-  const match = hash.replace(/^#/, '').match(/^\/case\/([\w-]+)$/)
-  return match ? { name: 'case', slug: match[1] } : { name: 'home' }
+  const path = hash.replace(/^#/, '')
+  const caseMatch = path.match(/^\/case\/([\w-]+)$/)
+  if (caseMatch) return { name: 'case', slug: caseMatch[1] }
+  if (path === '/about') return { name: 'about' }
+  return { name: 'home' }
 }
 
 export function useHashRoute(): Route {
@@ -28,6 +31,10 @@ export function useHashRoute(): Route {
 
 export function navigateToCase(slug: string) {
   window.location.hash = `/case/${slug}`
+}
+
+export function navigateToAbout() {
+  window.location.hash = '/about'
 }
 
 export function navigateHome() {

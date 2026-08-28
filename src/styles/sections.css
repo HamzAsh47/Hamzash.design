@@ -5069,3 +5069,134 @@ body:has(.assistant.is-open) .assistant-launch {
   background: var(--obsidian);
   color: var(--white);
 }
+
+/* === About ================================================================ */
+
+/* The eyebrow, headline and lede sit inside a single Reveal, so
+   `.case__head`'s own gap never reaches between them — it spaces direct
+   children, and it sees one. Measured 3px under the eyebrow and 0px under a
+   70px headline, against 52 to 90px everywhere else on the page. */
+.about__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.about__bio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 46rem;
+  margin-bottom: var(--space-lg);
+}
+
+.about__personal-line {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: var(--step-1);
+  margin-top: var(--space-2xs);
+}
+
+.about__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-2xl);
+}
+
+.about__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.about__stat-value {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-3);
+  color: var(--crimson);
+  line-height: 1;
+}
+
+.about__stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.about__section {
+  margin-bottom: var(--space-2xl);
+}
+
+.about__section:last-child {
+  margin-bottom: 0;
+}
+
+.about__section .headline {
+  margin-bottom: var(--space-md);
+}
+
+.timeline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline__item {
+  display: grid;
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  gap: var(--space-sm) var(--space-md);
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--hairline);
+  align-items: start;
+}
+
+.timeline__range {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding-top: 0.2em;
+}
+
+.timeline__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.timeline__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-1);
+  color: var(--white);
+}
+
+/* White, not crimson. Crimson at this size measures 3.21:1 against obsidian
+   — under AA, and this is the line naming who the work was for, which is the
+   part of an entry a reader actually scans. The big stat numbers above keep
+   crimson because large text only needs 3.0 and they clear it. */
+.timeline__org {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--white);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .about__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .timeline__item {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xs);
+  }
+}

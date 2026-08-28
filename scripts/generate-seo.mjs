@@ -41,6 +41,9 @@ if (slugs.length === 0) throw new Error('No case-study slugs found — has the c
 const today = new Date().toISOString().slice(0, 10)
 const urls = [
   { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'monthly' },
+  /* A real page with its own title, description and canonical, linked first
+     in the nav — it belongs here for the same reason the case studies do. */
+  { loc: `${SITE_URL}/#/about`, priority: '0.7', changefreq: 'yearly' },
   ...slugs.map((slug) => ({
     loc: `${SITE_URL}/#/case/${slug}`,
     priority: '0.6',
