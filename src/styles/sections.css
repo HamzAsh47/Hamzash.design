@@ -3137,7 +3137,7 @@
   border-top: 1px solid var(--hairline);
   align-items: start;
   position: relative;
-  --glyph: clamp(7rem, 17vw, 13rem);
+  --glyph: clamp(8.5rem, 21vw, 16rem);
 }
 
 /* No rule under the last step. Each step's top border separates it from the
@@ -3164,7 +3164,10 @@
   position: absolute;
   top: 50%;
   right: calc((var(--bleed) + var(--glyph) / 2) * -1);
-  transform: translateY(-50%);
+  /* Lifted clear of the step's optical centre, and tilted off square. The
+     rotation is small on purpose: enough that the mark reads as placed rather
+     than pasted, not so much that it becomes the thing you look at. */
+  transform: translateY(calc(-50% - 20px)) rotate(-8deg);
 
   display: inline-flex;
   align-items: center;
