@@ -28,6 +28,12 @@
      3.0:1 on the lightest surface, 3.26:1 on obsidian. */
   --stroke: #626875;
   --cyan: #22d3ee;
+  /* WhatsApp's own mark colour, not a palette accent — it is here for the
+     same reason the glyph's geometry is theirs: the control is recognised by
+     the platform's colour, and substituting the site's would make it read as
+     a generic chat button. Never used for anything else on the page.
+     7.65:1 on --surface-raised, well past the 3.0 a UI component needs. */
+  --whatsapp: #25d366;
 
   /* Derived neutrals, all mixed from the locked palette rather than invented */
   --obsidian-raised: #131d33;

@@ -4002,7 +4002,10 @@
   border: 1px solid var(--gunmetal);
   border-radius: 999px;
   background: var(--surface-raised);
-  color: var(--text-secondary);
+  /* The platform's own green, at rest rather than on hover. A grey glyph made
+     this read as a generic chat button — the colour is most of what makes the
+     mark recognisable at 30px. */
+  color: var(--whatsapp);
 
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
@@ -4030,11 +4033,12 @@
   stroke-width: 1;
 }
 
-/* Crimson is the accent the palette spends on intent, so it arrives on hover
-   rather than sitting lit the whole time competing with "Start a project". */
-.wa-fab:hover {
-  color: var(--white);
-  border-color: var(--crimson);
+/* The glyph is already lit, so hover is answered by the ring around it rather
+   than by changing the mark's colour — which would only make it less like
+   WhatsApp at the moment somebody is about to press it. */
+.wa-fab:hover,
+.wa-fab:focus-visible {
+  border-color: color-mix(in srgb, var(--whatsapp) 60%, transparent);
   transform: translateY(-2px);
 }
 
@@ -4099,12 +4103,18 @@
   stroke-width: 1;
 }
 
+/* Cyan is the palette's AI/system colour, and this control is the AI — so it
+   carries it at rest, not only under a pointer. The launcher and the panel's
+   title glyph now agree, which they did not while one was grey until hovered. */
+.assistant-launch {
+  color: var(--cyan);
+}
+
 /* Cyan is the palette's AI/system colour, and this control is the AI. It is
    the one place on the page that earns it, so it arrives on interaction the
    same way crimson does everywhere else. */
 .assistant-launch:hover,
 .assistant-launch:focus-visible {
-  color: var(--cyan);
   border-color: color-mix(in srgb, var(--cyan) 60%, transparent);
   transform: translateY(-2px);
 }
