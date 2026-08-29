@@ -774,6 +774,17 @@
      an even box round uneven content looks tighter at the end than the start. */
   padding: var(--space-sm) var(--space-sm) var(--space-md);
   cursor: pointer;
+
+  /* A permanent crimson strip along the top edge, inset to the card's own
+     padding so it reads as part of the layout rather than a rule stuck on the
+     border. Painted as a background layer, not ::after: .service-card is a
+     .panel, so both pseudo-elements are already spoken for — ::before is the
+     scanline-and-spotlight layer and ::after is the crimson ring, and claiming
+     either here would silently delete it. */
+  background-image: linear-gradient(rgba(200, 30, 58, 0.55), rgba(200, 30, 58, 0.55));
+  background-repeat: no-repeat;
+  background-size: calc(100% - var(--space-sm) * 2) 2px;
+  background-position: var(--space-sm) 0;
 }
 
 .service-card__index {
@@ -831,10 +842,7 @@
 /* The whole call to action takes the crimson, arrow included — on a card whose
    stroke has just gone crimson too, a white label read as the odd one out. */
 .service-card:hover .service-card__link,
-.service-card.is-hot /* Pushed to the foot of the card, so the three links align across the row
-   whatever length the copy above them runs to. */
-.service-card__link {
-  margin-top: auto;
+.service-card.is-hot .service-card__link {
   color: var(--crimson);
 }
 
