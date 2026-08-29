@@ -34,12 +34,14 @@ function ServiceCard({ service }: { service: Service }) {
       <span className="service-card__media">
         <img src={media.src} alt={media.alt} loading="lazy" width={760} height={428} />
       </span>
+      {/* Index left, glyph pushed to the right corner of the copy — the top
+          of the card is the photograph, and nothing goes over that. */}
       <span className="service-card__meta">
-        <span className="service-card__glyph" aria-hidden="true">
-          <Icon name={service.icon} size={20} />
-        </span>
         <span className="service-card__index" aria-hidden="true">
           {index}
+        </span>
+        <span className="service-card__glyph" aria-hidden="true">
+          <Icon name={service.icon} size={22} />
         </span>
       </span>
       <span className="service-card__title">{service.title}</span>

@@ -844,30 +844,30 @@
    sections use was tried here and taken back out: at the scale of a card it
    read as decoration rather than as a system, which is the opposite of what
    these three cards are for. */
+/* Index at the left, glyph at the right corner. The card's own top is the
+   photograph, so the copy's top edge is the corner this can have. */
 .service-card__meta {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2xs);
+  /* The card is a flex column with align-items: flex-start, so this row would
+     otherwise shrink to its content and space-between would have nothing to
+     space. */
+  width: 100%;
 }
 
+/* The mark alone. Boxed it read as a button on a card that is already a
+   button, which is two affordances arguing over one control. */
 .service-card__glyph {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--radius-sm, 6px);
-  border: 1px solid var(--hairline);
   color: var(--text-secondary);
   flex-shrink: 0;
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .service-card:hover .service-card__glyph,
 .service-card.is-hot .service-card__glyph {
-  border-color: var(--crimson);
   color: var(--crimson);
 }
 
@@ -1024,7 +1024,8 @@
 .bleed-glyph.system__glyph {
   --glyph: 10rem;
   --bleed-share: 0;
-  top: var(--space-sm);
+  top: var(--space-lg);
+
   /* Derived from the tilt: rotating a square pushes each corner out by about
      half its width times the sine of the angle, so 8 degrees needs a shade
      over 7% of the glyph to keep it inside the box. */
@@ -3174,6 +3175,11 @@
   /* Phones: large against a narrow column, which is where the mark has the
      room to read as a plate behind the step. */
   --glyph: 8.5rem;
+  /* Smaller than the shared default: at 0.1 the corner was biting into the
+     page edge hard enough to read as clipped rather than as grazing it.
+     Declared on the step because .process__copy reserves room from the same
+     value and is a sibling of the glyph, not a descendant. */
+  --bleed-share: 0.04;
 }
 
 /* No rule under the last step. Each step's top border separates it from the
@@ -3272,9 +3278,6 @@
   }
 }
 
-/* Below this the copy runs the full width of the container and would set
-   itself under the glyph's visible half. Measured at 33 to 36px of overlap at
-   360 to 768; above it the copy column ends well clear and needs nothing. */
 /* Room for the visible part of the mark, at every width rather than only
    below a breakpoint. Scoped to a breakpoint it failed at exactly 1024, where
    the reservation stopped but the desktop glyph was still reaching in.
@@ -3288,14 +3291,22 @@
   padding-right: calc(var(--glyph) - var(--glyph) * var(--bleed-share) + var(--space-2xs));
 }
 
+/* Larger only where the panel is wide enough to hold it. The two panels sit
+   side by side from 900 up, so up to about 1300 each is barely 460 to 560px
+   and a 12rem mark reaches down into the outcome line — measured crossing it
+   at 1024 and again at 1200. Above 1320 there is room. */
+@media (min-width: 1320px) {
+  .bleed-glyph.system__glyph {
+    --glyph: 12rem;
+  }
+}
+
 @media (max-width: 640px) {
   .process__step {
     grid-template-columns: 1fr;
     gap: var(--space-xs);
   }
 
-  /* The panel is barely wider than the mark at this size, so the chain runs
-     into it. Smaller here, where there is nothing to spare. */
   .bleed-glyph.system__glyph {
     --glyph: 6rem;
   }
