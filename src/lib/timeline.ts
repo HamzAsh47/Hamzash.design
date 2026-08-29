@@ -11,6 +11,12 @@
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+/** Months since year zero for today, so a range ending "Present" has a length. */
+function currentMonth(): number {
+  const now = new Date()
+  return now.getFullYear() * 12 + now.getMonth()
+}
+
 /** Months since year zero, so ranges compare as plain numbers. */
 function parseMonth(token: string): number {
   const value = token.trim()
@@ -22,9 +28,23 @@ function parseMonth(token: string): number {
 }
 
 /** Splits on an em dash, en dash or hyphen — the copy uses an em dash. */
-function parseRange(range: string): [number, number] {
+export function parseRange(range: string): [number, number] {
   const [from, to] = range.split(/\s[—–-]\s/)
   return [parseMonth(from ?? ''), parseMonth(to ?? '')]
+}
+
+/**
+ * A range as two month numbers, with "Present" resolved to today rather than
+ * left at infinity — the map's scrubber compares against a real end.
+ */
+export function monthRange(range: string): [number, number] {
+  const [start, end] = parseRange(range)
+  return [start, Number.isFinite(end) ? end : currentMonth()]
+}
+
+/** A month number back to "Sep 2023", for the scrubber's readout. */
+export function monthLabel(month: number): string {
+  return `${MONTHS[((month % 12) + 12) % 12]} ${Math.floor(month / 12)}`
 }
 
 export type LaneSegment = {
@@ -47,12 +67,6 @@ export type BranchRow = {
   months: number
   /** The same figure in words — "1 yr 6 mos". */
   duration: string
-}
-
-/** Months since year zero for today, so a range ending "Present" has a length. */
-function currentMonth(): number {
-  const now = new Date()
-  return now.getFullYear() * 12 + now.getMonth()
 }
 
 function formatDuration(months: number): string {

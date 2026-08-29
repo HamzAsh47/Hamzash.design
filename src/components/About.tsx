@@ -8,6 +8,7 @@ import {
   aboutTimeline,
 } from '../content'
 import { navigateHome } from '../hooks/useHashRoute'
+import { CareerMap } from './CareerMap'
 import { layoutBranches } from '../lib/timeline'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
@@ -99,6 +100,8 @@ export function About() {
             </div>
           ))}
         </Reveal>
+
+        <CareerMap />
 
         <section className="about__section" aria-labelledby="about-timeline-heading">
           <Reveal>

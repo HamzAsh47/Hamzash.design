@@ -15,6 +15,8 @@ export type TimelineEntry = {
   copy: string
   /** Optional. Entries without one show their number on the rail instead. */
   logo?: string
+  /** Where the client sat, for the map. Omitted where there is no one place. */
+  place?: { label: string; lat: number; lon: number }
 }
 
 export const aboutIntro = {
@@ -46,6 +48,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Oct 2015 — Jan 2019',
     title: 'Graphic Designer',
     org: 'Freelance / Contract — Print & Production',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     location: 'Karachi, Pakistan',
     copy: 'Early-career roles across Karachi\u2019s print production industry before transitioning to digital and brand systems.',
   },
@@ -53,6 +56,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Apr 2019 — Nov 2019',
     title: 'Broadcast Motion Designer & Video Editor',
     org: 'Raah TV',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     logo: raahTv,
     location: 'Karachi, Pakistan',
     copy: 'Broadcast-quality motion graphics and video for a 24-hour news network under daily deadline pressure — editing, graphic design, and content packaging across news, cultural coverage, and community programming.',
@@ -61,6 +65,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Aug 2019 — Apr 2020',
     title: 'Design Team Lead',
     org: 'CentricSource',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     logo: centricsource,
     location: 'Karachi, Pakistan',
     copy: 'Joined building production design for a virtual garment-fitting system, then promoted to lead the design team — owning the design-to-development handoff and leading the team through a fully remote transition during COVID-19.',
@@ -69,6 +74,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jan 2020 — Aug 2020',
     title: 'Co-Founder',
     org: 'Design Dot',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     location: 'Karachi, Pakistan',
     copy: 'Co-founded a creative venture with Rohan Shahid, sourcing and delivering freelance design and video projects for international clients — first-hand lessons in business operations and client acquisition.',
   },
@@ -76,6 +82,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jan 2021 — May 2022',
     title: 'Freelance Motion Graphic Designer & Animator',
     org: 'Upwork (Self-employed)',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     logo: upwork,
     location: 'Karachi, Pakistan',
     copy: 'Built an independent motion design practice — custom animation, character animation, and story-driven explainers for international clients across music, tech, and education.',
@@ -84,6 +91,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jan 2021 — Jun 2022',
     title: 'YouTube Content Strategist & Producer',
     org: 'Santamaria Law Firm, P.C.',
+    place: { label: 'San Francisco, USA', lat: 37.77, lon: -122.42 },
     logo: santamaria,
     location: 'San Francisco, CA · Remote',
     copy: '10+ videos monthly, turning raw green-screen footage into polished 4K motion graphics on immigration law. Grew into content for the firm\u2019s university partnerships and a rebrand of their presentation assets.',
@@ -92,6 +100,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jul 2022 — Sep 2022',
     title: 'Professional Development',
     org: 'Career Break',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     location: 'Karachi, Pakistan',
     copy: 'An intentional pause to invest in new skills and lay the groundwork for the next chapter.',
   },
@@ -99,6 +108,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Sep 2022 — Present',
     title: 'Founder & Sole Operator',
     org: 'The Visualist',
+    place: { label: 'Karachi, Pakistan', lat: 24.86, lon: 67.01 },
     logo: theVisualist,
     location: 'Karachi, Pakistan · Hybrid',
     copy: 'Founded a multidisciplinary creative studio directing brand, UI/UX, and motion for international clients — hiring and leading a team before transitioning, two and a half years in, to running it solo.',
@@ -107,6 +117,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Sep 2023 — Mar 2026',
     title: 'Art Director — Brand Development',
     org: "JOSEF'S Buffalo Wings",
+    place: { label: 'Hamburg, Germany', lat: 53.55, lon: 9.99 },
     location: 'Hamburg an der Elbe, Germany · Remote',
     copy: 'Built the full brand identity from the ground up for Hamburg\u2019s pioneering buffalo wings concept — the complete visual system across digital, marketing, and print.',
   },
@@ -114,6 +125,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Oct 2023 — Oct 2025',
     title: 'Freelance Creative Director — Multimedia & Curriculum Design',
     org: 'Uplift K12',
+    place: { label: 'Houston, USA', lat: 29.76, lon: -95.37 },
     logo: upliftK12,
     location: 'Houston, TX · Remote',
     copy: 'Started designing K-4 math game assets, then grew into an ongoing creative partnership leading multimedia content across the platform\u2019s educational products as its design needs scaled.',
@@ -130,6 +142,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jun 2025 — Dec 2025',
     title: 'Freelance Creative Art Director',
     org: 'Muhammad Labs LTD',
+    place: { label: 'London, United Kingdom', lat: 51.51, lon: -0.13 },
     logo: muhammadLabs,
     location: 'United Kingdom · Remote',
     copy: 'Creative Director for a UK IT consultancy — scalable creative systems for their client portfolio, UI/UX for onboarding dashboards and mobile apps, and repeatable workflows the team operated under.',
