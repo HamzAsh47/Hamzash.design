@@ -5529,7 +5529,10 @@ body:has(.assistant.is-open) .assistant-launch {
   height: var(--node-size);
   border-radius: 50%;
   background: var(--obsidian);
-  border: 1px solid var(--hairline);
+  border: var(--rule, 1px) solid var(--hairline);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5626,6 +5629,9 @@ body:has(.assistant.is-open) .assistant-launch {
      whose copy needs more room still gets it. */
   --per-month: 0.5rem;
   --row-cap: 24rem;
+  /* The lines carry this section. A single pixel reads as wiring at the scale
+     the rows run to; two draws as a diagram. */
+  --rule: 2px;
 }
 
 /* Length reads as duration. Without this every role occupied one copy-sized
@@ -5671,9 +5677,9 @@ body:has(.assistant.is-open) .assistant-launch {
      renders the border inside the box at any real width but has to bulge it
      outward at width zero — so without this the trunk and the branches ended
      up centred a pixel apart from each other. */
-  left: calc(var(--node-size) / 2 - 0.5px);
-  width: calc(var(--lane) * var(--lane-gap) + 1px);
-  border-right: 1px solid var(--line, var(--hairline));
+  left: calc(var(--node-size) / 2 - var(--rule) / 2);
+  width: calc(var(--lane) * var(--lane-gap) + var(--rule));
+  border-right: var(--rule) solid var(--line, var(--hairline));
 }
 
 /* The trunk stops at the first and last nodes rather than running past them
@@ -5707,8 +5713,8 @@ body:has(.assistant.is-open) .assistant-launch {
   right: 0;
   bottom: 100%;
   height: var(--elbow);
-  border-top: 1px solid var(--line, var(--hairline));
-  border-right: 1px solid var(--line, var(--hairline));
+  border-top: var(--rule) solid var(--line, var(--hairline));
+  border-right: var(--rule) solid var(--line, var(--hairline));
   border-top-right-radius: var(--elbow-r);
 }
 
@@ -5727,8 +5733,8 @@ body:has(.assistant.is-open) .assistant-launch {
   right: 0;
   top: 100%;
   height: var(--elbow);
-  border-bottom: 1px solid var(--line, var(--hairline));
-  border-right: 1px solid var(--line, var(--hairline));
+  border-bottom: var(--rule) solid var(--line, var(--hairline));
+  border-right: var(--rule) solid var(--line, var(--hairline));
   border-bottom-right-radius: var(--elbow-r);
 }
 
@@ -5787,6 +5793,18 @@ body:has(.assistant.is-open) .assistant-launch {
    out of five running side by side. */
 .timeline--branch:hover .timeline__item:not(:hover) .branch__lanes--fill {
   opacity: 0.28;
+}
+
+/* And the row's own station comes forward to meet it. */
+.timeline__item:hover .timeline__node {
+  border-color: var(--crimson);
+  transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline__item:hover .timeline__node {
+    transform: none;
+  }
 }
 
 /* Reduced motion: the crimson is simply there. The global rule collapses the

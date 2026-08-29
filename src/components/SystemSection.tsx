@@ -75,7 +75,7 @@ export function SystemSection() {
 
           <Reveal className="system__panel system__panel--new" delayMs={120}>
             <span className="bleed-glyph system__glyph" aria-hidden="true">
-              <Icon name="system" />
+              <Icon name="system" draw />
             </span>
             <div className="system__panel-head">
               <span className="system__label system__label--new">{system.newWay.label}</span>

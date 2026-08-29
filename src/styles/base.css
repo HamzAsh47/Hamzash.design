@@ -1062,3 +1062,26 @@ html {
 .route-hold {
   min-height: 100vh;
 }
+
+
+/* --- Icons that draw themselves --------------------------------------------
+   Every shape in a drawing glyph is normalised to pathLength 1 by the Icon
+   component, so one dash rule covers marks of wildly different real lengths.
+   The dash is the whole path and the offset hides it; taking the offset to
+   zero pulls the stroke on end to end.
+
+   Keyed to the Reveal ancestor rather than an observer of its own: the marks
+   that draw all sit inside one, so the stagger already on those blocks carries
+   the drawing with it. */
+@media (prefers-reduced-motion: no-preference) {
+  .icon--draw > * {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 900ms var(--ease-out);
+    transition-delay: calc(var(--reveal-delay, 0ms) + 150ms);
+  }
+
+  .is-visible .icon--draw > * {
+    stroke-dashoffset: 0;
+  }
+}

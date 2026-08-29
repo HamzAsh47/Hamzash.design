@@ -91,7 +91,7 @@ const ContactIntro = memo(function ContactIntro({ step }: { step: number }) {
                 thing twice — the panel opposite already reads
                 "STEP 1 OF 4 — YOU", and the list is in order. */}
             <span className="contact__step-mark">
-              {index < step ? <Icon name="check" size={14} /> : <Icon name={item.icon} size={14} />}
+              {index < step ? <Icon name="check" size={14} /> : <Icon name={item.icon} size={14} draw />}
             </span>
             <span className="contact__step-label">{item.label}</span>
           </li>

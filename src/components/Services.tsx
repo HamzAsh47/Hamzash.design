@@ -41,7 +41,7 @@ function ServiceCard({ service }: { service: Service }) {
           {index}
         </span>
         <span className="service-card__glyph" aria-hidden="true">
-          <Icon name={service.icon} size={22} />
+          <Icon name={service.icon} size={22} draw />
         </span>
       </span>
       <span className="service-card__title">{service.title}</span>

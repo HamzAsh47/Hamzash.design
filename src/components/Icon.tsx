@@ -1,3 +1,5 @@
+import { Children, cloneElement, isValidElement } from 'react'
+
 /**
  * The site's monoline glyph set.
  *
@@ -244,10 +246,40 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
 }
 
-export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
+/**
+ * Stamps pathLength="1" onto every shape in a glyph, recursing through the
+ * fragments the set is written in.
+ *
+ * Without it a stroke-dash animation is unusable here: dash lengths are in
+ * user units, every one of these paths is a different length, and a single
+ * dasharray would come out as dashes on one mark and a solid line on the next.
+ * Normalising each path to a length of 1 lets one CSS rule draw all of them.
+ */
+function normalise(node: React.ReactNode): React.ReactNode {
+  return Children.map(node, (child) => {
+    if (!isValidElement(child)) return child
+    const props = child.props as { children?: React.ReactNode }
+    return cloneElement(
+      child as React.ReactElement<Record<string, unknown>>,
+      { pathLength: 1 },
+      props.children ? normalise(props.children) : undefined,
+    )
+  })
+}
+
+export function Icon({
+  name,
+  size = 16,
+  draw = false,
+}: {
+  name: IconName
+  size?: number
+  /** Draws itself when its Reveal ancestor arrives. See .icon--draw. */
+  draw?: boolean
+}) {
   return (
     <svg
-      className="icon"
+      className={'icon' + (draw ? ' icon--draw' : '')}
       viewBox="0 0 20 20"
       width={size}
       height={size}
@@ -259,7 +291,7 @@ export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
       aria-hidden="true"
       focusable="false"
     >
-      {PATHS[name]}
+      {draw ? normalise(PATHS[name]) : PATHS[name]}
     </svg>
   )
 }
