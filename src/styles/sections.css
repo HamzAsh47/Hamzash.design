@@ -3111,45 +3111,6 @@
 
 /* === Process ============================================================= */
 
-/* Steps and a photograph, side by side. The column is fixed so the steps keep
-   a readable measure rather than stretching to whatever is left. */
-.process__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
-  gap: var(--space-xl);
-  align-items: start;
-}
-
-.process__figure {
-  position: sticky;
-  top: calc(var(--header-height) + var(--space-md));
-  border: 1px solid var(--gunmetal);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.process__figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  /* Held back so it sits behind the copy rather than competing with it — the
-     steps are what this section is for. */
-  filter: grayscale(1) contrast(1.04);
-  opacity: 0.8;
-}
-
-@media (max-width: 1024px) {
-  .process__body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Out of the layout rather than stacked underneath: on a narrow screen the
-     photograph would just be one more thing between the reader and the steps. */
-  .process__figure {
-    display: none;
-  }
-}
-
 .process__list {
   list-style: none;
   margin: 0;
