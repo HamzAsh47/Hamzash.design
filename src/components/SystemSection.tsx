@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { system } from '../content'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
+import { Icon } from './Icon'
 import { Reveal } from './Reveal'
 
 /**
@@ -55,6 +56,11 @@ export function SystemSection() {
 
         <div className="system__compare" data-lane={lane}>
           <Reveal className="system__panel system__panel--old">
+            {/* Three pieces that do not meet, against the panel that argues
+                they should. Same treatment as the pillars and the process. */}
+            <span className="bleed-glyph system__glyph" aria-hidden="true">
+              <Icon name="fragments" />
+            </span>
             <div className="system__panel-head">
               <span className="system__label">{system.oldWay.label}</span>
             </div>
@@ -73,6 +79,9 @@ export function SystemSection() {
           </Reveal>
 
           <Reveal className="system__panel system__panel--new" delayMs={120}>
+            <span className="bleed-glyph system__glyph" aria-hidden="true">
+              <Icon name="system" />
+            </span>
             <div className="system__panel-head">
               <span className="system__label system__label--new">{system.newWay.label}</span>
             </div>

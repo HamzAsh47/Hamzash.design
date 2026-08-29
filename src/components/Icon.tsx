@@ -40,6 +40,10 @@ export type IconName =
   | 'budget'
   | 'scope'
   | 'details'
+  /* The two halves of the comparison: three pieces that do not meet, and the
+     same three held in one frame. */
+  | 'fragments'
+  | 'system'
   /* List markers. */
   | 'check'
 
@@ -207,6 +211,24 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M4.6 3.4h10.8v13.2H4.6z" />
       <path d="M7.4 7h5.2M7.4 10h5.2M7.4 13h3" />
+    </>
+  ),
+  /* Three separate pieces, deliberately not touching. */
+  fragments: (
+    <>
+      <rect x="2.4" y="2.4" width="6.4" height="6.4" rx="1.4" />
+      <rect x="11.6" y="5.4" width="6" height="6" rx="1.4" />
+      <rect x="4.6" y="12.2" width="6.6" height="5.4" rx="1.4" />
+    </>
+  ),
+  /* The same pieces, held in one frame and joined. */
+  system: (
+    <>
+      <rect x="2.4" y="2.4" width="15.2" height="15.2" rx="2.6" />
+      <circle cx="6.6" cy="6.6" r="1.6" />
+      <circle cx="13.4" cy="6.6" r="1.6" />
+      <circle cx="10" cy="13.6" r="1.6" />
+      <path d="M8.2 6.6h3.6M7.4 8.1l1.8 4M12.6 8.1l-1.8 4" />
     </>
   ),
   check: (

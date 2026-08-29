@@ -24,7 +24,7 @@ export function Process() {
                     which on a phone read as a bullet the number then repeated. */}
                 <div className="process__heading">
                   <h3 className="process__title">{step.title}</h3>
-                  <span className="process__glyph" aria-hidden="true">
+                  <span className="bleed-glyph process__glyph" aria-hidden="true">
                     <Icon name={step.icon} size={24} />
                   </span>
                 </div>

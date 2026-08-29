@@ -34,13 +34,13 @@ function ServiceCard({ service }: { service: Service }) {
       <span className="service-card__media">
         <img src={media.src} alt={media.alt} loading="lazy" width={760} height={428} />
       </span>
-      <span className="service-card__meta">
-        <span className="service-card__glyph" aria-hidden="true">
-          <Icon name={service.icon} size={20} />
-        </span>
-        <span className="service-card__index" aria-hidden="true">
-          {index}
-        </span>
+      {/* Oversized, cut by the card's own right edge, and held far back —
+          the same treatment the process steps and the system panels use. */}
+      <span className="bleed-glyph service-card__glyph" aria-hidden="true">
+        <Icon name={service.icon} />
+      </span>
+      <span className="service-card__index" aria-hidden="true">
+        {index}
       </span>
       <span className="service-card__title">{service.title}</span>
       <span className="service-card__body">{service.description}</span>
