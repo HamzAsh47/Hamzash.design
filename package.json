@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && node scripts/check-worker-imports.mjs && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "seo": "node scripts/generate-seo.mjs",
     "deploy": "npm run build && wrangler deploy",
     "deploy:check": "npm run build && wrangler deploy --dry-run",
-    "images": "node scripts/optimise-case-images.mjs"
+    "images": "node scripts/optimise-case-images.mjs",
+    "check:worker": "node scripts/check-worker-imports.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
