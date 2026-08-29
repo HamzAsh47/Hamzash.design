@@ -1011,8 +1011,25 @@
   overflow: hidden;
 }
 
-.system__glyph {
+/* Wholly inside the panel — nothing runs off here. The panel is narrow, and a
+   mark cut by a box reads as a mistake rather than as a bleed; bleeding only
+   works against the page edge. Aligned to the top, beside the chain, rather
+   than floated at the panel's centre, where it crossed the outcome line
+   underneath. The small right inset is for the tilt: rotating a square pushes
+   its corners out by about a twentieth of its width each side.
+
+   Both class names again, because .bleed-glyph is defined further down this
+   file — at equal specificity it wins on source order, and `top` and
+   `transform` here were doing nothing at all. */
+.bleed-glyph.system__glyph {
   --glyph: 10rem;
+  --bleed-share: 0;
+  top: var(--space-sm);
+  /* Derived from the tilt: rotating a square pushes each corner out by about
+     half its width times the sine of the angle, so 8 degrees needs a shade
+     over 7% of the glyph to keep it inside the box. */
+  right: calc(var(--glyph) * 0.075);
+  transform: rotate(var(--glyph-tilt));
   z-index: 0;
 }
 
@@ -3275,6 +3292,12 @@
   .process__step {
     grid-template-columns: 1fr;
     gap: var(--space-xs);
+  }
+
+  /* The panel is barely wider than the mark at this size, so the chain runs
+     into it. Smaller here, where there is nothing to spare. */
+  .bleed-glyph.system__glyph {
+    --glyph: 6rem;
   }
 }
 
