@@ -5090,12 +5090,29 @@ body:has(.assistant.is-open) .assistant-launch {
   gap: var(--space-sm);
 }
 
+/* Portrait and biography side by side. The portrait column is fixed so the
+   measure of the copy beside it stays inside a readable line length instead of
+   stretching with the viewport. */
 .about__bio {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 40rem);
+  gap: var(--space-lg);
+  align-items: start;
+  margin-bottom: var(--space-lg);
+}
+
+.about__bio-copy {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  max-width: 46rem;
-  margin-bottom: var(--space-lg);
+}
+
+.about__portrait {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gunmetal);
 }
 
 .about__personal-line {
@@ -5149,6 +5166,16 @@ body:has(.assistant.is-open) .assistant-launch {
   margin-bottom: var(--space-md);
 }
 
+/* Explains what the lines mean, once, so the diagram is not a puzzle. */
+.about__section-note {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 46rem;
+  margin-top: var(--space-2xs);
+  margin-bottom: var(--space-md);
+}
+
 .timeline__list {
   list-style: none;
   margin: 0;
@@ -5191,12 +5218,14 @@ body:has(.assistant.is-open) .assistant-launch {
 
 /* The rail is inset by half a node so it does not stick out past the first
    and last circles; these trim the matching padding so the line still meets
-   them instead of stopping short. */
-.timeline__item:first-child {
+   them instead of stopping short. Rail only — the branch diagram needs every
+   row padded identically, because it draws its lines per row and they have to
+   butt up against the rows above and below to read as continuous. */
+.timeline--rail .timeline__item:first-child {
   padding-top: 0;
 }
 
-.timeline__item:last-child {
+.timeline--rail .timeline__item:last-child {
   padding-bottom: 0;
 }
 
@@ -5276,13 +5305,181 @@ body:has(.assistant.is-open) .assistant-launch {
   letter-spacing: 0.02em;
 }
 
+/* --- The branch diagram --------------------------------------------------
+
+   Concurrent roles get parallel lines. The lane each entry sits in, and which
+   lanes pass through each row, are computed in lib/timeline.ts from the same
+   date strings printed in the copy — so the picture cannot drift from the text.
+
+   Geometry hangs off two numbers. --lanes comes from the data and sets the
+   gutter's width; --lane-gap sets the spacing, and everything else is derived
+   from it, so the mobile breakpoint only has to restate the two. */
+.timeline--branch {
+  --node-size: 2.5rem;
+  /* At least the node's width, or a branch node lands on top of the trunk it
+     just left — measured at 1.5rem, where the lane-1 circle's left edge sat
+     exactly on the trunk line. */
+  --lane-gap: 2.5rem;
+  --gutter: calc(var(--node-size) + (var(--lanes) - 1) * var(--lane-gap));
+  /* Where a node's centre falls, measured from its row's top edge. Every line
+     that starts, ends or turns does it on this axis. */
+  --node-mid: calc(var(--space-md) + var(--node-size) / 2);
+  --elbow: 2.25rem;
+  /* Never larger than the box it rounds: a lane-1 elbow is only one gap wide,
+     and on small screens only an elbow tall. */
+  --elbow-r: calc(min(var(--elbow), var(--lane-gap)) * 0.65);
+}
+
+.timeline--branch .timeline__item {
+  grid-template-columns: var(--gutter) minmax(0, 9rem) minmax(0, 1fr);
+}
+
+/* Absolute, not a grid item, so it covers the row's padding as well as its
+   content box — otherwise each row's lines would stop short of the next. */
+.branch__lanes {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--gutter);
+  pointer-events: none;
+}
+
+/* A box spanning trunk to lane, with only its right border drawn. That gives
+   the vertical line its x for free and gives the elbows a box to hang off. */
+.branch__seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* The extra pixel of width, and the half pixel of offset, put the border's
+     centre exactly on the lane axis. Both are needed because border-box sizing
+     renders the border inside the box at any real width but has to bulge it
+     outward at width zero — so without this the trunk and the branches ended
+     up centred a pixel apart from each other. */
+  left: calc(var(--node-size) / 2 - 0.5px);
+  width: calc(var(--lane) * var(--lane-gap) + 1px);
+  border-right: 1px solid var(--hairline);
+}
+
+/* The trunk stops at the first and last nodes rather than running past them
+   into open space. */
+.timeline--branch .timeline__item:first-child .branch__seg {
+  top: var(--node-mid);
+}
+
+.timeline--branch .timeline__item:last-child .branch__seg:not(.branch__seg--open) {
+  bottom: calc(100% - var(--node-mid));
+}
+
+/* Still running. The line runs past the last node and fades instead of being
+   cut off or curved back — closing it would say the engagement ended, which
+   for anything dated "Present" is not true. */
+.branch__seg--open {
+  bottom: 0;
+  mask-image: linear-gradient(to bottom, #000 45%, transparent);
+}
+
+/* Leaving the trunk: a quarter turn out of the main line, then straight down
+   the lane. Starts above the node so the curve is not swallowed by it. */
+.branch__seg--start {
+  top: var(--node-mid);
+}
+
+.branch__seg--start::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--elbow);
+  border-top: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  border-top-right-radius: var(--elbow-r);
+}
+
+/* Rejoining: the mirror of the same turn, on the last row the role ran
+   through. Without it four lines would simply stop in mid-air. */
+.branch__seg--end {
+  bottom: calc(100% - var(--node-mid));
+}
+
+.branch__seg--end::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: var(--elbow);
+  border-bottom: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  border-bottom-right-radius: var(--elbow-r);
+}
+
+/* A role that both branched and rejoined without anything else starting in
+   between: out and back in one row, so the run between the two turns is just
+   the node's own height. */
+.branch__seg--start.branch__seg--end {
+  top: var(--node-mid);
+  bottom: auto;
+  height: calc(var(--node-size) / 2);
+}
+
+/* Nodes ride their lane rather than the gutter's left edge. */
+.timeline--branch .timeline__node {
+  margin-left: calc(var(--lane) * var(--lane-gap));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .branch__seg,
+  .branch__seg::before,
+  .branch__seg::after {
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+}
+
+/* Hovering a row lights its own line, so a reader can pick one engagement out
+   of five running side by side. Keyed to --start rather than :last-child:
+   only the entry that owns the row branches in it, whereas the last segment
+   is somebody else's line whenever the row's own entry sits on the trunk. */
+.timeline__item:hover .branch__seg--start,
+.timeline__item:hover .branch__seg--start::before,
+.timeline__item:hover .branch__seg--start::after {
+  border-color: var(--crimson);
+}
+
+@media (max-width: 1024px) {
+  .timeline--branch {
+    --node-size: 2rem;
+    --lane-gap: 2rem;
+    --elbow: 1.75rem;
+  }
+}
+
 @media (max-width: 640px) {
   .about__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .about__bio {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
+  }
+
+  .about__portrait {
+    max-width: 15rem;
+  }
+
   .timeline--rail {
     --node-size: 2.5rem;
+  }
+
+  .timeline--branch {
+    --node-size: 1.5rem;
+    --lane-gap: 1.25rem;
+    --elbow: 1.25rem;
+  }
+
+  .timeline--branch .timeline__index {
+    font-size: 0.58rem;
   }
 
   .timeline__item {
@@ -5290,6 +5487,10 @@ body:has(.assistant.is-open) .assistant-launch {
     grid-template-areas:
       'node range'
       'node copy';
+  }
+
+  .timeline--branch .timeline__item {
+    grid-template-columns: var(--gutter) minmax(0, 1fr);
   }
 
   .timeline__node {

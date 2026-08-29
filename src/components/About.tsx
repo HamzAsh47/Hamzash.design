@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import portrait from '../assets/images/portrait.webp'
 import {
   aboutBio,
   aboutEducation,
@@ -7,9 +8,14 @@ import {
   aboutTimeline,
 } from '../content'
 import { navigateHome } from '../hooks/useHashRoute'
+import { layoutBranches } from '../lib/timeline'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
+
+/* Derived once at module scope: the ranges never change between renders, and
+   the layout is a pure function of them. */
+const branches = layoutBranches(aboutTimeline.map((entry) => entry.range))
 
 export function About() {
   /* Hash routing swaps the view without moving the scroll position, so
@@ -39,12 +45,23 @@ export function About() {
 
       <div className="container">
         <Reveal className="about__bio">
-          {aboutBio.paragraphs.map((paragraph) => (
-            <p className="body" key={paragraph.slice(0, 24)}>
-              {paragraph}
-            </p>
-          ))}
-          <p className="about__personal-line">{aboutBio.personalLine}</p>
+          {/* Decorative: the name and the whole biography sit beside it, so a
+              description here would only repeat what a reader already has. */}
+          <img
+            className="about__portrait"
+            src={portrait}
+            alt=""
+            width={900}
+            height={1205}
+          />
+          <div className="about__bio-copy">
+            {aboutBio.paragraphs.map((paragraph) => (
+              <p className="body" key={paragraph.slice(0, 24)}>
+                {paragraph}
+              </p>
+            ))}
+            <p className="about__personal-line">{aboutBio.personalLine}</p>
+          </div>
         </Reveal>
 
         <Reveal className="about__stats" delayMs={80}>
@@ -64,33 +81,72 @@ export function About() {
               as="h2"
               className="headline--lg"
             />
+            <p className="about__section-note">
+              Lines that run side by side ran side by side. The trunk is whatever the main
+              engagement was at the time; every branch beside it is a role held at the same
+              time, for exactly as long as the dates say. A line that curves back has ended.
+              A line that fades off the bottom is still running.
+            </p>
           </Reveal>
 
-          <ol className="timeline__list timeline--rail">
-            {aboutTimeline.map((entry, index) => (
-              <Reveal as="li" key={`${entry.org}-${entry.range}`} delayMs={index * 60} className="timeline__item">
-                {/* The node sits on the rail: the company mark where one
-                    exists, the entry's number where it does not. The org is
-                    already named in the copy beside it, so the mark is
-                    decorative and the alt stays empty. */}
-                <span className="timeline__node" aria-hidden="true">
-                  {entry.logo ? (
-                    <img className="timeline__logo" src={entry.logo} alt="" loading="lazy" />
-                  ) : (
-                    <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
-                  )}
-                </span>
-                <span className="timeline__range">{entry.range}</span>
-                <div className="timeline__copy">
-                  <h3 className="timeline__title">{entry.title}</h3>
-                  <p className="timeline__org">
-                    {entry.org}
-                    {entry.location ? ` · ${entry.location}` : ''}
-                  </p>
-                  <p className="body">{entry.copy}</p>
-                </div>
-              </Reveal>
-            ))}
+          <ol
+            className="timeline__list timeline--branch"
+            style={{ '--lanes': branches.lanes } as React.CSSProperties}
+          >
+            {aboutTimeline.map((entry, index) => {
+              const row = branches.rows[index]
+              return (
+                <Reveal
+                  as="li"
+                  key={`${entry.org}-${entry.range}`}
+                  delayMs={index * 60}
+                  className="timeline__item"
+                >
+                  {/* The diagram for this row: one element per lane with a line
+                      passing through it, each the full height of the row. Drawn
+                      per row rather than as wires spanning several, because row
+                      heights are set by their copy — a spanning element would
+                      have to be measured, while these just butt up against the
+                      ones above and below and read as continuous. */}
+                  <span className="branch__lanes" aria-hidden="true">
+                    {row.segments.map((segment) => (
+                      <span
+                        key={segment.lane}
+                        className={
+                          'branch__seg' +
+                          (segment.startsHere ? ' branch__seg--start' : '') +
+                          (segment.endsHere ? ' branch__seg--end' : '') +
+                          (segment.open ? ' branch__seg--open' : '')
+                        }
+                        style={{ '--lane': segment.lane } as React.CSSProperties}
+                      />
+                    ))}
+                  </span>
+
+                  <span
+                    className="timeline__node"
+                    aria-hidden="true"
+                    style={{ '--lane': row.lane } as React.CSSProperties}
+                  >
+                    {entry.logo ? (
+                      <img className="timeline__logo" src={entry.logo} alt="" loading="lazy" />
+                    ) : (
+                      <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
+                    )}
+                  </span>
+
+                  <span className="timeline__range">{entry.range}</span>
+                  <div className="timeline__copy">
+                    <h3 className="timeline__title">{entry.title}</h3>
+                    <p className="timeline__org">
+                      {entry.org}
+                      {entry.location ? ` · ${entry.location}` : ''}
+                    </p>
+                    <p className="body">{entry.copy}</p>
+                  </div>
+                </Reveal>
+              )
+            })}
           </ol>
         </section>
 
@@ -104,6 +160,9 @@ export function About() {
             />
           </Reveal>
 
+          {/* A plain rail, not the branch diagram. Three entries with no
+              meaningful concurrency would make the branching read as decoration
+              rather than as information. */}
           <ol className="timeline__list timeline--rail">
             {aboutEducation.map((entry, index) => (
               <Reveal as="li" key={`${entry.org}-${entry.range}`} delayMs={index * 60} className="timeline__item">
