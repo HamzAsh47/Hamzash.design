@@ -69,12 +69,16 @@ export function About() {
           <ol className="timeline__list timeline--rail">
             {aboutTimeline.map((entry, index) => (
               <Reveal as="li" key={`${entry.org}-${entry.range}`} delayMs={index * 60} className="timeline__item">
-                {/* The node sits on the rail. It carries the entry's number
-                    because no company marks are in the repo yet; when they
-                    land, an <img className="timeline__logo"> replaces the
-                    index here and the CSS already handles it. */}
+                {/* The node sits on the rail: the company mark where one
+                    exists, the entry's number where it does not. The org is
+                    already named in the copy beside it, so the mark is
+                    decorative and the alt stays empty. */}
                 <span className="timeline__node" aria-hidden="true">
-                  <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
+                  {entry.logo ? (
+                    <img className="timeline__logo" src={entry.logo} alt="" loading="lazy" />
+                  ) : (
+                    <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
+                  )}
                 </span>
                 <span className="timeline__range">{entry.range}</span>
                 <div className="timeline__copy">

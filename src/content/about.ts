@@ -1,9 +1,20 @@
+import centricsource from '../assets/logos/centricsource.jpeg'
+import ezSportsApparel from '../assets/logos/ez-sports-apparel.png'
+import muhammadLabs from '../assets/logos/muhammad-labs.jpeg'
+import raahTv from '../assets/logos/raah-tv.jpeg'
+import santamaria from '../assets/logos/santamaria.jpeg'
+import theVisualist from '../assets/logos/the-visualist.jpeg'
+import upliftK12 from '../assets/logos/uplift-k12.jpeg'
+import upwork from '../assets/logos/upwork.jpeg'
+
 export type TimelineEntry = {
   range: string
   title: string
   org: string
   location: string
   copy: string
+  /** Optional. Entries without one show their number on the rail instead. */
+  logo?: string
 }
 
 export const aboutIntro = {
@@ -42,6 +53,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Apr 2019 — Nov 2019',
     title: 'Broadcast Motion Designer & Video Editor',
     org: 'Raah TV',
+    logo: raahTv,
     location: 'Karachi, Pakistan',
     copy: 'Broadcast-quality motion graphics and video for a 24-hour news network under daily deadline pressure — editing, graphic design, and content packaging across news, cultural coverage, and community programming.',
   },
@@ -49,6 +61,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Aug 2019 — Apr 2020',
     title: 'Design Team Lead',
     org: 'CentricSource',
+    logo: centricsource,
     location: 'Karachi, Pakistan',
     copy: 'Joined building production design for a virtual garment-fitting system, then promoted to lead the design team — owning the design-to-development handoff and leading the team through a fully remote transition during COVID-19.',
   },
@@ -63,6 +76,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jan 2021 — May 2022',
     title: 'Freelance Motion Graphic Designer & Animator',
     org: 'Upwork (Self-employed)',
+    logo: upwork,
     location: 'Karachi, Pakistan',
     copy: 'Built an independent motion design practice — custom animation, character animation, and story-driven explainers for international clients across music, tech, and education.',
   },
@@ -70,6 +84,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jan 2021 — Jun 2022',
     title: 'YouTube Content Strategist & Producer',
     org: 'Santamaria Law Firm, P.C.',
+    logo: santamaria,
     location: 'San Francisco, CA · Remote',
     copy: '10+ videos monthly, turning raw green-screen footage into polished 4K motion graphics on immigration law. Grew into content for the firm\u2019s university partnerships and a rebrand of their presentation assets.',
   },
@@ -84,6 +99,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Sep 2022 — Present',
     title: 'Founder & Sole Operator',
     org: 'The Visualist',
+    logo: theVisualist,
     location: 'Karachi, Pakistan · Hybrid',
     copy: 'Founded a multidisciplinary creative studio directing brand, UI/UX, and motion for international clients — hiring and leading a team before transitioning, two and a half years in, to running it solo.',
   },
@@ -98,6 +114,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Oct 2023 — Oct 2025',
     title: 'Freelance Creative Director — Multimedia & Curriculum Design',
     org: 'Uplift K12',
+    logo: upliftK12,
     location: 'Houston, TX · Remote',
     copy: 'Started designing K-4 math game assets, then grew into an ongoing creative partnership leading multimedia content across the platform\u2019s educational products as its design needs scaled.',
   },
@@ -105,6 +122,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Apr 2024 — Present',
     title: 'Senior Apparel Branding & Visualization Designer',
     org: 'EZ Sports Apparel',
+    logo: ezSportsApparel,
     location: 'Remote',
     copy: 'Own the full pre-production visual pipeline for client-facing apparel presentations — logo application, pattern graphics, color matching, and layout that turns raw requirements into production-ready mockups.',
   },
@@ -112,6 +130,7 @@ export const aboutTimeline: TimelineEntry[] = [
     range: 'Jun 2025 — Dec 2025',
     title: 'Freelance Creative Art Director',
     org: 'Muhammad Labs LTD',
+    logo: muhammadLabs,
     location: 'United Kingdom · Remote',
     copy: 'Creative Director for a UK IT consultancy — scalable creative systems for their client portfolio, UI/UX for onboarding dashboards and mobile apps, and repeatable workflows the team operated under.',
   },
