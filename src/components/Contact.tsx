@@ -1,5 +1,6 @@
 import { memo, useState } from 'react'
 import { contact, site } from '../content'
+import contactPortrait from '../assets/images/contact-portrait.webp'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
@@ -90,6 +91,25 @@ const ContactIntro = memo(function ContactIntro({ step }: { step: number }) {
           </li>
         ))}
       </ol>
+
+      {/* Whose inbox this actually lands in. The differentiator on this site
+          is that one person does all of it, and the form is the moment that
+          claim is worth showing rather than only stating. */}
+      <figure className="contact__who">
+        <img
+          src={contactPortrait}
+          alt="Hamza Ashraf"
+          width={900}
+          height={1200}
+          loading="lazy"
+        />
+        <figcaption className="contact__who-copy">
+          <span className="contact__who-name">Hamza Ashraf</span>
+          <span className="contact__who-role">
+            Reads and answers this himself, usually within a day.
+          </span>
+        </figcaption>
+      </figure>
     </Reveal>
   )
 })

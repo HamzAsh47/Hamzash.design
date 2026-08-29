@@ -787,6 +787,47 @@
   background-position: var(--space-sm) 0;
 }
 
+/* Full-bleed to the card's edge, pulled out of its padding, so the frame is
+   part of the card rather than a picture placed inside one. The 2px accent
+   strip painted on .service-card sits directly on top of it. */
+.service-card__media {
+  display: block;
+  margin: calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) var(--space-2xs);
+  border-bottom: 1px solid var(--hairline);
+  overflow: hidden;
+  aspect-ratio: 760 / 428;
+}
+
+.service-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Three client palettes in a row would read as three unrelated swatches on
+     an obsidian page. Desaturated they read as one body of work; colour is
+     what the card gives back when it is picked up. */
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.72;
+  transition:
+    filter var(--dur-mid) var(--ease-out),
+    opacity var(--dur-mid) var(--ease-out),
+    transform var(--dur-mid) var(--ease-out);
+}
+
+.service-card:hover .service-card__media img,
+.service-card.is-hot .service-card__media img {
+  filter: grayscale(0) contrast(1);
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-card:hover .service-card__media img,
+  .service-card.is-hot .service-card__media img {
+    transform: none;
+  }
+}
+
 .service-card__index {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -3041,6 +3082,45 @@
 
 /* === Process ============================================================= */
 
+/* Steps and a photograph, side by side. The column is fixed so the steps keep
+   a readable measure rather than stretching to whatever is left. */
+.process__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.process__figure {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-md));
+  border: 1px solid var(--gunmetal);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.process__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Held back so it sits behind the copy rather than competing with it — the
+     steps are what this section is for. */
+  filter: grayscale(1) contrast(1.04);
+  opacity: 0.8;
+}
+
+@media (max-width: 1024px) {
+  .process__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Out of the layout rather than stacked underneath: on a narrow screen the
+     photograph would just be one more thing between the reader and the steps. */
+  .process__figure {
+    display: none;
+  }
+}
+
 .process__list {
   list-style: none;
   margin: 0;
@@ -3211,6 +3291,48 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+}
+
+/* A face against the form. Small on purpose — it is a signature at the foot
+   of the column, not a hero image competing with the headline above it. */
+.contact__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--hairline);
+}
+
+.contact__who img {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 22%;
+  border: 1px solid var(--gunmetal);
+  flex-shrink: 0;
+}
+
+.contact__who-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  min-width: 0;
+}
+
+.contact__who-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-0);
+  color: var(--white);
+}
+
+.contact__who-role {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
 .contact__steps {
@@ -5327,7 +5449,7 @@ body:has(.assistant.is-open) .assistant-launch {
   --elbow: 2.25rem;
   /* Never larger than the box it rounds: a lane-1 elbow is only one gap wide,
      and on small screens only an elbow tall. */
-  --elbow-r: calc(min(var(--elbow), var(--lane-gap)) * 0.65);
+  --elbow-r: calc(min(var(--elbow), var(--lane-gap)) * 0.92);
   /* Vertical space per month of work. The cap stops a four-year engagement
      from running to three screens; the min-height below is a floor, so a row
      whose copy needs more room still gets it. */
@@ -5464,9 +5586,22 @@ body:has(.assistant.is-open) .assistant-launch {
    the most to travel. */
 .branch__lanes--fill {
   --line: var(--crimson);
-  clip-path: inset(0 0 100% 0);
-  transition-property: clip-path, opacity;
-  transition-duration: 1100ms, var(--dur-fast);
+  /* A soft leading edge instead of a hard one. clip-path cut the crimson off
+     at a straight line travelling down the row, which read as a wipe over the
+     diagram rather than as the line being drawn — the edge was the thing you
+     watched. The mask is twice the row's height with a gradient across its
+     middle, so sliding it from top to bottom passes a feathered edge down the
+     line and there is nothing to see but the crimson arriving. */
+  mask-image: linear-gradient(to bottom, transparent 0 44%, #000 56% 100%);
+  mask-size: 100% 200%;
+  mask-repeat: no-repeat;
+  mask-position: 0 0;
+  /* The line is lit rather than merely coloured. A 1px crimson stroke on
+     obsidian with no falloff reads as wiring; the bloom is what separates a
+     drawn line from a circuit trace. */
+  filter: drop-shadow(0 0 4px rgba(200, 30, 58, 0.4));
+  transition-property: mask-position, opacity;
+  transition-duration: 1200ms, var(--dur-fast);
   transition-timing-function: var(--ease-out);
   /* Starts just after the row itself has arrived, so the line is drawn onto a
      row that is already there rather than racing it. */
@@ -5474,7 +5609,7 @@ body:has(.assistant.is-open) .assistant-launch {
 }
 
 .timeline__item.is-visible .branch__lanes--fill {
-  clip-path: inset(0 0 0 0);
+  mask-position: 0 100%;
 }
 
 /* Hovering a row dims every line but its own, so one engagement can be picked
@@ -5489,7 +5624,7 @@ body:has(.assistant.is-open) .assistant-launch {
    still arrive late, which is the effect somebody asked not to have. */
 @media (prefers-reduced-motion: reduce) {
   .branch__lanes--fill {
-    clip-path: inset(0 0 0 0);
+    mask-image: none;
     transition: none;
   }
 }

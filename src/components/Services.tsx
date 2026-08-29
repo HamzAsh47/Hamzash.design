@@ -24,6 +24,12 @@ function ServiceCard({ service }: { service: Service }) {
     >
       {/* The scrambling glyphs are decoration; the real index is already in the
           button's label, so assistive tech never hears the noise. */}
+      {/* Real work from this pillar rather than a picture of the idea of it.
+          Desaturated at rest so three different client palettes in a row read
+          as one system, full colour on hover. */}
+      <span className="service-card__media">
+        <img src={service.media} alt={service.mediaAlt} loading="lazy" width={760} height={428} />
+      </span>
       <span className="service-card__index" aria-hidden="true">
         {index}
       </span>
