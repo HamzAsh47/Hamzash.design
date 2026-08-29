@@ -17,6 +17,33 @@ import { Reveal } from './Reveal'
    the layout is a pure function of them. */
 const branches = layoutBranches(aboutTimeline.map((entry) => entry.range))
 
+/* The diagram for one row: one element per lane with a line passing through
+   it, each the full height of the row. Drawn per row rather than as wires
+   spanning several, because row heights are set by their copy — a spanning
+   element would have to be measured, while these butt up against the ones
+   above and below and read as continuous.
+   Rendered twice per row: once in hairline as the resting state, once in
+   crimson as a layer that is clipped away and wipes downward when the row
+   scrolls in. Identical geometry, so the fill lands exactly on the line. */
+function Lanes({ row, fill }: { row: (typeof branches.rows)[number]; fill?: boolean }) {
+  return (
+    <span className={'branch__lanes' + (fill ? ' branch__lanes--fill' : '')} aria-hidden="true">
+      {row.segments.map((segment) => (
+        <span
+          key={segment.lane}
+          className={
+            'branch__seg' +
+            (segment.startsHere ? ' branch__seg--start' : '') +
+            (segment.endsHere ? ' branch__seg--end' : '') +
+            (segment.open ? ' branch__seg--open' : '')
+          }
+          style={{ '--lane': segment.lane } as React.CSSProperties}
+        />
+      ))}
+    </span>
+  )
+}
+
 export function About() {
   /* Hash routing swaps the view without moving the scroll position, so
      arriving from a link near the bottom of the home page landed on the
@@ -84,8 +111,8 @@ export function About() {
             <p className="about__section-note">
               Lines that run side by side ran side by side. The trunk is whatever the main
               engagement was at the time; every branch beside it is a role held at the same
-              time, for exactly as long as the dates say. A line that curves back has ended.
-              A line that fades off the bottom is still running.
+              time, and each line is as long as the engagement was. A line that curves back
+              has ended; one that fades off the bottom is still running.
             </p>
           </Reveal>
 
@@ -101,27 +128,14 @@ export function About() {
                   key={`${entry.org}-${entry.range}`}
                   delayMs={index * 60}
                   className="timeline__item"
+                  /* The row is at least as tall as the engagement was long, so
+                     a year and a half does not occupy the same space as three
+                     months. Capped in CSS, and copy still wins when it needs
+                     more room. */
+                  style={{ '--months': row.months } as React.CSSProperties}
                 >
-                  {/* The diagram for this row: one element per lane with a line
-                      passing through it, each the full height of the row. Drawn
-                      per row rather than as wires spanning several, because row
-                      heights are set by their copy — a spanning element would
-                      have to be measured, while these just butt up against the
-                      ones above and below and read as continuous. */}
-                  <span className="branch__lanes" aria-hidden="true">
-                    {row.segments.map((segment) => (
-                      <span
-                        key={segment.lane}
-                        className={
-                          'branch__seg' +
-                          (segment.startsHere ? ' branch__seg--start' : '') +
-                          (segment.endsHere ? ' branch__seg--end' : '') +
-                          (segment.open ? ' branch__seg--open' : '')
-                        }
-                        style={{ '--lane': segment.lane } as React.CSSProperties}
-                      />
-                    ))}
-                  </span>
+                  <Lanes row={row} />
+                  <Lanes row={row} fill />
 
                   <span
                     className="timeline__node"
@@ -135,7 +149,10 @@ export function About() {
                     )}
                   </span>
 
-                  <span className="timeline__range">{entry.range}</span>
+                  <span className="timeline__range">
+                    {entry.range}
+                    {row.duration ? <span className="timeline__duration">{row.duration}</span> : null}
+                  </span>
                   <div className="timeline__copy">
                     <h3 className="timeline__title">{entry.title}</h3>
                     <p className="timeline__org">

@@ -22,6 +22,12 @@ type RevealProps = {
    * the client another, and React would throw away the markup it was handed.
    */
   index?: number
+  /**
+   * Merged under the reveal's own custom properties, so a caller can hand the
+   * element a value of its own without being able to overwrite --reveal-delay
+   * or the settle pose.
+   */
+  style?: CSSProperties
 }
 
 /**
@@ -56,6 +62,7 @@ export function Reveal({
   id,
   variant = 'fade',
   index = 0,
+  style: styleProp,
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
@@ -88,7 +95,7 @@ export function Reveal({
      stylesheet because it varies per card and CSS has no way to derive a
      value from an index. Reduced motion is handled in the stylesheet, which
      ignores these entirely — no need to branch twice. */
-  const style: Record<string, string> = {}
+  const style: Record<string, unknown> = { ...styleProp }
   if (delayMs) style['--reveal-delay'] = `${delayMs}ms`
   if (variant === 'settle') {
     style['--settle-rot'] = `${((scatter(index, 12.9898) - 0.5) * 2 * MAX_TILT_DEG).toFixed(2)}deg`

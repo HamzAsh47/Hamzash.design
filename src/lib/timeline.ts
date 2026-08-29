@@ -43,6 +43,26 @@ export type BranchRow = {
   lane: number
   /** Every lane with a line passing through this row, the trunk included. */
   segments: LaneSegment[]
+  /** How long the role ran, in months, inclusive of both end months. */
+  months: number
+  /** The same figure in words — "1 yr 6 mos". */
+  duration: string
+}
+
+/** Months since year zero for today, so a range ending "Present" has a length. */
+function currentMonth(): number {
+  const now = new Date()
+  return now.getFullYear() * 12 + now.getMonth()
+}
+
+function formatDuration(months: number): string {
+  if (!Number.isFinite(months) || months < 1) return ''
+  const years = Math.floor(months / 12)
+  const rest = months % 12
+  const parts = []
+  if (years) parts.push(`${years} yr${years > 1 ? 's' : ''}`)
+  if (rest) parts.push(`${rest} mo${rest > 1 ? 's' : ''}`)
+  return parts.join(' ')
 }
 
 export function layoutBranches(ranges: string[]): { rows: BranchRow[]; lanes: number } {
@@ -76,7 +96,9 @@ export function layoutBranches(ranges: string[]): { rows: BranchRow[]; lanes: nu
     lane[index] = candidate
   }
 
-  const rows = spans.map((_, index) => {
+  const today = currentMonth()
+
+  const rows = spans.map((span, index) => {
     /* The trunk, which is whichever lane-0 entry is still running at this row.
        It only closes off if that entry has actually ended. */
     const holder = lane.findIndex((value, entry) => value === 0 && entry <= index && through[entry] >= index)
@@ -95,7 +117,13 @@ export function layoutBranches(ranges: string[]): { rows: BranchRow[]; lanes: nu
         open: last && ongoing,
       })
     }
-    return { lane: lane[index], segments }
+    /* Inclusive of both end months, so a role listed "Apr 2019 — Nov 2019" is
+       eight months rather than seven. A range still running is measured to
+       today. */
+    const finish = Number.isFinite(span[1]) ? span[1] : today
+    const months = Number.isNaN(span[0]) ? 0 : Math.max(1, finish - span[0] + 1)
+
+    return { lane: lane[index], segments, months, duration: formatDuration(months) }
   })
 
   return { rows, lanes: Math.max(1, ...lane.map((value) => value + 1)) }

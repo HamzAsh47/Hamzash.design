@@ -5328,6 +5328,29 @@ body:has(.assistant.is-open) .assistant-launch {
   /* Never larger than the box it rounds: a lane-1 elbow is only one gap wide,
      and on small screens only an elbow tall. */
   --elbow-r: calc(min(var(--elbow), var(--lane-gap)) * 0.65);
+  /* Vertical space per month of work. The cap stops a four-year engagement
+     from running to three screens; the min-height below is a floor, so a row
+     whose copy needs more room still gets it. */
+  --per-month: 0.5rem;
+  --row-cap: 24rem;
+}
+
+/* Length reads as duration. Without this every role occupied one copy-sized
+   row, so eighteen months at Santamaria looked like the three-month career
+   break — which is exactly backwards for a diagram whose whole job is showing
+   how long things ran and what overlapped. */
+.timeline--branch .timeline__item {
+  min-height: min(calc(var(--months, 12) * var(--per-month)), var(--row-cap));
+}
+
+/* The figure in words, under the dates. A reader should not have to subtract
+   two months in their head to see that an engagement lasted two years. */
+.timeline__duration {
+  display: block;
+  margin-top: 0.35em;
+  color: var(--crimson);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
 }
 
 .timeline--branch .timeline__item {
@@ -5357,7 +5380,7 @@ body:has(.assistant.is-open) .assistant-launch {
      up centred a pixel apart from each other. */
   left: calc(var(--node-size) / 2 - 0.5px);
   width: calc(var(--lane) * var(--lane-gap) + 1px);
-  border-right: 1px solid var(--hairline);
+  border-right: 1px solid var(--line, var(--hairline));
 }
 
 /* The trunk stops at the first and last nodes rather than running past them
@@ -5366,7 +5389,7 @@ body:has(.assistant.is-open) .assistant-launch {
   top: var(--node-mid);
 }
 
-.timeline--branch .timeline__item:last-child .branch__seg:not(.branch__seg--open) {
+.timeline--branch .timeline__item:last-child .branch__seg:not(.branch__seg--open):not(.branch__seg--end) {
   bottom: calc(100% - var(--node-mid));
 }
 
@@ -5391,15 +5414,17 @@ body:has(.assistant.is-open) .assistant-launch {
   right: 0;
   bottom: 100%;
   height: var(--elbow);
-  border-top: 1px solid var(--hairline);
-  border-right: 1px solid var(--hairline);
+  border-top: 1px solid var(--line, var(--hairline));
+  border-right: 1px solid var(--line, var(--hairline));
   border-top-right-radius: var(--elbow-r);
 }
 
 /* Rejoining: the mirror of the same turn, on the last row the role ran
-   through. Without it four lines would simply stop in mid-air. */
+   through. It turns at the foot of that row, not at its node — the role was
+   still running for the whole of it, and stopping at the node drew a line far
+   shorter than the engagement actually was. */
 .branch__seg--end {
-  bottom: calc(100% - var(--node-mid));
+  bottom: var(--elbow);
 }
 
 .branch__seg--end::after {
@@ -5409,18 +5434,19 @@ body:has(.assistant.is-open) .assistant-launch {
   right: 0;
   top: 100%;
   height: var(--elbow);
-  border-bottom: 1px solid var(--hairline);
-  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--line, var(--hairline));
+  border-right: 1px solid var(--line, var(--hairline));
   border-bottom-right-radius: var(--elbow-r);
 }
 
-/* A role that both branched and rejoined without anything else starting in
-   between: out and back in one row, so the run between the two turns is just
-   the node's own height. */
+/* A role that branched and rejoined without anything else starting in
+   between still ran for its whole row, so it runs the whole row: out at the
+   node, down to the foot, back in. Height is left to top and bottom rather
+   than fixed, which is what made this case a 20px stub before. */
 .branch__seg--start.branch__seg--end {
   top: var(--node-mid);
-  bottom: auto;
-  height: calc(var(--node-size) / 2);
+  bottom: var(--elbow);
+  height: auto;
 }
 
 /* Nodes ride their lane rather than the gutter's left edge. */
@@ -5428,22 +5454,44 @@ body:has(.assistant.is-open) .assistant-launch {
   margin-left: calc(var(--lane) * var(--lane-gap));
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .branch__seg,
-  .branch__seg::before,
-  .branch__seg::after {
-    transition: border-color var(--dur-fast) var(--ease-out);
-  }
+/* The crimson copy of the same lines, clipped to nothing and wiped downward
+   when its row scrolls into view — so the diagram draws itself as the reader
+   moves through it, trunk included. It rides Reveal's own .is-visible class
+   and --reveal-delay, so the stagger already on the rows carries the wipe
+   with it and no second observer is needed.
+   Slower than the row's own entrance on purpose: the point is watching a line
+   travel the length of an engagement, and the longest rows are the ones with
+   the most to travel. */
+.branch__lanes--fill {
+  --line: var(--crimson);
+  clip-path: inset(0 0 100% 0);
+  transition-property: clip-path, opacity;
+  transition-duration: 1100ms, var(--dur-fast);
+  transition-timing-function: var(--ease-out);
+  /* Starts just after the row itself has arrived, so the line is drawn onto a
+     row that is already there rather than racing it. */
+  transition-delay: calc(var(--reveal-delay, 0ms) + 120ms), 0ms;
 }
 
-/* Hovering a row lights its own line, so a reader can pick one engagement out
-   of five running side by side. Keyed to --start rather than :last-child:
-   only the entry that owns the row branches in it, whereas the last segment
-   is somebody else's line whenever the row's own entry sits on the trunk. */
-.timeline__item:hover .branch__seg--start,
-.timeline__item:hover .branch__seg--start::before,
-.timeline__item:hover .branch__seg--start::after {
-  border-color: var(--crimson);
+.timeline__item.is-visible .branch__lanes--fill {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Hovering a row dims every line but its own, so one engagement can be picked
+   out of five running side by side. */
+.timeline--branch:hover .timeline__item:not(:hover) .branch__lanes--fill {
+  opacity: 0.28;
+}
+
+/* Reduced motion: the crimson is simply there. The global rule collapses the
+   duration but not the delay, and the clip is keyed to an observer that has
+   not fired yet for anything below the fold — so without this the lines would
+   still arrive late, which is the effect somebody asked not to have. */
+@media (prefers-reduced-motion: reduce) {
+  .branch__lanes--fill {
+    clip-path: inset(0 0 0 0);
+    transition: none;
+  }
 }
 
 @media (max-width: 1024px) {
