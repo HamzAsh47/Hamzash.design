@@ -842,8 +842,19 @@
   min-width: 3.5ch;
 }
 
-.service-card__glyph {
-  --glyph: 9rem;
+/* Smaller than the other two, and anchored to the foot of the card rather
+   than its middle — centred it sat across the photograph at the top, which is
+   real work and should not have a mark laid over it. Bottom-anchored it stays
+   inside the copy where it belongs.
+
+   Both class names carried, because .bleed-glyph is defined further down this
+   file: at equal specificity it would win on source order and this would set
+   nothing at all. */
+.bleed-glyph.service-card__glyph {
+  --glyph: 6.5rem;
+  top: auto;
+  bottom: var(--space-md);
+  transform: rotate(var(--glyph-tilt));
   /* Below the card's own copy, which is lifted by `.panel > *`. */
   z-index: 0;
 }
@@ -3158,10 +3169,9 @@
    card or panel that is zero — the box clips it itself. In the process list it
    is the distance out to the viewport, so the cut lands on the page edge. */
 .bleed-glyph {
+  /* How far the container's own edge is from the edge the mark is cut on.
+     Zero inside a card or panel, which clip it themselves. */
   --bleed: 0px;
-  /* Most of it is past the edge. Enough stays to read as a mark rather than
-     as a shape somebody has to work out. */
-  --bleed-share: 0.7;
 
   position: absolute;
   top: 50%;
@@ -3169,7 +3179,7 @@
   /* Lifted off the optical centre and taken off square. The rotation is small
      on purpose: enough that the mark reads as placed rather than pasted, not
      so much that it becomes the thing being looked at. */
-  transform: translateY(calc(-50% - 20px)) rotate(-8deg);
+  transform: translateY(calc(-50% - var(--glyph-lift))) rotate(var(--glyph-tilt));
 
   display: inline-flex;
   align-items: center;
@@ -3240,7 +3250,13 @@
    360 to 768; above it the copy column ends well clear and needs nothing. */
 @media (max-width: 1023px) {
   .process__copy {
-    padding-right: calc(var(--glyph) / 2 + var(--space-2xs));
+    /* Derived from --bleed-share rather than assuming half is showing, so
+       changing how far the mark runs off adjusts this with it — it was pinned
+       to half and left 1 to 3px of overlap the moment the share moved.
+       Written as two terms: `var(--glyph) * (1 - var(--bleed-share))` parses
+       but is thrown out at computed-value time, taking the whole declaration
+       with it and leaving no padding at all. */
+    padding-right: calc(var(--glyph) - var(--glyph) * var(--bleed-share) + var(--space-2xs));
   }
 }
 

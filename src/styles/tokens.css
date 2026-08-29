@@ -35,6 +35,15 @@
      7.65:1 on --surface-raised, well past the 3.0 a UI component needs. */
   --whatsapp: #25d366;
 
+  /* The bleeding glyph, shared by the process steps, the pillar cards and the
+     system panels. Defined at the root rather than on .bleed-glyph itself
+     because the copy beside the mark has to reserve room from the same
+     number, and a custom property set on the glyph does not reach its
+     siblings. */
+  --bleed-share: 0.35;
+  --glyph-lift: 20px;
+  --glyph-tilt: -8deg;
+
   /* Derived neutrals, all mixed from the locked palette rather than invented */
   --obsidian-raised: #131d33;
   --obsidian-sunken: #0a1020;
