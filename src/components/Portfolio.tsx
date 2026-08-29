@@ -4,6 +4,7 @@ import { caseStudies, pillarFilters, portfolioIntro, site } from '../content'
 import { navigateToCase } from '../hooks/useHashRoute'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { CrtImage } from './CrtImage'
+import { Icon } from './Icon'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
@@ -49,7 +50,7 @@ function WorkCard({ item, index }: { item: Study; index: number }) {
           <span className="work-card__link">
             Read case study
             <span className="btn__arrow" aria-hidden="true">
-              →
+              <Icon name="arrow-right" size={14} />
             </span>
           </span>
         </span>

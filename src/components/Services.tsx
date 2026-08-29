@@ -2,6 +2,7 @@ import { services, servicesIntro, type Service } from '../content'
 import { useScramble } from '../hooks/useScramble'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
+import { Icon } from './Icon'
 import { Eyebrow } from './Eyebrow'
 import { Reveal } from './Reveal'
 
@@ -30,15 +31,20 @@ function ServiceCard({ service }: { service: Service }) {
       <span className="service-card__media">
         <img src={service.media} alt={service.mediaAlt} loading="lazy" width={760} height={428} />
       </span>
-      <span className="service-card__index" aria-hidden="true">
-        {index}
+      <span className="service-card__meta">
+        <span className="service-card__glyph" aria-hidden="true">
+          <Icon name={service.icon} size={20} />
+        </span>
+        <span className="service-card__index" aria-hidden="true">
+          {index}
+        </span>
       </span>
       <span className="service-card__title">{service.title}</span>
       <span className="service-card__body">{service.description}</span>
       <span className="service-card__link">
         See the work
         <span className="btn__arrow" aria-hidden="true">
-          →
+          <Icon name="arrow-right" size={14} />
         </span>
       </span>
     </button>

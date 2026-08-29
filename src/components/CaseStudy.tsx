@@ -6,6 +6,7 @@ import type {
   CaseSection,
 } from '../content'
 import { CrtImage } from './CrtImage'
+import { Icon } from './Icon'
 import { Lightbox, type LightboxItem } from './Lightbox'
 import {
   caseStudies,
@@ -472,7 +473,7 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
           </span>
 
           <span className="case__next-arrow" aria-hidden="true">
-            →
+            <Icon name="arrow-right" size={14} />
           </span>
         </button>
 
@@ -481,7 +482,7 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
           <button className="btn btn--primary" onClick={() => goToSection('contact')}>
             Start a project
             <span className="btn__arrow" aria-hidden="true">
-              →
+              <Icon name="arrow-right" size={14} />
             </span>
           </button>
         </div>

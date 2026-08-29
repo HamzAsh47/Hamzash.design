@@ -839,6 +839,35 @@
   min-width: 3.5ch;
 }
 
+/* Index and glyph on one line, so the card opens with a marker rather than a
+   number floating on its own. */
+.service-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.service-card__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.service-card:hover .service-card__glyph,
+.service-card.is-hot .service-card__glyph {
+  border-color: var(--crimson);
+  color: var(--crimson);
+}
+
 /* SYS.02 is crimson because every section index now is — the eyebrow itself
    splits the token from its label, so this no longer needs a local override. */
 
@@ -3142,6 +3171,34 @@
    one before, so a closing line has nothing left to separate — it just draws a
    box round the list and reads as an unfinished fifth row. */
 
+/* The number keeps its weight — the steps are ordered and that has to stay
+   obvious — with the glyph under it saying what the step actually is. */
+.process__marker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+}
+
+.process__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.process__step:hover .process__glyph {
+  border-color: var(--crimson);
+  color: var(--crimson);
+}
+
 .process__number {
   font-family: var(--font-display);
   font-weight: 900;
@@ -3364,6 +3421,36 @@
 
 .contact__step.is-done {
   color: var(--text-secondary);
+}
+
+/* A glyph carries the step's state: what it asks for while it is ahead of
+   you, a tick once it is behind you. The ring is the progress indicator —
+   hairline pending, crimson on the step you are on, filled once it is done. */
+.contact__step-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition:
+    border-color var(--dur-mid) var(--ease-out),
+    background var(--dur-mid) var(--ease-out),
+    color var(--dur-mid) var(--ease-out);
+}
+
+.contact__step.is-active .contact__step-mark {
+  border-color: var(--crimson);
+  color: var(--crimson);
+}
+
+.contact__step.is-done .contact__step-mark {
+  border-color: var(--crimson);
+  background: var(--crimson);
+  color: var(--obsidian);
 }
 
 .contact__step-index {
@@ -5688,4 +5775,19 @@ body:has(.assistant.is-open) .assistant-launch {
   .timeline__copy {
     grid-area: copy;
   }
+}
+
+
+/* --- Drawn arrows ---------------------------------------------------------
+   The glyphs these replaced sat on the text baseline and rendered at whatever
+   weight the fallback font happened to have. An inline SVG needs putting back
+   on the optical centre of the label beside it. */
+.btn__arrow .icon,
+.icon {
+  display: block;
+}
+
+.btn__arrow {
+  display: inline-flex;
+  align-items: center;
 }

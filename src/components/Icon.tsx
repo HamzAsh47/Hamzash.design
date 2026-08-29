@@ -1,5 +1,5 @@
 /**
- * Monoline glyphs for the footer link lists.
+ * The site's monoline glyph set.
  *
  * Hand-drawn as simple geometry rather than pulled from an icon package: the
  * set needed is eight marks at 16px, and a dependency for that is more weight
@@ -19,6 +19,29 @@ export type IconName =
   | 'whatsapp'
   | 'assistant'
   | 'calendar'
+  /* Direction. Drawn rather than set as → and ↗, which arrive at whatever
+     weight the fallback font has and sit on the text baseline instead of the
+     optical centre of the label beside them. */
+  | 'arrow-right'
+  | 'arrow-up-right'
+  /* The three pillars. Each one says what the discipline produces, not what
+     it is about: a system of parts, a screen with a flow through it, a frame
+     in motion. */
+  | 'brand'
+  | 'uiux'
+  | 'motion'
+  /* The four process steps, in order. */
+  | 'call'
+  | 'plan'
+  | 'build'
+  | 'handoff'
+  /* The four form steps, in order. */
+  | 'you'
+  | 'budget'
+  | 'scope'
+  | 'details'
+  /* List markers. */
+  | 'check'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   linkedin: (
@@ -93,6 +116,104 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M6.6 11.4h2M11.4 11.4h2M6.6 13.8h2M11.4 13.8h2" />
     </>
   ),
+  'arrow-right': (
+    <>
+      <path d="M3.6 10h12.8M11.4 5.2 16.4 10l-5 4.8" />
+    </>
+  ),
+  'arrow-up-right': (
+    <>
+      <path d="M5.4 14.6 14.6 5.4M7.2 5.4h7.4v7.4" />
+    </>
+  ),
+  /* Brand: a system of parts held in one frame — the outer rule is the
+     system, the parts inside are what a team is handed. */
+  brand: (
+    <>
+      <rect x="2.6" y="2.6" width="14.8" height="14.8" rx="2.4" />
+      <path d="M2.6 8.2h14.8M8.2 8.2v9.2" />
+      <circle cx="5.4" cy="5.4" r="1" />
+    </>
+  ),
+  /* UI/UX: a screen with a path traced across it and a cursor at the end —
+     the interface and the route somebody takes through it. */
+  uiux: (
+    <>
+      <rect x="2.6" y="3.4" width="14.8" height="11" rx="2" />
+      <path d="M2.6 6.6h14.8" />
+      <path d="M6 12.4c1.8-3 3.4-3 5.2-.6" />
+      <path d="m11.2 11.8 2.8 4.4.6-2 2-.5z" />
+    </>
+  ),
+  /* Motion: a frame with a play triangle, and the trailing marks that say it
+     is moving rather than paused. */
+  motion: (
+    <>
+      <rect x="2.6" y="4" width="10.4" height="12" rx="2" />
+      <path d="M6.4 7.6 10 10l-3.6 2.4z" />
+      <path d="M15.4 6.6v6.8M17.8 8.4v3.2" />
+    </>
+  ),
+  /* Discovery call. */
+  call: (
+    <>
+      <path d="M3 8A3.2 3.2 0 0 1 6.2 4.8h7.6A3.2 3.2 0 0 1 17 8v3.4a3.2 3.2 0 0 1-3.2 3.2H8.4L5 17.2a.4.4 0 0 1-.6-.34v-2.3A3.2 3.2 0 0 1 3 11.4Z" />
+      <path d="M7 8.8h6M7 11.2h3.6" />
+    </>
+  ),
+  /* The written proposal. */
+  plan: (
+    <>
+      <path d="M4.6 2.8h6.6l4.2 4.2v10.2H4.6z" />
+      <path d="M11.2 2.8V7h4.2" />
+      <path d="M7.4 10.4h5M7.4 13.2h5" />
+    </>
+  ),
+  /* Build: layers going up, the last one still landing. */
+  build: (
+    <>
+      <path d="M10 2.8 17 6.4 10 10 3 6.4z" />
+      <path d="m3 10.6 7 3.6 7-3.6" />
+      <path d="m3 14.6 7 3.6 7-3.6" />
+    </>
+  ),
+  /* Handoff: the work leaving the box it was built in. */
+  handoff: (
+    <>
+      <path d="M16.4 11.6v3.6a2 2 0 0 1-2 2H5.6a2 2 0 0 1-2-2v-3.6" />
+      <path d="M10 12.6V3.4M6.6 6.6 10 3.2l3.4 3.4" />
+    </>
+  ),
+  you: (
+    <>
+      <circle cx="10" cy="7" r="3.2" />
+      <path d="M4.2 16.8a5.8 5.8 0 0 1 11.6 0" />
+    </>
+  ),
+  budget: (
+    <>
+      <rect x="2.6" y="5.4" width="14.8" height="9.6" rx="2" />
+      <circle cx="10" cy="10.2" r="2.2" />
+      <path d="M5.4 8.4v3.6M14.6 8.4v3.6" />
+    </>
+  ),
+  scope: (
+    <>
+      <path d="M3.2 5.2h13.6M3.2 5.2v9.6M16.8 5.2v9.6M3.2 14.8h13.6" strokeDasharray="3 2.4" />
+      <path d="M7.2 10h5.6M10 7.2v5.6" />
+    </>
+  ),
+  details: (
+    <>
+      <path d="M4.6 3.4h10.8v13.2H4.6z" />
+      <path d="M7.4 7h5.2M7.4 10h5.2M7.4 13h3" />
+    </>
+  ),
+  check: (
+    <>
+      <path d="m4.4 10.4 3.6 3.6 7.6-8" />
+    </>
+  ),
   whatsapp: (
     <>
       <path d="M10 2.8a7.2 7.2 0 0 0-6.2 10.9L2.8 17.2l3.6-1a7.2 7.2 0 1 0 3.6-13.4Z" />
@@ -101,13 +222,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
 }
 
-export function Icon({ name }: { name: IconName }) {
+export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
   return (
     <svg
       className="icon"
       viewBox="0 0 20 20"
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="1.4"

@@ -3,6 +3,7 @@ import type { Tier } from '../content'
 import { pricingIntro } from '../content'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
+import { Icon } from './Icon'
 
 export type TierContext = {
   tier: Tier
@@ -214,7 +215,7 @@ export function TierDetail({ context, onClose }: { context: TierContext; onClose
           >
             Start with this tier
             <span className="btn__arrow" aria-hidden="true">
-              →
+              <Icon name="arrow-right" size={14} />
             </span>
           </button>
         </footer>

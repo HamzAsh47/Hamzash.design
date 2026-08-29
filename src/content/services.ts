@@ -13,6 +13,8 @@ export type Service = {
   media: string
   /** What the frame actually shows, for anyone who cannot see it. */
   mediaAlt: string
+  /** Glyph in the card's header row. Names come from components/Icon. */
+  icon: 'brand' | 'uiux' | 'motion'
 }
 
 export const servicesIntro = {
@@ -29,6 +31,7 @@ export const services: Service[] = [
     filter: 'brand',
     media: brandIdentity,
     mediaAlt: "Branded takeaway packaging for JOSEF'S Buffalo Wings",
+    icon: 'brand',
   },
   {
     id: 'uiux',
@@ -39,6 +42,7 @@ export const services: Service[] = [
     filter: 'uiux',
     media: uiUx,
     mediaAlt: 'Mobile screens from the WACA tournament guide',
+    icon: 'uiux',
   },
   {
     id: 'motion',
@@ -49,5 +53,6 @@ export const services: Service[] = [
     filter: 'motion',
     media: motion,
     mediaAlt: "The animated mascot built for JOSEF'S Buffalo Wings",
+    icon: 'motion',
   },
 ]

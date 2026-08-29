@@ -9,12 +9,14 @@ export const contact = {
    * visitor there is a real scoping process ahead — which is the whole point
    * of asking four questions instead of showing one email field.
    */
+  /* `icon` names come from components/Icon — the step list is a progress
+     indicator, and a glyph reads as state faster than a number alone. */
   steps: [
-    { id: 'who', label: 'You', next: 'Next: budget range' },
-    { id: 'budget', label: 'Budget', next: 'Next: project scope' },
-    { id: 'scope', label: 'Scope', next: 'Next: project details' },
-    { id: 'details', label: 'Details', next: '' },
-  ],
+    { id: 'who', label: 'You', next: 'Next: budget range', icon: 'you' },
+    { id: 'budget', label: 'Budget', next: 'Next: project scope', icon: 'budget' },
+    { id: 'scope', label: 'Scope', next: 'Next: project details', icon: 'scope' },
+    { id: 'details', label: 'Details', next: '', icon: 'details' },
+  ] as const,
 
   fields: {
     name: { label: 'Name', placeholder: 'Your name', required: true },

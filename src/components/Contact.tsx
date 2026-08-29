@@ -2,6 +2,7 @@ import { memo, useState } from 'react'
 import { contact, site } from '../content'
 import contactPortrait from '../assets/images/contact-portrait.webp'
 import { Eyebrow } from './Eyebrow'
+import { Icon } from './Icon'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
 
@@ -86,6 +87,9 @@ const ContactIntro = memo(function ContactIntro({ step }: { step: number }) {
               index < step ? ' is-done' : ''
             }`}
           >
+            <span className="contact__step-mark">
+              {index < step ? <Icon name="check" size={14} /> : <Icon name={item.icon} size={14} />}
+            </span>
             <span className="contact__step-index">{String(index + 1).padStart(2, '0')}</span>
             <span className="contact__step-label">{item.label}</span>
           </li>
@@ -377,7 +381,7 @@ export function Contact() {
                   <button key="advance" type="button" className="btn btn--primary" onClick={next}>
                     {contact.steps[step].next}
                     <span className="btn__arrow" aria-hidden="true">
-                      →
+                      <Icon name="arrow-right" size={14} />
                     </span>
                   </button>
                 ) : (

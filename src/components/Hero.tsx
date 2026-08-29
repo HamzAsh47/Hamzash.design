@@ -1,6 +1,7 @@
 import { hero } from '../content'
 import { goToSection } from '../lib/scroll'
 import { CrtImage } from './CrtImage'
+import { Icon } from './Icon'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Ticker } from './Ticker'
@@ -83,7 +84,7 @@ export function Hero() {
               >
                 {hero.primaryCta.label}
                 <span className="btn__arrow" aria-hidden="true">
-                  →
+                  <Icon name="arrow-right" size={14} />
                 </span>
               </button>
               <button

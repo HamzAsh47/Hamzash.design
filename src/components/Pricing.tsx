@@ -3,6 +3,7 @@ import type { Tier } from '../content'
 import { oneTimePackages, pricingIntro, retainer } from '../content'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
+import { Icon } from './Icon'
 import { Eyebrow } from './Eyebrow'
 import { Heading } from './Heading'
 import { Reveal } from './Reveal'
@@ -67,7 +68,7 @@ function TierCard({
       <div className="tier__foot">
         <span className="tier__more" aria-hidden="true">
           See full details
-          <span className="btn__arrow">→</span>
+          <span className="btn__arrow"><Icon name="arrow-right" size={14} /></span>
         </span>
 
         <button
