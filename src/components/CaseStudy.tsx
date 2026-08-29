@@ -273,7 +273,11 @@ export function CaseStudy({ study }: { study: CaseStudyType }) {
   const [zoomed, setZoomed] = useState<number | null>(null)
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    /* 'instant', not 'auto'. base.css sets `html { scroll-behavior: smooth }`,
+       and 'auto' defers to that — so this reset animated the full height of
+       the page the reader had just left, which is what made arriving here
+       look like it had dropped them at the footer. */
+    window.scrollTo({ top: 0, behavior: 'instant' })
     setZoomed(null)
   }, [study.slug])
 

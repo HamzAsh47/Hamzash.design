@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   aboutBio,
   aboutEducation,
@@ -11,6 +12,17 @@ import { Heading } from './Heading'
 import { Reveal } from './Reveal'
 
 export function About() {
+  /* Hash routing swaps the view without moving the scroll position, so
+     arriving from a link near the bottom of the home page landed on the
+     footer. Same pattern CaseStudy.tsx uses for the same reason. */
+  useEffect(() => {
+    /* 'instant', not 'auto'. base.css sets `html { scroll-behavior: smooth }`,
+       and 'auto' defers to that — so this reset animated the full height of
+       the page the reader had just left, which is what made arriving here
+       look like it had dropped them at the footer. */
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [])
+
   return (
     <article className="case" id="top">
       <div className="container case__head">
@@ -54,9 +66,16 @@ export function About() {
             />
           </Reveal>
 
-          <ol className="timeline__list">
+          <ol className="timeline__list timeline--rail">
             {aboutTimeline.map((entry, index) => (
               <Reveal as="li" key={`${entry.org}-${entry.range}`} delayMs={index * 60} className="timeline__item">
+                {/* The node sits on the rail. It carries the entry's number
+                    because no company marks are in the repo yet; when they
+                    land, an <img className="timeline__logo"> replaces the
+                    index here and the CSS already handles it. */}
+                <span className="timeline__node" aria-hidden="true">
+                  <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
+                </span>
                 <span className="timeline__range">{entry.range}</span>
                 <div className="timeline__copy">
                   <h3 className="timeline__title">{entry.title}</h3>
@@ -81,9 +100,12 @@ export function About() {
             />
           </Reveal>
 
-          <ol className="timeline__list">
+          <ol className="timeline__list timeline--rail">
             {aboutEducation.map((entry, index) => (
               <Reveal as="li" key={`${entry.org}-${entry.range}`} delayMs={index * 60} className="timeline__item">
+                <span className="timeline__node" aria-hidden="true">
+                  <span className="timeline__index">{String(index + 1).padStart(2, '0')}</span>
+                </span>
                 <span className="timeline__range">{entry.range}</span>
                 <div className="timeline__copy">
                   <h3 className="timeline__title">{entry.title}</h3>

@@ -5149,13 +5149,86 @@ body:has(.assistant.is-open) .assistant-launch {
   flex-direction: column;
 }
 
+/* The connecting rail: one continuous line behind every node, not a border
+   per row. Every offset is derived from --node-size rather than typed as a
+   literal, because the two have to agree exactly: the node sits at the start
+   of its column, so its centre is one radius in, and the rail has to land on
+   that same axis. Hard-coding both is how the line ends up a few pixels off
+   the circles — and the mobile breakpoint only has to restate --node-size. */
+.timeline--rail {
+  --node-size: 3rem;
+  position: relative;
+}
+
+.timeline--rail::before {
+  content: '';
+  position: absolute;
+  /* Starts and ends on the first and last node's centre, so the line is
+     never seen sticking out past the circles at either end. */
+  top: calc(var(--node-size) / 2);
+  bottom: calc(var(--node-size) / 2);
+  left: calc(var(--node-size) / 2);
+  width: 1px;
+  background: var(--hairline);
+}
+
 .timeline__item {
   display: grid;
-  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  grid-template-columns: 3.5rem minmax(0, 9rem) minmax(0, 1fr);
   gap: var(--space-sm) var(--space-md);
   padding: var(--space-md) 0;
-  border-top: 1px solid var(--hairline);
   align-items: start;
+  position: relative;
+}
+
+/* The rail is inset by half a node so it does not stick out past the first
+   and last circles; these trim the matching padding so the line still meets
+   them instead of stopping short. */
+.timeline__item:first-child {
+  padding-top: 0;
+}
+
+.timeline__item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline__node {
+  position: relative;
+  z-index: 1;
+  width: var(--node-size);
+  height: var(--node-size);
+  border-radius: 50%;
+  background: var(--obsidian);
+  border: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.timeline__logo {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  /* Desaturated at rest so a dozen different brand colours down one rail do
+     not read as a confetti strip; full colour is the reward for looking. */
+  filter: grayscale(1);
+  opacity: 0.85;
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.timeline__item:hover .timeline__logo {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+.timeline__index {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--crimson);
 }
 
 .timeline__range {
@@ -5163,7 +5236,7 @@ body:has(.assistant.is-open) .assistant-launch {
   font-size: 0.76rem;
   letter-spacing: 0.04em;
   color: var(--text-muted);
-  padding-top: 0.2em;
+  padding-top: 0.6em;
 }
 
 .timeline__copy {
@@ -5181,8 +5254,8 @@ body:has(.assistant.is-open) .assistant-launch {
 
 /* White, not crimson. Crimson at this size measures 3.21:1 against obsidian
    — under AA, and this is the line naming who the work was for, which is the
-   part of an entry a reader actually scans. The big stat numbers above keep
-   crimson because large text only needs 3.0 and they clear it. */
+   part of an entry a reader actually scans. Crimson stays on the rail and the
+   node index, where it is decorative and carries no meaning on its own. */
 .timeline__org {
   font-family: var(--font-mono);
   font-size: 0.74rem;
@@ -5195,8 +5268,27 @@ body:has(.assistant.is-open) .assistant-launch {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .timeline--rail {
+    --node-size: 2.5rem;
+  }
+
   .timeline__item {
-    grid-template-columns: 1fr;
-    gap: var(--space-2xs);
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-areas:
+      'node range'
+      'node copy';
+  }
+
+  .timeline__node {
+    grid-area: node;
+  }
+
+  .timeline__range {
+    grid-area: range;
+    padding-top: 0.3em;
+  }
+
+  .timeline__copy {
+    grid-area: copy;
   }
 }

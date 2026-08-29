@@ -4,6 +4,20 @@ import { navCta, navLinks } from '../content'
 import { navigateToAbout } from '../hooks/useHashRoute'
 import { goToSection } from '../lib/scroll'
 
+/* About is the only entry that leaves the page rather than scrolling down it,
+   so it carries a sentinel id instead of a section anchor. */
+const ABOUT_ID = '__about'
+
+/* One list drives both the desktop bar and the drawer, so the two can never
+   drift out of order — and the drawer's 01, 02, 03 numbering stays sequential
+   without an offset to maintain. The slot is found by id, not by index, so
+   reordering navLinks moves About with Work instead of silently stranding it. */
+const links = (() => {
+  const work = navLinks.findIndex((link) => link.id === 'portfolio')
+  const slot = work < 0 ? navLinks.length : work + 1
+  return [...navLinks.slice(0, slot), { id: ABOUT_ID, label: 'About' }, ...navLinks.slice(slot)]
+})()
+
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
@@ -31,6 +45,10 @@ export function Nav() {
 
   const navigate = (id: string) => {
     setOpen(false)
+    if (id === ABOUT_ID) {
+      navigateToAbout()
+      return
+    }
     goToSection(id)
   }
 
@@ -48,18 +66,7 @@ export function Nav() {
         </button>
 
         <nav className="nav__links" aria-label="Primary">
-          {/* First, because it is the only link that leaves the page rather
-              than moving down it. */}
-          <button
-            className="nav__link"
-            onClick={() => {
-              setOpen(false)
-              navigateToAbout()
-            }}
-          >
-            About
-          </button>
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <button key={link.id} className="nav__link" onClick={() => navigate(link.id)}>
               {link.label}
             </button>
@@ -92,27 +99,14 @@ export function Nav() {
           height: the toggle flipped to an X and no menu ever appeared. */}
       <div id="mobile-nav" className={`nav__drawer${open ? ' is-open' : ''}`} hidden={!open}>
         <nav className="container nav__drawer-inner" aria-label="Mobile">
-          <button
-            className="nav__drawer-link"
-            onClick={() => {
-              setOpen(false)
-              navigateToAbout()
-            }}
-            style={{ '--word-index': 0 } as React.CSSProperties}
-          >
-            <span className="nav__drawer-index">01</span>
-            About
-          </button>
-          {/* Offset by one so the drawer still counts 01, 02, 03 down the
-              list rather than starting again at 01 under About. */}
-          {navLinks.map((link, index) => (
+          {links.map((link, index) => (
             <button
               key={link.id}
               className="nav__drawer-link"
               onClick={() => navigate(link.id)}
-              style={{ '--word-index': index + 1 } as React.CSSProperties}
+              style={{ '--word-index': index } as React.CSSProperties}
             >
-              <span className="nav__drawer-index">{String(index + 2).padStart(2, '0')}</span>
+              <span className="nav__drawer-index">{String(index + 1).padStart(2, '0')}</span>
               {link.label}
             </button>
           ))}
