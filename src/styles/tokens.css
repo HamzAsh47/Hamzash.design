@@ -35,14 +35,20 @@
      7.65:1 on --surface-raised, well past the 3.0 a UI component needs. */
   --whatsapp: #25d366;
 
-  /* The bleeding glyph, shared by the process steps, the pillar cards and the
-     system panels. Defined at the root rather than on .bleed-glyph itself
-     because the copy beside the mark has to reserve room from the same
-     number, and a custom property set on the glyph does not reach its
-     siblings. */
-  --bleed-share: 0.35;
+  /* The bleeding glyph, shared by the process steps and the system panels.
+     Defined at the root rather than on .bleed-glyph itself because the copy
+     beside the mark has to reserve room from the same number, and a custom
+     property set on the glyph does not reach its siblings.
+
+     Only a tenth runs off: enough that the tilted corner is caught by the
+     edge, not so much that the mark is a shape to work out. At 0.35 it read
+     as cut; the point is a whole mark that happens to reach the edge. */
+  --bleed-share: 0.1;
   --glyph-lift: 20px;
   --glyph-tilt: -8deg;
+  /* Faint enough to be ground rather than figure — the copy has to read
+     straight across it without the eye catching. */
+  --glyph-opacity: 0.1;
 
   /* Derived neutrals, all mixed from the locked palette rather than invented */
   --obsidian-raised: #131d33;

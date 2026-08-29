@@ -774,9 +774,6 @@
      an even box round uneven content looks tighter at the end than the start. */
   padding: var(--space-sm) var(--space-sm) var(--space-md);
   cursor: pointer;
-  /* Clips the glyph's overhang at the card's edge. The panel's scanline and
-     ring layers are inset to 0, so this does not touch them. */
-  overflow: hidden;
 
   /* A permanent crimson strip along the top edge, inset to the card's own
      padding so it reads as part of the layout rather than a rule stuck on the
@@ -842,21 +839,36 @@
   min-width: 3.5ch;
 }
 
-/* Smaller than the other two, and anchored to the foot of the card rather
-   than its middle — centred it sat across the photograph at the top, which is
-   real work and should not have a mark laid over it. Bottom-anchored it stays
-   inside the copy where it belongs.
+/* Index and glyph on one line, so the card opens with a marker rather than a
+   number floating on its own. The oversized bleeding mark the other two
+   sections use was tried here and taken back out: at the scale of a card it
+   read as decoration rather than as a system, which is the opposite of what
+   these three cards are for. */
+.service-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
 
-   Both class names carried, because .bleed-glyph is defined further down this
-   file: at equal specificity it would win on source order and this would set
-   nothing at all. */
-.bleed-glyph.service-card__glyph {
-  --glyph: 6.5rem;
-  top: auto;
-  bottom: var(--space-md);
-  transform: rotate(var(--glyph-tilt));
-  /* Below the card's own copy, which is lifted by `.panel > *`. */
-  z-index: 0;
+.service-card__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.service-card:hover .service-card__glyph,
+.service-card.is-hot .service-card__glyph {
+  border-color: var(--crimson);
+  color: var(--crimson);
 }
 
 /* SYS.02 is crimson because every section index now is — the eyebrow itself
@@ -3187,7 +3199,7 @@
   width: var(--glyph);
   height: var(--glyph);
   color: var(--white);
-  opacity: 0.24;
+  opacity: var(--glyph-opacity);
   pointer-events: none;
   transition:
     color var(--dur-mid) var(--ease-out),
@@ -3203,11 +3215,9 @@
 }
 
 .process__step:hover .bleed-glyph,
-.service-card:hover .bleed-glyph,
-.service-card.is-hot .bleed-glyph,
 .system__panel:hover .bleed-glyph {
   color: var(--crimson);
-  opacity: 0.42;
+  opacity: 0.24;
 }
 
 /* The one that reaches past its container, out to the page edge. */
@@ -3248,16 +3258,17 @@
 /* Below this the copy runs the full width of the container and would set
    itself under the glyph's visible half. Measured at 33 to 36px of overlap at
    360 to 768; above it the copy column ends well clear and needs nothing. */
-@media (max-width: 1023px) {
-  .process__copy {
-    /* Derived from --bleed-share rather than assuming half is showing, so
-       changing how far the mark runs off adjusts this with it — it was pinned
-       to half and left 1 to 3px of overlap the moment the share moved.
-       Written as two terms: `var(--glyph) * (1 - var(--bleed-share))` parses
-       but is thrown out at computed-value time, taking the whole declaration
-       with it and leaving no padding at all. */
-    padding-right: calc(var(--glyph) - var(--glyph) * var(--bleed-share) + var(--space-2xs));
-  }
+/* Room for the visible part of the mark, at every width rather than only
+   below a breakpoint. Scoped to a breakpoint it failed at exactly 1024, where
+   the reservation stopped but the desktop glyph was still reaching in.
+
+   Derived from --bleed-share rather than assuming a fixed share, so changing
+   how far the mark runs off adjusts this with it. Written as two terms:
+   `var(--glyph) * (1 - var(--bleed-share))` parses but is thrown out at
+   computed-value time, taking the whole declaration with it and leaving no
+   padding at all. */
+.process__copy {
+  padding-right: calc(var(--glyph) - var(--glyph) * var(--bleed-share) + var(--space-2xs));
 }
 
 @media (max-width: 640px) {
