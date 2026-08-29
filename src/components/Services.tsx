@@ -3,6 +3,7 @@ import { useScramble } from '../hooks/useScramble'
 import { useSpotlight } from '../hooks/useSpotlight'
 import { goToSection } from '../lib/scroll'
 import { Icon } from './Icon'
+import { serviceMedia } from '../content/serviceMedia'
 import { Eyebrow } from './Eyebrow'
 import { Reveal } from './Reveal'
 
@@ -15,6 +16,8 @@ import { Reveal } from './Reveal'
 function ServiceCard({ service }: { service: Service }) {
   const { hot, handlers } = useSpotlight()
   const index = useScramble(service.index, hot)
+
+  const media = serviceMedia[service.id]
 
   return (
     <button
@@ -29,7 +32,7 @@ function ServiceCard({ service }: { service: Service }) {
           Desaturated at rest so three different client palettes in a row read
           as one system, full colour on hover. */}
       <span className="service-card__media">
-        <img src={service.media} alt={service.mediaAlt} loading="lazy" width={760} height={428} />
+        <img src={media.src} alt={media.alt} loading="lazy" width={760} height={428} />
       </span>
       <span className="service-card__meta">
         <span className="service-card__glyph" aria-hidden="true">
