@@ -3137,7 +3137,9 @@
   border-top: 1px solid var(--hairline);
   align-items: start;
   position: relative;
-  --glyph: clamp(8.5rem, 21vw, 16rem);
+  /* Phones: large against a narrow column, which is where the mark has the
+     room to read as a plate behind the step. */
+  --glyph: 8.5rem;
 }
 
 /* No rule under the last step. Each step's top border separates it from the
@@ -3210,6 +3212,15 @@
   font-weight: 500;
   font-size: var(--step-2);
   color: var(--white);
+}
+
+/* Desktop has several times the width, so the same mark at the phone's scale
+   stops reading as placed and starts reading as oversized. Sized to the step
+   itself here rather than to the viewport. */
+@media (min-width: 1024px) {
+  .process__step {
+    --glyph: 9.5rem;
+  }
 }
 
 /* Below this the copy runs the full width of the container and would set
