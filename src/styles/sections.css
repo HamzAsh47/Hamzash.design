@@ -3111,6 +3111,13 @@
 
 /* === Process ============================================================= */
 
+/* Clips the glyph's overhang. `clip` rather than `hidden`: hidden would make
+   this a scroll container, which changes how anything sticky inside it
+   behaves and can trap the page's own scrolling. */
+.process {
+  overflow-x: clip;
+}
+
 .process__list {
   list-style: none;
   margin: 0;
@@ -3119,6 +3126,9 @@
   flex-direction: column;
 }
 
+/* The oversized glyph is positioned against this, and clipped by the section
+   rather than by the step — so it runs off the page edge instead of being cut
+   at the column. */
 .process__step {
   display: grid;
   grid-template-columns: minmax(0, 6rem) minmax(0, 1fr);
@@ -3126,40 +3136,55 @@
   padding: var(--space-md) 0;
   border-top: 1px solid var(--hairline);
   align-items: start;
+  position: relative;
+  --glyph: clamp(7rem, 17vw, 13rem);
 }
 
 /* No rule under the last step. Each step's top border separates it from the
    one before, so a closing line has nothing left to separate — it just draws a
    box round the list and reads as an unfinished fifth row. */
 
-/* Title on the left, glyph on the right edge of the step. The two are on one
-   line so the mark is anchored to the thing it describes at any width, rather
-   than stacking above the number — which on a phone read as a bullet the
-   number immediately repeated. */
 .process__heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-sm);
 }
 
+/* The glyph at the scale of the step itself, run off the right edge of the
+   page so only half of it is on screen. It is no longer a marker beside the
+   title — at this size it is the step's own plate, and the copy reads across
+   it. Held far back in weight for the same reason: it has to be large without
+   taking the line away from the title in front of it.
+   --bleed is the distance from the container's edge out to the viewport's, so
+   pushing past it by half the glyph's width lands the cut exactly on the page
+   edge at any width. */
 .process__glyph {
+  --bleed: calc((100vw - 100%) / 2);
+
+  position: absolute;
+  top: 50%;
+  right: calc((var(--bleed) + var(--glyph) / 2) * -1);
+  transform: translateY(-50%);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  border: 1px solid var(--hairline);
-  color: var(--text-secondary);
-  flex-shrink: 0;
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+  width: var(--glyph);
+  height: var(--glyph);
+  color: var(--gunmetal);
+  pointer-events: none;
+  transition: color var(--dur-mid) var(--ease-out);
+}
+
+/* The stroke is drawn in a 20-unit viewBox, so it scales with the glyph — at
+   13rem the 1.4 the small icons use would render about 15px thick. */
+.process__glyph .icon {
+  width: 100%;
+  height: 100%;
+  stroke-width: 0.5;
 }
 
 .process__step:hover .process__glyph {
-  border-color: var(--crimson);
   color: var(--crimson);
 }
 
@@ -3182,6 +3207,15 @@
   font-weight: 500;
   font-size: var(--step-2);
   color: var(--white);
+}
+
+/* Below this the copy runs the full width of the container and would set
+   itself under the glyph's visible half. Measured at 33 to 36px of overlap at
+   360 to 768; above it the copy column ends well clear and needs nothing. */
+@media (max-width: 1023px) {
+  .process__copy {
+    padding-right: calc(var(--glyph) / 2 + var(--space-2xs));
+  }
 }
 
 @media (max-width: 640px) {
