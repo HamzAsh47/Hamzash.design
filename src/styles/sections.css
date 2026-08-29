@@ -3132,24 +3132,27 @@
    one before, so a closing line has nothing left to separate — it just draws a
    box round the list and reads as an unfinished fifth row. */
 
-/* The number keeps its weight — the steps are ordered and that has to stay
-   obvious — with the glyph under it saying what the step actually is. */
-.process__marker {
+/* Title on the left, glyph on the right edge of the step. The two are on one
+   line so the mark is anchored to the thing it describes at any width, rather
+   than stacking above the number — which on a phone read as a bullet the
+   number immediately repeated. */
+.process__heading {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2xs);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
 }
 
 .process__glyph {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   border: 1px solid var(--hairline);
   color: var(--text-secondary);
+  flex-shrink: 0;
   transition:
     border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out);
@@ -3412,17 +3415,6 @@
   border-color: var(--crimson);
   background: var(--crimson);
   color: var(--obsidian);
-}
-
-.contact__step-index {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-}
-
-.contact__step.is-active .contact__step-index {
-  color: var(--crimson);
 }
 
 .contact__step-label {

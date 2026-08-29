@@ -87,10 +87,12 @@ const ContactIntro = memo(function ContactIntro({ step }: { step: number }) {
               index < step ? ' is-done' : ''
             }`}
           >
+            {/* The glyph alone. The number beside it was saying the same
+                thing twice — the panel opposite already reads
+                "STEP 1 OF 4 — YOU", and the list is in order. */}
             <span className="contact__step-mark">
               {index < step ? <Icon name="check" size={14} /> : <Icon name={item.icon} size={14} />}
             </span>
-            <span className="contact__step-index">{String(index + 1).padStart(2, '0')}</span>
             <span className="contact__step-label">{item.label}</span>
           </li>
         ))}
